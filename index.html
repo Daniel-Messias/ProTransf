@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ProTransf - Mercado de Transferências</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #0d1b2a, #1b263b);
+      color: white;
+    }
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 40px;
+      background-color: #0a192f;
+    }
+    .logo {
+      font-weight: bold;
+      font-size: 24px;
+    }
+    .logo span {
+      color: #5fbdf2;
+    }
+    nav a {
+      color: white;
+      text-decoration: none;
+      margin: 0 15px;
+      font-size: 14px;
+    }
+    .btn-login {
+      padding: 8px 16px;
+      border: 1px solid #5fbdf2;
+      background: none;
+      color: white;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+    .hero {
+      text-align: center;
+      padding: 60px 20px;
+    }
+    .hero h1 {
+      font-size: 48px;
+      margin-bottom: 10px;
+    }
+    .hero h2 {
+      color: #5fbdf2;
+      margin-bottom: 20px;
+    }
+    .hero p {
+      font-size: 16px;
+      color: #cccccc;
+    }
+    .hero .buttons {
+      margin-top: 30px;
+    }
+    .hero .buttons button {
+      padding: 12px 24px;
+      margin: 0 10px;
+      border: none;
+      border-radius: 4px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .btn-primary {
+      background-color: #5fbdf2;
+      color: #000;
+    }
+    .btn-secondary {
+      background-color: #1b263b;
+      color: white;
+      border: 1px solid #5fbdf2;
+    }
+    section {
+      max-width: 1000px;
+      margin: 40px auto;
+      padding: 0 20px;
+    }
+    h3 {
+      margin-bottom: 10px;
+      border-bottom: 2px solid #5fbdf2;
+      display: inline-block;
+      padding-bottom: 5px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+    table th, table td {
+      text-align: left;
+      padding: 10px;
+      border-bottom: 1px solid #333;
+    }
+    .columns {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 40px;
+    }
+    .column {
+      flex: 1;
+      min-width: 300px;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="logo">PRO<span>TRANSF</span></div>
+    <nav>
+      <a href="#">Transferências</a>
+      <a href="#">Jogadores</a>
+      <a href="#">Clubes</a>
+    </nav>
+    <button class="btn-login">Entrar</button>
+  </header>
+
+  <div class="hero">
+    <h1>PROTRANSF</h1>
+    <h2>MERCADO DE TRANSFERÊNCIAS</h2>
+    <p>A plataforma de transferências para Pro Clubs no EA FC 25</p>
+    <div class="buttons">
+      <button class="btn-primary">VER JOGADORES</button>
+      <button class="btn-secondary">CADASTRAR-SE</button>
+    </div>
+  </div>
+
+  <section>
+    <h3>JOGADORES EM DESTAQUE</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Jogador</th>
+          <th>Posição</th>
+          <th>Status</th>
+          <th>Plataforma</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>ProGamer97</td>
+          <td>Volante</td>
+          <td>Livre</td>
+          <td>Xbox</td>
+        </tr>
+        <tr>
+          <td>SoccerKing11</td>
+          <td>Atacante</td>
+          <td>Contrato ativo</td>
+          <td>PlayStation</td>
+        </tr>
+        <tr>
+          <td>ElitePlayer22</td>
+          <td>Goleiro</td>
+          <td>Aberto a propostas</td>
+          <td>PC</td>
+        </tr>
+        <tr>
+          <td>SkillMaster09</td>
+          <td>Meia</td>
+          <td>Livre</td>
+          <td>Xbox</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="columns">
+    <div class="column">
+      <h3>RANKING DE CLUBES</h3>
+      <table>
+        <tbody>
+          <tr><td>1</td><td>FC Virtual</td></tr>
+          <tr><td>2</td><td>Eleven United</td></tr>
+          <tr><td>3</td><td>VPG Stars</td></tr>
+          <tr><td>4</td><td>E-Squad</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="column">
+      <h3>ÚLTIMAS TRANSFERÊNCIAS</h3>
+      <table>
+        <tbody>
+          <tr><td>RapidShot55 → Cyber FC</td></tr>
+          <tr><td>Playmaker08 → Final josoada</td></tr>
+          <tr><td>SolidDefender → Dreamerz</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+</body>
+</html>

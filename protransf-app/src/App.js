@@ -10,15 +10,5 @@ function App() {
     </div>
   );
 }
-import Cadastro from './Cadastro';
-
-function App() {
-  return (
-    <div>
-      <Cadastro />
-    </div>
-  );
-}
-
 
 export default App;

@@ -50,19 +50,23 @@
     }
 
     .btn-login {
-      background: transparent;
-      border: 1px solid var(--primary);
-      color: var(--text);
-      padding: 8px 16px;
-      border-radius: 6px;
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
+  display: inline-block;
+  padding: 10px 20px;
+  background-color: transparent;
+  border: 2px solid var(--primary);
+  color: var(--primary);
+  border-radius: 8px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
 
-    .btn-login:hover {
-      background-color: var(--primary);
-      color: #000;
-    }
+.btn-login:hover {
+  background-color: var(--primary);
+  color: #000;
+}
+
+    
 
     .hero {
       text-align: center;
@@ -106,9 +110,19 @@
     }
 
     .btn-secondary {
-      background-color: var(--surface);
-      color: var(--text);
-      border: 1px solid var(--primary);
+       display: inline-block;       
+  padding: 6px 12px;
+  margin-top: 32px;
+  background-color: var(--primary);
+  color: #000;
+  border-radius: 8px;
+  margin: 0 8px;
+  text-decoration: none;       
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+  text-align: center;
+  transition: all 0.2s ease;
     }
 
     .btn-secondary:hover {

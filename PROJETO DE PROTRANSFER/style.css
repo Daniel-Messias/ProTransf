@@ -37,6 +37,16 @@
       color: var(--primary);
     }
 
+    .centro span{
+      color: var(--primary);
+    }
+    .soccer-ball {
+  width: 68px;
+  height: 68px;
+   vertical-align: middle;
+  transform: translateY(-5px);
+  margin: 0 4
+}
     nav a {
       color: var(--text);
       text-decoration: none;

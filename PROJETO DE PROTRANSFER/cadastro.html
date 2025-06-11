@@ -157,6 +157,49 @@
       margin-top: 4px;
       display: block;
     }
+
+    
+    .checkbox-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .checkbox-group label {
+      background-color: #243447;
+      padding: 8px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      user-select: none;
+      color: var(--text);
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: background-color 0.2s ease;
+      border: 1px solid transparent;
+    }
+
+    .checkbox-group input[type="checkbox"] {
+      accent-color: var(--primary);
+      cursor: pointer;
+    }
+
+    .checkbox-group label:hover {
+      background-color: #2e405a;
+    }
+
+    .checkbox-group input[type="checkbox"]:checked + span {
+      background-color: var(--primary);
+      color: #000;
+      border-color: var(--primary);
+    }
+
+    
+    .checkbox-group input[type="checkbox"]:checked {
+      background-color: var(--primary);
+      border-color: var(--primary);
+    }
   </style>
 </head>
 <body>
@@ -167,7 +210,8 @@
       <a href="ProTransf.html">Início</a>
       <a href="cadastro.html">Cadastrar-se</a>
     </nav>
-    <button class="btn-login">Entrar</button>
+    <a href="login.html" class="btn-login">Entrar</a>
+
   </header>
 
   <main>
@@ -195,6 +239,12 @@
         </div>
 
         <div class="form-group">
+          <label for="confirmarSenha">Repita a senha:</label>
+          <input type="password" id="confirmarSenha" name="confirmarSenha" class="form-input" required minlength="6" />
+          <span class="error-msg" id="erro-confirmarSenha"></span>
+        </div>
+
+        <div class="form-group">
           <label for="dataNascimento">Data de nascimento:</label>
           <input type="date" id="dataNascimento" name="dataNascimento" class="form-input" required />
           <span class="error-msg" id="erro-data"></span>
@@ -212,8 +262,15 @@
         </div>
 
         <div class="form-group">
-          <label for="outras">Outras informações:</label>
-          <textarea id="outras" name="outras" rows="4" class="form-input textarea"></textarea>
+          <label>Posições que você joga:</label>
+          <div class="checkbox-group">
+            <label><input type="checkbox" name="posicoes" value="goleiro" /><span>Goleiro</span></label>
+            <label><input type="checkbox" name="posicoes" value="zagueiro" /><span>Zagueiro</span></label>
+            <label><input type="checkbox" name="posicoes" value="lateral" /><span>Lateral</span></label>
+            <label><input type="checkbox" name="posicoes" value="meio-campo" /><span>Meio-campo</span></label>
+            <label><input type="checkbox" name="posicoes" value="atacante" /><span>Atacante</span></label>
+          </div>
+          <span class="error-msg" id="erro-posicoes"></span>
         </div>
 
         <div class="form-actions">
@@ -240,7 +297,7 @@
 
       const email = document.getElementById('email');
       const erroEmail = document.getElementById('erro-email');
-      const emailRegex = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/;
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(email.value.trim())) {
         erroEmail.textContent = 'Digite um email válido.';
         isValid = false;
@@ -255,6 +312,15 @@
         isValid = false;
       } else {
         erroSenha.textContent = '';
+      }
+
+      const confirmarSenha = document.getElementById('confirmarSenha');
+      const erroConfirmarSenha = document.getElementById('erro-confirmarSenha');
+      if (confirmarSenha.value !== senha.value) {
+        erroConfirmarSenha.textContent = 'As senhas não coincidem.';
+        isValid = false;
+      } else {
+        erroConfirmarSenha.textContent = '';
       }
 
       const data = document.getElementById('dataNascimento');
@@ -275,9 +341,19 @@
         erroPlataforma.textContent = '';
       }
 
+      const posicoes = document.querySelectorAll('input[name="posicoes"]:checked');
+      const erroPosicoes = document.getElementById('erro-posicoes');
+      if (posicoes.length === 0) {
+        erroPosicoes.textContent = 'Selecione ao menos uma posição.';
+        isValid = false;
+      } else {
+        erroPosicoes.textContent = '';
+      }
+
       if (isValid) {
         alert('Cadastro realizado com sucesso!');
         
+        this.reset();
       }
     });
   </script>

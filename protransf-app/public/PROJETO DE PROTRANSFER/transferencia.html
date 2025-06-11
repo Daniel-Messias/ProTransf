@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ProTransf - Transferências</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --primary: #5fbdf2;
+      --background: #0d1b2a;
+      --surface: #1b263b;
+      --text: #ffffff;
+      --text-muted: #cccccc;
+    }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: var(--background);
+      color: var(--text);
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    header {
+      background-color: #0a192f;
+      padding: 20px 40px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+      flex-shrink: 0;
+    }
+    .logo {
+      font-size: 24px;
+      font-weight: 700;
+      cursor: default;
+    }
+    .logo span {
+      color: var(--primary);
+    }
+    nav a {
+      color: var(--text);
+      text-decoration: none;
+      margin: 0 15px;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+    nav a:hover {
+      color: var(--primary);
+    }
+    nav a.active {
+      color: var(--primary);
+      font-weight: 700;
+    }
+    .btn-login {
+      display: inline-block;
+      padding: 10px 20px;
+      background-color: transparent;
+      border: 2px solid var(--primary);
+      color: var(--primary);
+      border-radius: 8px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.3s ease;
+    }
+    .btn-login:hover {
+      background-color: var(--primary);
+      color: #000;
+    }
+    main {
+      flex-grow: 1;
+      max-width: 1100px;
+      margin: 40px auto;
+      padding: 0 20px 60px;
+      width: 100%;
+    }
+    h1 {
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 30px;
+      color: var(--primary);
+      text-align: center;
+    }
+   
+    .search-bar {
+      max-width: 500px;
+      margin: 0 auto 40px auto;
+      display: flex;
+      gap: 10px;
+    }
+    .search-bar input[type="text"] {
+      flex-grow: 1;
+      padding: 12px 16px;
+      border-radius: 8px;
+      border: none;
+      font-size: 1rem;
+      outline: none;
+    }
+    .search-bar button {
+      padding: 12px 20px;
+      border: none;
+      background-color: var(--primary);
+      color: #000;
+      font-weight: 700;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    .search-bar button:hover {
+      background-color: #3fa5e8;
+    }
+
+    
+    .carousel-container {
+      position: relative;
+      overflow: hidden;
+      max-width: 100%;
+      margin-bottom: 50px;
+    }
+    .carousel-track {
+      display: flex;
+      gap: 20px;
+      overflow-x: auto;
+      scroll-behavior: smooth;
+      padding-bottom: 10px;
+    }
+    .carousel-track::-webkit-scrollbar {
+      height: 8px;
+    }
+    .carousel-track::-webkit-scrollbar-thumb {
+      background: var(--primary);
+      border-radius: 4px;
+    }
+    .card {
+      background-color: var(--surface);
+      min-width: 280px;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+      flex-shrink: 0;
+      transition: transform 0.3s ease;
+      cursor: pointer;
+    }
+    .card:hover {
+      transform: translateY(-8px);
+    }
+    .card h3 {
+      margin-bottom: 10px;
+      color: var(--primary);
+      font-weight: 700;
+      font-size: 1.2rem;
+    }
+    .card p {
+      font-size: 1rem;
+      color: var(--text);
+      margin-bottom: 6px;
+    }
+    .card small {
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+
+    
+    .section-title {
+      color: var(--primary);
+      font-weight: 700;
+      font-size: 1.5rem;
+      margin-bottom: 20px;
+      border-bottom: 2px solid var(--primary);
+      padding-bottom: 4px;
+      max-width: fit-content;
+    }
+    .jogadores-procurando {
+      background-color: var(--surface);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 50px;
+      max-width: 800px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .jogadores-procurando ul {
+      list-style: none;
+      padding-left: 0;
+    }
+    .jogadores-procurando li {
+      padding: 12px 10px;
+      border-bottom: 1px solid #2c3e50;
+      font-size: 1rem;
+      color: var(--text);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .jogadores-procurando li:last-child {
+      border-bottom: none;
+    }
+
+    
+    .horarios-clubes {
+      background-color: var(--surface);
+      border-radius: 12px;
+      padding: 20px;
+      max-width: 600px;
+      margin: 0 auto 50px auto;
+    }
+    .horarios-clubes ul {
+      list-style: none;
+      padding-left: 0;
+    }
+    .horarios-clubes li {
+      padding: 10px 12px;
+      border-bottom: 1px solid #2c3e50;
+      font-size: 1rem;
+      color: var(--text);
+    }
+    .horarios-clubes li:last-child {
+      border-bottom: none;
+    }
+
+    
+    footer {
+      background-color: #0a192f;
+      padding: 15px 40px;
+      display: flex;
+      justify-content: flex-end;
+      gap: 20px;
+      align-items: center;
+      flex-shrink: 0;
+    }
+    footer a {
+      color: var(--primary);
+      font-size: 28px;
+      transition: color 0.3s ease;
+    }
+    footer a:hover {
+      color: #3fa5e8;
+    }
+
+    
+    svg.icon {
+      width: 28px;
+      height: 28px;
+      fill: currentColor;
+      vertical-align: middle;
+    }
+
+    @media (max-width: 600px) {
+      header {
+        flex-wrap: wrap;
+        padding: 20px;
+      }
+      nav {
+        width: 100%;
+        margin-top: 10px;
+        display: flex;
+        justify-content: center;
+      }
+      nav a {
+        margin: 0 10px;
+      }
+      .search-bar {
+        flex-direction: column;
+      }
+      .search-bar button {
+        width: 100%;
+      }
+      .carousel-track {
+        padding-bottom: 20px;
+      }
+      .card {
+        min-width: 240px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo">PRO<span>TRANSF</span></div>
+    <nav>
+      <a href="ProTransf.html">Início</a>
+      <a href="jogador.html">Jogadores</a>
+      <a href="clube.html">Clubes</a>
+      <a href="ranking.html">Ranking</a>
+    </nav>
+    <a href="login.html" class="btn-login">Entrar</a>
+  </header>
+
+  <main>
+    <h1>Transferências Recentes</h1>
+
+    
+    <form class="search-bar" onsubmit="pesquisar(event)">
+      <input type="text" id="searchInput" placeholder="Pesquisar jogador ou clube..." aria-label="Pesquisar jogador ou clube" />
+      <button type="submit">Buscar</button>
+    </form>
+
+    
+    <div class="carousel-container" aria-label="Transferências recentes">
+      <div class="carousel-track" id="carouselTrack" tabindex="0">
+        <div class="card" tabindex="0">
+          <h3>ProGamer97 → FC Virtual</h3>
+          <p><strong>Posição:</strong> Volante</p>
+          <p><strong>Data:</strong> 05/06/2025</p>
+          <small>Contrato ativo</small>
+        </div>
+        <div class="card" tabindex="0">
+          <h3>SoccerKing11 → Atlético Digital</h3>
+          <p><strong>Posição:</strong> Atacante</p>
+          <p><strong>Data:</strong> 02/06/2025</p>
+          <small>Contrato ativo</small>
+        </div>
+        <div class="card" tabindex="0">
+          <h3>ElitePlayer22 → Real Virtual</h3>
+          <p><strong>Posição:</strong> Goleiro</p>
+          <p><strong>Data:</strong> 30/05/2025</p>
+          <small>Contrato ativo</small>
+        </div>
+        <div class="card" tabindex="0">
+          <h3>FastFoot → Clube Gamer</h3>
+          <p><strong>Posição:</strong> Lateral</p>
+          <p><strong>Data:</strong> 28/05/2025</p>
+          <small>Contrato ativo</small>
+        </div>
+      </div>
+    </div>
+
+    
+    <section class="jogadores-procurando" aria-label="Jogadores procurando clube">
+      <h2 class="section-title">Jogadores Procurando Clube</h2>
+      <ul id="jogadoresProcurandoLista">
+        <li>SpeedyPlayer <span style="color: var(--primary); font-weight: 600;">Meio-campo</span></li>
+        <li>SharpShooter <span style="color: var(--primary); font-weight: 600;">Atacante</span></li>
+        <li>DefensePro <span style="color: var(--primary); font-weight: 600;">Zagueiro</span></li>
+        <li>GoalieMaster <span style="color: var(--primary); font-weight: 600;">Goleiro</span></li>
+      </ul>
+    </section>
+
+    
+   <section class="horarios-clubes" aria-label="Horários que os clubes mais jogam">
+  <h2 class="section-title">Horários que os Clubes Mais Jogam</h2>
+  <ul>
+    <li><strong>FC Virtual</strong> — Segunda-feira: 20h - 22h</li>
+    <li><strong>Atlético Digital</strong> — Quarta-feira: 19h - 21h</li>
+    <li><strong>Real Virtual</strong> — Sexta-feira: 21h - 23h</li>
+    <li><strong>Clube Gamer</strong> — Sábado: 15h - 18h</li>
+    <li><strong>Gamer United</strong> — Domingo: 14h - 17h</li>
+  </ul>
+</section>
+
+  </main>
+
+  <footer>
+    <a href="https://wa.me/5511999999999" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp do ProTransf">
+      <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.52 3.48a11.74 11.74 0 0 0-16.56 0 11.67 11.67 0 0 0-3.14 8.18c0 2.07.54 4.05 1.55 5.77L2 22l4.7-1.21a11.62 11.62 0 0 0 5.77 1.55 11.67 11.67 0 0 0 8.18-3.14 11.74 11.74 0 0 0 0-16.56Zm-8.16 15.77a9.27 9.27 0 0 1-4.99-1.46l-.36-.22-2.78.72.74-2.71-.23-.37a9.34 9.34 0 0 1-1.5-5.02 9.28 9.28 0 0 1 16.13-6.64 9.27 9.27 0 0 1-10.01 14.36Zm5.37-6.54c-.3-.15-1.77-.87-2.05-.97-.28-.1-.48-.15-.68.15-.2.3-.78.97-.96 1.17-.17.2-.35.22-.65.07-.3-.15-1.27-.47-2.42-1.49-.9-.8-1.5-1.79-1.67-2.09-.17-.3-.02-.46.13-.61.14-.14.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.02-.52-.07-.15-.68-1.64-.93-2.25-.25-.59-.5-.51-.68-.52-.17-.01-.37-.01-.57-.01s-.52.07-.8.37c-.28.3-1.06 1.04-1.06 2.53s1.09 2.94 1.24 3.15c.15.2 2.14 3.25 5.18 4.56.72.31 1.28.49 1.71.63.72.23 1.38.2 1.9.12.58-.09 1.77-.72 2.02-1.42.25-.7.25-1.3.17-1.42-.08-.12-.28-.2-.58-.35Z"/></svg>
+    </a>
+    <a href="https://instagram.com/protransf" target="_blank" rel="noopener noreferrer" aria-label="Instagram do ProTransf">
+      <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M7.75 2h8.5A5.75 5.75 0 0 1 22 7.75v8.5A5.75 5.75 0 0 1 16.25 22h-8.5A5.75 5.75 0 0 1 2 16.25v-8.5A5.75 5.75 0 0 1 7.75 2Zm0 2A3.75 3.75 0 0 0 4 7.75v8.5A3.75 3.75 0 0 0 7.75 20h8.5A3.75 3.75 0 0 0 20 16.25v-8.5A3.75 3.75 0 0 0 16.25 4h-8.5Zm8.25 2a1 1 0 1 1 0 2 1 1 0 0 1 0-2ZM12 7a5 5 0 1 1 0 10 5 5 0 0 1 0-10Zm0 2a3 3 0 1 0 0 6 3 3 0 0 0 0-6Z"/></svg>
+    </a>
+  </footer>
+
+  <script>
+    
+    function pesquisar(event) {
+      event.preventDefault();
+      const query = document.getElementById('searchInput').value.trim().toLowerCase();
+      if (!query) {
+        alert('Por favor, digite um nome de jogador ou clube para pesquisar.');
+        return;
+      }
+      
+      alert('Busca por: ' + query);
+    }
+  </script>
+</body>
+</html>

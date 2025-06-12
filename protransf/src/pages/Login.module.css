@@ -1,0 +1,156 @@
+:root {
+  --primary: #5fbdf2;
+  --background: #0d1b2a;
+  --surface: #1b263b;
+  --text: #ffffff;
+  --text-muted: #cccccc;
+  --error: #ff5c5c;
+}
+
+.loginContainer {
+  font-family: 'Inter', sans-serif;
+  background-color: var(--background);
+  color: var(--text);
+  min-height: 100vh;
+  padding: 40px 20px;
+}
+
+.header {
+  background-color: #0a192f;
+  padding: 20px 40px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
+.logo {
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.logo span {
+  color: var(--primary);
+}
+
+.navLinks a {
+  color: var(--text);
+  margin: 0 15px;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+
+.navLinks a:hover {
+  color: var(--primary);
+}
+
+.btnLogin {
+  background: transparent;
+  border: 1px solid var(--primary);
+  color: var(--text);
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btnLogin:hover {
+  background-color: var(--primary);
+  color: #000;
+}
+
+.mainContent {
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+.title {
+  font-size: 32px;
+  text-align: center;
+  margin-bottom: 8px;
+}
+
+.subtitle {
+  color: var(--primary);
+  text-align: center;
+  font-size: 18px;
+  margin-bottom: 32px;
+}
+
+.formulario {
+  background-color: var(--surface);
+  padding: 32px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.formGroup {
+  margin-bottom: 20px;
+}
+
+.formGroup label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 500;
+}
+
+.formInput {
+  width: 100%;
+  padding: 10px;
+  border-radius: 6px;
+  border: none;
+  background-color: #243447;
+  color: var(--text);
+  font-size: 14px;
+}
+
+.formInput:focus {
+  outline: 2px solid var(--primary);
+}
+
+.errorInput {
+  outline: 2px solid var(--error);
+}
+
+.errorMsg {
+  font-size: 13px;
+  color: var(--error);
+  margin-top: 4px;
+  display: block;
+}
+
+.formActions {
+  text-align: center;
+  margin-top: 24px;
+}
+
+.btnSecondary {
+  padding: 10px 20px;
+  background-color: var(--primary);
+  color: #000;
+  border-radius: 8px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btnSecondary:hover {
+  background-color: #4fa9dd;
+}
+
+.linkCadastro {
+  margin-top: 16px;
+  text-align: center;
+  font-size: 14px;
+}
+
+.linkCadastro a {
+  color: var(--primary);
+  text-decoration: none;
+}
+
+.linkCadastro a:hover {
+  text-decoration: underline;
+}

@@ -5,17 +5,19 @@ import './style.css';
 import Home from "./pages/Protransf";
 import Transferencias from "./pages/Transferencia";
 import Cadastro from "./pages/Cadastro"; 
+import Login from './pages/Login';
+
 
 function Header() {
   return (
     <header>
-      <div className="logo">PRO<span>TRANSF</span></div>
+      <Link to="/" className="logo">PRO<span>TRANSF</span></Link>
       <nav>
         <Link to="/transferencias">Transferências</Link>
         <Link to="/jogador">Jogador</Link>
         <Link to="/clube">Clubes</Link>
         <Link to="/ranking">Ranking</Link>
-        <Link to="/cadastro">Cadastrar-se</Link> {/* ✅ NOVO */}
+        <Link to="/cadastro">Cadastrar-se</Link> 
       </nav>
       <Link to="/login" className="btn-login">Entrar</Link>
     </header>
@@ -29,8 +31,8 @@ function App() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/transferencias" element={<Transferencias />} />
-        <Route path="/cadastro" element={<Cadastro />} /> {/* ✅ NOVO */}
-        {/* Outras rotas aqui */}
+        <Route path="/cadastro" element={<Cadastro />} /> 
+        <Route path="/login" element={<Login />} />
       </Routes>
     </Router>
   );

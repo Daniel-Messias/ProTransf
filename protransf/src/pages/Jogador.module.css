@@ -1,0 +1,110 @@
+:root {
+  --primary: #5fbdf2;
+  --background: #0d1b2a;
+  --surface: #1b263b;
+  --text: #ffffff;
+  --text-muted: #cccccc;
+}
+
+.perfilJogador {
+  max-width: 900px;
+  margin: 40px auto 80px;
+  padding: 30px 40px;
+  background-color: var(--surface);
+  border-radius: 12px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+  color: var(--text);
+}
+
+.perfilTopo {
+  display: flex;
+  gap: 30px;
+  align-items: center;
+  margin-bottom: 30px;
+  flex-wrap: wrap;
+}
+
+.fotoJogador {
+  width: 180px;
+  height: 180px;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 4px solid var(--primary);
+  box-shadow: 0 4px 12px rgba(95, 189, 242, 0.5);
+}
+
+.infoJogador h1 {
+  font-size: 2.8rem;
+  margin-bottom: 10px;
+  font-weight: 700;
+}
+
+.infoJogador p {
+  font-size: 1.1rem;
+  margin-bottom: 8px;
+}
+
+.status {
+  font-weight: 700;
+  padding: 4px 12px;
+  border-radius: 20px;
+  display: inline-block;
+  font-size: 1rem;
+}
+
+.status.livre {
+  background-color: #28a745;
+  color: #fff;
+}
+
+.descricaoJogador, .clubeAtual, .videosDestaque, .contatoJogador {
+  margin-bottom: 30px;
+}
+
+.descricaoJogador h2,
+.clubeAtual h2,
+.videosDestaque h2,
+.contatoJogador h2 {
+  font-size: 1.8rem;
+  margin-bottom: 16px;
+  border-bottom: 2px solid var(--primary);
+  display: inline-block;
+  padding-bottom: 4px;
+}
+
+.descricaoJogador p,
+.clubeAtual p {
+  font-size: 1.1rem;
+  line-height: 1.5;
+  color: var(--text-muted);
+}
+
+.videoGrid {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+iframe {
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+}
+
+.contatoJogador p {
+  font-size: 1.1rem;
+  margin-bottom: 12px;
+  color: var(--text);
+}
+
+.contatoJogador a {
+  color: var(--primary);
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.3s ease;
+}
+
+.contatoJogador a:hover {
+  color: #83cfff;
+  text-decoration: underline;
+}

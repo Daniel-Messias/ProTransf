@@ -6,6 +6,7 @@ import Home from "./pages/Protransf";
 import Transferencias from "./pages/Transferencia";
 import Cadastro from "./pages/Cadastro"; 
 import Login from './pages/Login';
+import Jogador from './pages/Jogador';
 
 
 function Header() {
@@ -33,6 +34,7 @@ function App() {
         <Route path="/transferencias" element={<Transferencias />} />
         <Route path="/cadastro" element={<Cadastro />} /> 
         <Route path="/login" element={<Login />} />
+        <Route path="/jogador" element={<Jogador />} />
       </Routes>
     </Router>
   );

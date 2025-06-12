@@ -1,0 +1,239 @@
+:root {
+  --primary: #5fbdf2;
+  --dark-bg: #0a192f;
+  --light-bg: #111827;
+  --text-light: #d1d5db;
+  --text-muted: #9ca3af;
+  --background: #0d1b2a;
+  --surface: #1b263b;
+  --text: #ffffff;
+  --text-muted-alt: #cccccc;
+}
+
+.flex {
+  display: flex;
+}
+
+.flex-col {
+  flex-direction: column;
+}
+
+.min-h-screen {
+  min-height: 100vh;
+}
+
+.bg-gray-900 {
+  background-color: var(--dark-bg);
+}
+
+.text-white {
+  color: var(--text);
+}
+
+.header {
+  background-color: var(--dark-bg);
+  padding: 20px 40px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+  flex-shrink: 0;
+}
+
+.logo {
+  font-size: 24px;
+  font-weight: 700;
+  cursor: default;
+  color: var(--primary);
+}
+
+.navLink {
+  color: var(--text);
+  text-decoration: none;
+  margin: 0 15px;
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+.navLink:hover {
+  color: var(--primary);
+}
+
+.btnLogin {
+  padding: 8px 18px;
+  background-color: transparent;
+  border: 2px solid var(--primary);
+  color: var(--primary);
+  border-radius: 8px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.btnLogin:hover {
+  background-color: var(--primary);
+  color: #000;
+}
+
+.main {
+  flex-grow: 1;
+  padding: 30px 40px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.h1 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 25px;
+  color: var(--primary);
+}
+
+.searchBar {
+  display: flex;
+  margin-bottom: 30px;
+}
+
+.searchInput {
+  flex-grow: 1;
+  padding: 10px 15px;
+  font-size: 1rem;
+  border: 2px solid var(--primary);
+  border-radius: 8px 0 0 8px;
+  outline: none;
+  color: var(--text);
+  background-color: var(--surface);
+  transition: border-color 0.3s ease;
+}
+
+.searchInput::placeholder {
+  color: var(--text-muted);
+}
+
+.searchInput:focus {
+  border-color: #3ea6ff;
+}
+
+.searchButton {
+  background-color: var(--primary);
+  border: none;
+  padding: 0 25px;
+  border-radius: 0 8px 8px 0;
+  color: #000;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.searchButton:hover {
+  background-color: #3ea6ff;
+}
+
+.carouselContainer {
+  overflow-x: auto;
+  margin-bottom: 40px;
+  padding: 0 20px;
+
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none;  /* IE 10+ */
+  scroll-snap-type: x mandatory;
+  position: relative;
+}
+
+.carouselContainer::-webkit-scrollbar {
+  display: none; /* Chrome, Safari e Opera */
+}
+
+.carouselContainer::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 40px;
+  height: 100%;
+  pointer-events: none;
+  background: linear-gradient(to left, var(--dark-bg), transparent);
+}
+
+.carouselTrack {
+  display: flex;
+  gap: 20px;
+  padding-bottom: 10px;
+  scroll-snap-type: x mandatory;
+  scroll-padding-left: 20px;
+}
+
+.card {
+  min-width: 250px;
+  background-color: var(--surface);
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  cursor: pointer;
+  user-select: none;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  scroll-snap-align: start;
+}
+
+.card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 6px 20px rgba(95, 189, 242, 0.5);
+}
+
+.cardTitle {
+  font-weight: 600;
+  color: var(--primary);
+  font-size: 1.1rem;
+}
+
+.jogadoresProcurando,
+.horariosClubes {
+  margin-bottom: 40px;
+}
+
+.sectionTitle {
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin-bottom: 15px;
+  color: var(--primary);
+}
+
+.jogadorItem,
+.horarioItem {
+  background-color: var(--surface);
+  padding: 15px 20px;
+  margin-bottom: 12px;
+  border-radius: 10px;
+  box-shadow: 0 0 8px rgba(0,0,0,0.5);
+  font-weight: 500;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.jogadorPosicao {
+  color: var(--text-muted);
+  font-style: italic;
+  margin-left: 10px;
+}
+
+.footer {
+  background-color: var(--dark-bg);
+  padding: 20px 40px;
+  display: flex;
+  justify-content: center;
+  gap: 40px;
+  flex-shrink: 0;
+}
+
+.footerLink {
+  color: var(--text-muted-alt);
+  font-weight: 400;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.footerLink:hover {
+  color: var(--primary);
+}

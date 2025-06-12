@@ -7,6 +7,7 @@ import Transferencias from "./pages/Transferencia";
 import Cadastro from "./pages/Cadastro"; 
 import Login from './pages/Login';
 import Jogador from './pages/Jogador';
+import Clube from './pages/Clube';
 
 
 function Header() {
@@ -16,7 +17,7 @@ function Header() {
       <nav>
         <Link to="/transferencias">Transferências</Link>
         <Link to="/jogador">Jogador</Link>
-        <Link to="/clube">Clubes</Link>
+        <Link to="/clube">Clube</Link>
         <Link to="/ranking">Ranking</Link>
         <Link to="/cadastro">Cadastrar-se</Link> 
       </nav>
@@ -35,6 +36,7 @@ function App() {
         <Route path="/cadastro" element={<Cadastro />} /> 
         <Route path="/login" element={<Login />} />
         <Route path="/jogador" element={<Jogador />} />
+        <Route path="/clube" element={<Clube />} />
       </Routes>
     </Router>
   );

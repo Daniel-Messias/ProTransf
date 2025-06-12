@@ -1,0 +1,197 @@
+:root {
+  --primary: #5fbdf2;
+  --background: #0d1b2a;
+  --surface: #1b263b;
+  --text: #ffffff;
+  --text-muted: #cccccc;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  background-color: var(--background);
+  color: var(--text);
+  line-height: 1.6;
+  min-height: 100vh;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.clube-page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.btn-login {
+  background-color: var(--primary);
+  color: var(--text);
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-weight: 700;
+  box-shadow: 0 4px 6px rgba(95, 189, 242, 0.4);
+  text-decoration: none;
+  transition: background-color 0.3s;
+}
+
+.btn-login:hover {
+  background-color: #48a3db;
+}
+
+/* Main content */
+.clube-info {
+  max-width: 980px;
+  margin: 40px auto;
+  padding: 0 20px;
+  flex-grow: 1;
+}
+
+.clube-info h2 {
+  font-size: 2.4rem;
+  margin-bottom: 20px;
+  font-weight: 700;
+}
+
+.clube-detalhes p {
+  font-size: 1.1rem;
+  margin-bottom: 12px;
+}
+
+.clube-detalhes strong {
+  color: var(--primary);
+}
+
+.info-campeonatos h3,
+.info-procura-jogadores h3,
+.jogadores-lista h3 {
+  font-size: 1.6rem;
+  margin-top: 30px;
+  margin-bottom: 15px;
+  font-weight: 700;
+  color: var(--primary);
+}
+
+.info-campeonatos ul {
+  list-style: disc;
+  padding-left: 20px;
+}
+
+.info-campeonatos ul li {
+  font-size: 1.1rem;
+  margin-bottom: 8px;
+}
+
+.info-procura-jogadores {
+  margin-top: 20px;
+}
+
+.info-procura-jogadores select {
+  margin-top: 8px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1px solid var(--primary);
+  background-color: var(--surface);
+  color: var(--text);
+  font-size: 1rem;
+  cursor: pointer;
+  outline: none;
+}
+
+.info-procura-jogadores p {
+  margin-top: 12px;
+  font-size: 1.1rem;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.jogadores-lista table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 15px;
+  background-color: var(--surface);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.jogadores-lista th,
+.jogadores-lista td {
+  padding: 14px 16px;
+  text-align: left;
+  font-weight: 500;
+  font-size: 1.1rem;
+  color: var(--text);
+}
+
+.jogadores-lista th {
+  background-color: var(--primary);
+  color: var(--text);
+  font-weight: 700;
+}
+
+.jogadores-lista tbody tr:nth-child(even) {
+  background-color: #17304a;
+}
+
+.jogadores-lista tbody tr:hover {
+  background-color: #2a4a7d;
+  cursor: default;
+}
+
+/* Footer */
+footer {
+  background-color: #0a192f;
+  padding: 20px 40px;
+  display: flex;
+  justify-content: center;
+  gap: 30px;
+  flex-shrink: 0;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.contato-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--primary);
+  font-weight: 600;
+  text-decoration: none;
+  font-size: 1.1rem;
+  transition: color 0.3s;
+}
+
+.contato-link:hover {
+  color: #48a3db;
+}
+
+.contato-link svg {
+  width: 24px;
+  height: 24px;
+  fill: var(--primary);
+  transition: fill 0.3s;
+}
+
+.contato-link:hover svg {
+  fill: #48a3db;
+}
+
+
+@media (max-width: 768px) {
+  header {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  nav {
+    margin-top: 10px;
+  }
+  nav a {
+    margin: 8px 12px;
+  }
+  .clube-info {
+    margin: 20px 10px;
+    padding: 0 10px;
+  }
+  footer {
+    flex-direction: column;
+    gap: 15px;
+  }
+}

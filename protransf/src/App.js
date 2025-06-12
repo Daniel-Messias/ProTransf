@@ -8,6 +8,8 @@ import Cadastro from "./pages/Cadastro";
 import Login from './pages/Login';
 import Jogador from './pages/Jogador';
 import Clube from './pages/Clube';
+import RankingPage from './features/ranking/RankingPage';
+
 
 
 function Header() {
@@ -37,6 +39,7 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/jogador" element={<Jogador />} />
         <Route path="/clube" element={<Clube />} />
+        <Route path="/ranking" element={<RankingPage />} />
       </Routes>
     </Router>
   );

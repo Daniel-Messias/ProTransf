@@ -2,10 +2,9 @@ import React from "react";
 import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
 import './style.css';
 
-
 import Home from "./pages/Protransf";
 import Transferencias from "./pages/Transferencia";
-// importe as outras páginas que criar
+import Cadastro from "./pages/Cadastro"; 
 
 function Header() {
   return (
@@ -16,6 +15,7 @@ function Header() {
         <Link to="/jogador">Jogador</Link>
         <Link to="/clube">Clubes</Link>
         <Link to="/ranking">Ranking</Link>
+        <Link to="/cadastro">Cadastrar-se</Link> {/* ✅ NOVO */}
       </nav>
       <Link to="/login" className="btn-login">Entrar</Link>
     </header>
@@ -29,6 +29,7 @@ function App() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/transferencias" element={<Transferencias />} />
+        <Route path="/cadastro" element={<Cadastro />} /> {/* ✅ NOVO */}
         {/* Outras rotas aqui */}
       </Routes>
     </Router>

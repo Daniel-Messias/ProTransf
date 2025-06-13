@@ -2,11 +2,21 @@ import React from "react";
 import bola from "../assets/fotos/bola.png";
 
 export default function Home() {
+  
+  const jogadores = [
+  { nome: "ProGamer97", posicao: "Volante", status: "Livre", plataforma: "Xbox", foto: "https://randomuser.me/api/portraits/men/1.jpg" },
+  { nome: "SoccerKing11", posicao: "Atacante", status: "Contrato ativo", plataforma: "PlayStation", foto: "https://randomuser.me/api/portraits/men/2.jpg" },
+  { nome: "ElitePlayer22", posicao: "Goleiro", status: "Aberto a propostas", plataforma: "PC", foto: "https://randomuser.me/api/portraits/men/3.jpg" },
+  { nome: "SkillMaster09", posicao: "Meia", status: "Livre", plataforma: "Xbox", foto: "https://randomuser.me/api/portraits/men/4.jpg" },
+];
+
   return (
     <>
       <div className="hero">
         <h1 className="centro">
-          PR<img src={bola} alt="bola de futebol" className="soccer-ball" /><span>TRANSF</span>
+          PR
+          <img src={bola} alt="bola de futebol" className="soccer-ball" />
+          <span>TRANSF</span>
         </h1>
         <h2>MERCADO DE TRANSFERÊNCIAS</h2>
         <p>Buscando um novo clube ou reforços? No PROTRANSF você encontra as melhores oportunidades.</p>
@@ -16,49 +26,87 @@ export default function Home() {
         </div>
       </div>
 
-      <section>
+         <section>
         <h3>JOGADORES EM DESTAQUE</h3>
         <table>
           <thead>
             <tr>
-              <th>Jogador</th>
+              <th></th>
+              <th>Jogador</th> 
               <th>Posição</th>
               <th>Status</th>
               <th>Plataforma</th>
             </tr>
           </thead>
-          <tbody>
-            <tr><td>ProGamer97</td><td>Volante</td><td>Livre</td><td>Xbox</td></tr>
-            <tr><td>SoccerKing11</td><td>Atacante</td><td>Contrato ativo</td><td>PlayStation</td></tr>
-            <tr><td>ElitePlayer22</td><td>Goleiro</td><td>Aberto a propostas</td><td>PC</td></tr>
-            <tr><td>SkillMaster09</td><td>Meia</td><td>Livre</td><td>Xbox</td></tr>
-          </tbody>
-        </table>
-      </section>
+  <tbody>
+  {jogadores.map((jogador, index) => (
+    <tr key={index}>
+      <td>
+        <img 
+          src={jogador.foto} 
+          alt={`Foto de ${jogador.nome}`} 
+          style={{ width: "50px", height: "50px", borderRadius: "50%", objectFit: "cover" }} 
+        />
+      </td>
+      <td>{jogador.nome}</td>
+      <td>
+  <span
+    className={`posicao ${["Goleiro", "Zagueiro", "Lateral", "Volante"].includes(jogador.posicao) ? "defense" : "attack"}`}
+  >
+    {jogador.posicao}
+  </span>
+</td>
 
-      <section className="columns">
-        <div className="column">
-          <h3>RANKING DE CLUBES</h3>
-          <table>
-            <tbody>
-              <tr><td>1</td><td>FC Virtual</td></tr>
-              <tr><td>2</td><td>Eleven United</td></tr>
-              <tr><td>3</td><td>VPG Stars</td></tr>
-              <tr><td>4</td><td>E-Squad</td></tr>
-            </tbody>
-          </table>
-        </div>
-        <div className="column">
-          <h3>ÚLTIMAS TRANSFERÊNCIAS</h3>
-          <table>
-            <tbody>
-              <tr><td>RapidShot55 → Cyber FC</td></tr>
-              <tr><td>Playmaker08 → Final josoada</td></tr>
-              <tr><td>SolidDefender → Dreamerz</td></tr>
-            </tbody>
-          </table>
-        </div>
+      <td>{jogador.status}</td>
+      <td>{jogador.plataforma}</td>
+    </tr>
+  ))}
+</tbody>
+
+
+</table>
       </section>
+      <div className="table-container">
+
+      <div className="columns">
+  <div className="column">
+    <h3>RANKING DE CLUBES</h3>
+<ul className="ranking-list">
+  {[
+    { nome: "FC Virtual", pontos: 72 },
+    { nome: "Eleven United", pontos: 68 },
+    { nome: "VPG Stars", pontos: 65 },
+    { nome: "E-Squad", pontos: 60 }
+  ].map((clube, i) => (
+    <li key={i}>
+      <span className="pos">{i + 1}</span>
+      <span className="team-name">{clube.nome}</span>
+      <span className="pontos">{clube.pontos} pts</span>
+    </li>
+  ))}
+</ul>
+  </div>
+
+  <div className="column">
+  <h3>ÚLTIMAS TRANSFERÊNCIAS</h3>
+  <ul className="transfer-list">
+    {[
+      { de: "RapidShot55", para: "Cyber FC" },
+      { de: "Playmaker08", para: "Final Josoada" },
+      { de: "SolidDefender", para: "Dreamerz" },
+    ].map((t, i) => (
+      <li key={i} className="transfer-item">
+        <span className="from">{t.de}</span>
+        <span className="arrow">→</span>
+        <span className="to">{t.para}</span>
+      </li>
+    ))}
+  </ul>
+</div>
+
+  </div>
+</div>
+
 
       <section className="contact">
         <h3>Entre em contato conosco</h3>

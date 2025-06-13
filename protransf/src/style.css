@@ -13,6 +13,18 @@
       box-sizing: border-box;
     }
 
+    .imagem-fundo {
+  background-image: url(assets/fotos/campo1.png) 
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  min-height: 100vh; /* para ocupar a tela toda */
+  color: white; /* texto branco para melhor contraste */
+  position: relative;
+  z-index: 0;
+  /* opcionalmente, fonte e outras coisas que desejar */
+}
+
     body {
       font-family: 'Inter', sans-serif;
       background-color: var(--background);

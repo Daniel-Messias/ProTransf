@@ -31,6 +31,7 @@ function Header() {
 function App() {
   return (
     <Router>
+        <div className="imagem-fundo">
       <Header />
       <Routes>
         <Route path="/" element={<Home />} />
@@ -41,6 +42,7 @@ function App() {
         <Route path="/clube" element={<Clube />} />
         <Route path="/ranking" element={<RankingPage />} />
       </Routes>
+      </div>
     </Router>
   );
 }

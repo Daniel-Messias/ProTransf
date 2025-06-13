@@ -73,7 +73,7 @@ export default function Home() {
           </div>
           <div className="form-group full-width">
             <label htmlFor="mensagem">Mensagem</label>
-            <textarea id="mensagem" name="mensagem" rows="4" placeholder="Escreva sua mensagem..." required></textarea>
+            <textarea id="mensagem" name="mensagem" rows="3" placeholder="Escreva sua mensagem..." required></textarea>
           </div>
           <button type="submit" className="btn-primary">Enviar</button>
         </form>

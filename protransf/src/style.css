@@ -44,6 +44,7 @@
     .logo {
       font-size: 24px;
       font-weight: 700;
+       font-size: 28px;
        text-decoration: none;   
        color: var(--text);       
        cursor: pointer;          
@@ -52,6 +53,15 @@
     .logo span {
       color: var(--primary);
     }
+
+    .logo-bola {
+  width: 26px;
+  height: 26px;
+  object-fit: contain;
+  margin: 0 4px;
+  margin: 0 1px;
+   transform: translateY(3px);
+}
 
     .centro span{
       color: var(--primary);
@@ -204,8 +214,9 @@
   .contact {
   width: 100%;
   background-color: var(--surface);
-  padding: 60px 5%;
-  margin-top: 60px;
+  padding: 10px 5%;
+  margin: 0 auto;
+  margin-top: 10px;
   border-top: 3px solid var(--primary);
   color: var(--text);
 }
@@ -215,20 +226,20 @@
   font-size: 1.8rem;
   font-weight: 700;
   color: var(--primary);
-  margin-bottom: 40px;
+  margin-bottom: 20px;
 }
 
 .contact form {
   display: flex;
   flex-wrap: wrap;
-  gap: 24px;
-  max-width: 1000px;
+  gap: 12px;
+  max-width: 600px;
   margin: 0 auto;
   justify-content: center;
 }
 
 .form-group {
-  flex: 1 1 45%;
+  flex: 1 1 25%;
   display: flex;
   flex-direction: column;
 }
@@ -274,6 +285,7 @@
   cursor: pointer;
   transition: background-color 0.3s ease, transform 0.2s ease;
   margin-top: 20px;
+   margin-top: 10px;
 }
 
 .contact button.btn-primary:hover {

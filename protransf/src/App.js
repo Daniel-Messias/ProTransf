@@ -2,6 +2,7 @@ import React from "react";
 import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
 import './style.css';
 
+import bola from "../src/assets/fotos/bola.png";
 import Home from "./pages/Protransf";
 import Transferencias from "./pages/Transferencia";
 import Cadastro from "./pages/Cadastro"; 
@@ -15,7 +16,11 @@ import RankingPage from './features/ranking/RankingPage';
 function Header() {
   return (
     <header>
-      <Link to="/" className="logo">PRO<span>TRANSF</span></Link>
+      <Link to="/" className="logo">
+  PR<img src={bola} alt="Bola" className="logo-bola" /><span>TRANSF</span>
+</Link>
+
+
       <nav>
         <Link to="/transferencias">Transferências</Link>
         <Link to="/jogador">Jogador</Link>

@@ -1,5 +1,5 @@
 import React from "react";
-import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Link, useLocation } from "react-router-dom";
 import './style.css';
 
 import bola from "../src/assets/fotos/bola.png";
@@ -11,15 +11,12 @@ import Jogador from './pages/Jogador';
 import Clube from './pages/Clube';
 import RankingPage from './features/ranking/RankingPage';
 
-
-
 function Header() {
   return (
     <header>
       <Link to="/" className="logo">
-  PR<img src={bola} alt="Bola" className="logo-bola" /><span>TRANSF</span>
-</Link>
-
+        PR<img src={bola} alt="Bola" className="logo-bola" /><span>TRANSF</span>
+      </Link>
 
       <nav>
         <Link to="/transferencias">Transferências</Link>
@@ -33,11 +30,16 @@ function Header() {
   );
 }
 
-function App() {
+// Novo componente para gerenciar rotas com header condicional
+function LayoutRoutes() {
+  const location = useLocation();
+
+  const hideHeaderOnRoutes = ["/login"];
+  const hideHeader = hideHeaderOnRoutes.includes(location.pathname);
+
   return (
-    <Router>
-        <div className="imagem-fundo">
-      <Header />
+    <div className="imagem-fundo">
+      {!hideHeader && <Header />}
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/transferencias" element={<Transferencias />} />
@@ -47,7 +49,14 @@ function App() {
         <Route path="/clube" element={<Clube />} />
         <Route path="/ranking" element={<RankingPage />} />
       </Routes>
-      </div>
+    </div>
+  );
+}
+
+function App() {
+  return (
+    <Router>
+      <LayoutRoutes />
     </Router>
   );
 }

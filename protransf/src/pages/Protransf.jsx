@@ -16,7 +16,7 @@ export default function Home() {
         <h1 className="centro">
           PR
           <img src={bola} alt="bola de futebol" className="soccer-ball" />
-          <span>TRANSF</span>
+          <span>TRANSFER</span>
         </h1>
         <h2>MERCADO DE TRANSFERÊNCIAS</h2>
         <p>Buscando um novo clube ou reforços? No PROTRANSF você encontra as melhores oportunidades.</p>

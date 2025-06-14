@@ -37,10 +37,10 @@ export default function Login() {
     }
 
     if (valido) {
-      // Mostrar modal
+      
       setLoginSuccess(true);
 
-      // Depois de 2 segundos, sumir o modal e redirecionar
+      
       setTimeout(() => {
         setLoginSuccess(false);
         navigate('/');
@@ -59,7 +59,7 @@ export default function Login() {
     >
       <div className={styles.overlay}>
         <Link to="/" className={styles.logoTop}>
-          PR<img src={bola} alt="Bola" className={styles.logoBola}/><span>TRANSF</span>
+          PR<img src={bola} alt="Bola" className={styles.logoBola}/><span>TRANSFER</span>
         </Link>
 
         <div className={styles.formWrapper}>

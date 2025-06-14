@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 function Header() {
   return (
     <header>
-      <div className="logo">PRO<span>TRANSF</span></div>
+      <div className="logo">PRO<span>TRANSFER</span></div>
       <nav>
         <Link to="/transferencias">Transferências</Link>
         <Link to="/jogador">Jogador</Link>

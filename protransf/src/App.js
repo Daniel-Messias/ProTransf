@@ -15,7 +15,7 @@ function Header() {
   return (
     <header>
       <Link to="/" className="logo">
-        PR<img src={bola} alt="Bola" className="logo-bola" /><span>TRANSF</span>
+        PR<img src={bola} alt="Bola" className="logo-bola" /><span>TRANSFER</span>
       </Link>
 
       <nav>

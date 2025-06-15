@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import './Clube.css';
+import '../Clube.css';
 
-export default function Clube() {
+
+export default function PerfilClubePage() {
   const [procura, setProcura] = useState('sim');
 
   const handleProcuraChange = (e) => {

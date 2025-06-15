@@ -3,12 +3,12 @@ import { BrowserRouter as Router, Routes, Route, Link, useLocation } from "react
 import './style.css';
 
 import bola from "../src/assets/fotos/bola.png";
-import Home from "./pages/Protransf";
-import Transferencias from "./pages/Transferencia";
-import Cadastro from "./pages/Cadastro"; 
-import Login from './pages/Login';
-import Jogador from './pages/Jogador';
-import Clube from './pages/Clube';
+import Home from './features/home/pages/Protransf';
+import Transferencia from './features/transferencias/pages/Transferencia';
+import Cadastro from './features/Cadastro/pages/Cadastro';
+import Login from './features/auth/pages/Login';
+import PerfilJogadorPage from './features/jogador/pages/PerfilJogadorPage';
+import PerfilClubePage from './features/clube/pages/PerfilClubePage';
 import RankingPage from './features/ranking/RankingPage';
 
 function Header() {
@@ -42,11 +42,11 @@ function LayoutRoutes() {
       {!hideHeader && <Header />}
       <Routes>
         <Route path="/" element={<Home />} />
-        <Route path="/transferencias" element={<Transferencias />} />
+        <Route path="/transferencias" element={<Transferencia />} />
         <Route path="/cadastro" element={<Cadastro />} /> 
         <Route path="/login" element={<Login />} />
-        <Route path="/jogador" element={<Jogador />} />
-        <Route path="/clube" element={<Clube />} />
+        <Route path="/jogador" element={<PerfilJogadorPage />} />
+        <Route path="/clube" element={<PerfilClubePage />} />
         <Route path="/ranking" element={<RankingPage />} />
       </Routes>
     </div>

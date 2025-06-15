@@ -1,7 +1,7 @@
 import React from 'react';
-import styles from './Jogador.module.css';
+import styles from '../Jogador.module.css';
 
-export default function Jogador() {
+export default function PerfilJogadorPage() {
   return (
     <section className={styles.perfilJogador}>
       <div className={styles.perfilTopo}>

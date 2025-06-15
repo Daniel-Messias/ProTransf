@@ -1,5 +1,6 @@
 import React from "react";
-import bola from "../assets/fotos/bola.png";
+import bola from "../../../assets/fotos/bola.png";
+
 
 export default function Home() {
   

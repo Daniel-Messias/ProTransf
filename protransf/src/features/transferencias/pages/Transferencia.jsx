@@ -1,7 +1,7 @@
 import React, { useState } from "react";
-import styles from "./transferencia.module.css";
+import styles from '../transferencia.module.css';
 
-const Transferencias = () => {
+const Transferencia = () => {
   const [searchTerm, setSearchTerm] = useState("");
 
   const jogadores = [
@@ -29,7 +29,10 @@ const Transferencias = () => {
   );
 
   return (
-    <div className="flex flex-col min-h-screen bg-gray-900 text-white">
+    <div
+  className={`${styles.flex} ${styles['flex-col']} ${styles['min-h-screen']} ${styles['bg-gray-900']} ${styles['text-white']}`}
+>
+
       {/* header removido */}
 
       <main className={styles.main}>
@@ -84,4 +87,4 @@ const Transferencias = () => {
   );
 };
 
-export default Transferencias;
+export default Transferencia;

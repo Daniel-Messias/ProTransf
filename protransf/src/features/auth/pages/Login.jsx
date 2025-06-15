@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom'; // Importa useNavigate
-import styles from './Login.module.css';
-import fundoLogin from '../assets/fotos/fundo-login.jpg';
-import bola from '../assets/fotos/bola.png'; 
+import styles from '../Login.module.css';
+import fundoLogin from '../../../assets/fotos/fundo-login.jpg';
+import bola from '../../../assets/fotos/bola.png';
+
 
 export default function Login() {
   const [email, setEmail] = useState('');

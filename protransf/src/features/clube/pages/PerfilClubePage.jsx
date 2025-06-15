@@ -1,40 +1,110 @@
 import React, { useState } from 'react';
 import '../Clube.css';
 
-
 export default function PerfilClubePage() {
+  const [isEditing, setIsEditing] = useState(false);
   const [procura, setProcura] = useState('sim');
+  const [descricao, setDescricao] = useState("O The Horse FC é um clube focado em competições online, com uma equipe dedicada e apaixonada por jogos de futebol digital. Busca jogadores comprometidos e talentosos para reforçar seu elenco.");
+  const [campeonatos, setCampeonatos] = useState([
+    "Campeonato Nacional Virtual 2025",
+    "Liga Digital de Futebol 2025",
+    "Campeonato Paulista eSports 2025"
+  ]);
+  const [novoCampeonato, setNovoCampeonato] = useState('');
+  const [jogadores, setJogadores] = useState([
+    { nome: "ProGamer97", posicao: "Volante", status: "Contrato ativo", plataforma: "Xbox" },
+    { nome: "SoccerKing11", posicao: "Atacante", status: "Contrato ativo", plataforma: "PlayStation" },
+    { nome: "ElitePlayer22", posicao: "Goleiro", status: "Contrato ativo", plataforma: "PC" }
+  ]);
+  const [novoJogador, setNovoJogador] = useState({ nome: '', posicao: '', status: '', plataforma: '' });
 
-  const handleProcuraChange = (e) => {
-    setProcura(e.target.value);
+  const handleProcuraChange = (e) => setProcura(e.target.value);
+
+  const adicionarCampeonato = () => {
+    if (novoCampeonato.trim() !== '') {
+      setCampeonatos([...campeonatos, novoCampeonato.trim()]);
+      setNovoCampeonato('');
+    }
+  };
+
+  const removerCampeonato = (index) => {
+    setCampeonatos(campeonatos.filter((_, i) => i !== index));
+  };
+
+  const adicionarJogador = () => {
+    if (novoJogador.nome && novoJogador.posicao && novoJogador.status && novoJogador.plataforma) {
+      setJogadores([...jogadores, novoJogador]);
+      setNovoJogador({ nome: '', posicao: '', status: '', plataforma: '' });
+    }
+  };
+
+  const removerJogador = (index) => {
+    setJogadores(jogadores.filter((_, i) => i !== index));
+  };
+
+  const salvarAlteracoes = () => {
+    setIsEditing(false);
+    alert('Alterações salvas! (simulação)');
+  };
+
+  const cancelarEdicao = () => {
+    setIsEditing(false);
   };
 
   return (
     <>
-      
       <section className="clube-info">
         <h2>The Horse FC</h2>
+
         <div className="clube-detalhes">
           <p><strong>Fundação:</strong> 2020</p>
           <p><strong>Classificação:</strong> Top 1 no ranking</p>
-          <p><strong>Descrição:</strong> O The Horse FC é um clube focado em competições online, com uma equipe dedicada e apaixonada por jogos de futebol digital. Busca jogadores comprometidos e talentosos para reforçar seu elenco.</p>
+          <div>
+            <strong>Descrição:</strong><br />
+            {isEditing ? (
+              <textarea
+                value={descricao}
+                onChange={(e) => setDescricao(e.target.value)}
+                rows={4}
+                style={{ width: '100%', padding: 10, borderRadius: 6 }}
+              />
+            ) : (
+              <p>{descricao}</p>
+            )}
+          </div>
         </div>
 
         <div className="info-campeonatos">
           <h3>Campeonatos que Participa</h3>
           <ul>
-            <li>Campeonato Nacional Virtual 2025</li>
-            <li>Liga Digital de Futebol 2025</li>
-            <li>Campeonato Paulista eSports 2025</li>
+            {campeonatos.map((campeonato, index) => (
+              <li key={index}>
+                {campeonato}
+                {isEditing && (
+                  <button onClick={() => removerCampeonato(index)} className="btn-remover">🗑</button>
+                )}
+              </li>
+            ))}
           </ul>
+          {isEditing && (
+            <div className="adicionar-campeonato">
+              <input
+                type="text"
+                placeholder="Novo campeonato"
+                value={novoCampeonato}
+                onChange={(e) => setNovoCampeonato(e.target.value)}
+                className="input-edit"
+              />
+              <button onClick={adicionarCampeonato} className="btn-login">Adicionar</button>
+            </div>
+          )}
         </div>
 
         <div className="info-procura-jogadores">
           <h3>Procurando Jogadores?</h3>
-          <label htmlFor="procura-jogadores" style={{ fontSize: '1rem', fontWeight: '600', color: 'var(--primary)', cursor: 'pointer' }}>
+          <label htmlFor="procura-jogadores">
             <select
               id="procura-jogadores"
-              style={{ marginTop: 8, padding: '6px 10px', borderRadius: 6, border: '1px solid var(--primary)', backgroundColor: 'var(--surface)', color: 'var(--text)', fontSize: '1rem' }}
               value={procura}
               onChange={handleProcuraChange}
             >
@@ -42,7 +112,7 @@ export default function PerfilClubePage() {
               <option value="nao">Não.</option>
             </select>
           </label>
-          <p id="msg-procura" style={{ marginTop: 12, fontSize: '1.1rem', color: 'var(--text-muted)' }}>
+          <p id="msg-procura">
             {procura === 'sim'
               ? 'Sim, estamos em busca de novos talentos para nosso elenco!'
               : 'Não, o elenco está fechado no momento.'}
@@ -58,39 +128,50 @@ export default function PerfilClubePage() {
                 <th>Posição</th>
                 <th>Status</th>
                 <th>Plataforma</th>
+                {isEditing && <th>Ações</th>}
               </tr>
             </thead>
             <tbody>
-              <tr><td>ProGamer97</td><td>Volante</td><td>Contrato ativo</td><td>Xbox</td></tr>
-              <tr><td>SoccerKing11</td><td>Atacante</td><td>Contrato ativo</td><td>PlayStation</td></tr>
-              <tr><td>ElitePlayer22</td><td>Goleiro</td><td>Contrato ativo</td><td>PC</td></tr>
+              {jogadores.map((jogador, index) => (
+                <tr key={index}>
+                  <td>{jogador.nome}</td>
+                  <td>{jogador.posicao}</td>
+                  <td>{jogador.status}</td>
+                  <td>{jogador.plataforma}</td>
+                  {isEditing && (
+                    <td><button onClick={() => removerJogador(index)} className="btn-remover">❌</button></td>
+                  )}
+                </tr>
+              ))}
             </tbody>
           </table>
-        </div>
-      </section>
 
-      <footer>
-        <a
-          className="contato-link"
-          href="https://wa.me/5511999999999"
-          target="_blank"
-          rel="noopener noreferrer"
-          aria-label="WhatsApp do dono do clube"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.52 3.48a11.8 11.8 0 00-16.68 0 11.77 11.77 0 00-3.49 8.34c0 2.08.6 4.1 1.75 5.82L2 22l4.46-1.7a11.72 11.72 0 005.84 1.71 11.8 11.8 0 008.32-3.48 11.77 11.77 0 000-16.68zm-8.52 15.56a9.35 9.35 0 01-4.95-1.4l-.35-.22-2.63 1 1-2.58-.23-.33a9.45 9.45 0 011.43-13.25 9.35 9.35 0 0113.21 1.42 9.36 9.36 0 01-8.23 14.96zm4.6-7.58c-.25-.13-1.46-.72-1.69-.8s-.39-.13-.56.13-.64.8-.78.96-.29.2-.54.07a7.5 7.5 0 01-2.2-1.36 8.35 8.35 0 01-1.55-1.93c-.16-.27 0-.42.12-.55.12-.12.27-.31.41-.47a1.9 1.9 0 00.28-.47c.09-.16.05-.3 0-.43s-.56-1.35-.77-1.85-.4-.42-.55-.42-.37-.01-.56-.01a1 1 0 00-.74.35 3.11 3.11 0 00-1 2.35 4.22 4.22 0 001.21 2.92 9.4 9.4 0 005.3 4.37 3.74 3.74 0 001.55.24 2.74 2.74 0 001.92-1.44c.19-.33.26-.6.19-.66z"/></svg>
-          WhatsApp
-        </a>
-        <a
-          className="contato-link"
-          href="https://instagram.com/clubefcvirtual"
-          target="_blank"
-          rel="noopener noreferrer"
-          aria-label="Instagram do clube"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M7.75 2h8.5A5.76 5.76 0 0122 7.75v8.5A5.76 5.76 0 0116.25 22h-8.5A5.76 5.76 0 012 16.25v-8.5A5.76 5.76 0 017.75 2zm7.55 2.22h-7.6a3.5 3.5 0 00-3.5 3.5v7.6a3.5 3.5 0 003.5 3.5h7.6a3.5 3.5 0 003.5-3.5v-7.6a3.5 3.5 0 00-3.5-3.5zm-3.8 2.98a4.25 4.25 0 110 8.5 4.25 4.25 0 010-8.5zm0 6.83a2.58 2.58 0 100-5.16 2.58 2.58 0 000 5.16zm3.7-6.98a1 1 0 110-2 1 1 0 010 2z"/></svg>
-          Instagram
-        </a>
-      </footer>
+          {isEditing && (
+            <div className="adicionar-campeonato">
+              <input placeholder="Nome" value={novoJogador.nome} onChange={(e) => setNovoJogador({ ...novoJogador, nome: e.target.value })} className="input-edit" />
+              <input placeholder="Posição" value={novoJogador.posicao} onChange={(e) => setNovoJogador({ ...novoJogador, posicao: e.target.value })} className="input-edit" />
+              <input placeholder="Status" value={novoJogador.status} onChange={(e) => setNovoJogador({ ...novoJogador, status: e.target.value })} className="input-edit" />
+              <input placeholder="Plataforma" value={novoJogador.plataforma} onChange={(e) => setNovoJogador({ ...novoJogador, plataforma: e.target.value })} className="input-edit" />
+              <button onClick={adicionarJogador} className="btn-login">Adicionar Jogador</button>
+            </div>
+          )}
+        </div>
+
+        {!isEditing ? (
+          <button onClick={() => setIsEditing(true)} className="btn-login" style={{ marginTop: 20 }}>
+            Editar Clube
+          </button>
+        ) : (
+          <div style={{ marginTop: 20 }}>
+            <button onClick={salvarAlteracoes} className="btn-login" style={{ marginRight: 10 }}>
+              Salvar Alterações
+            </button>
+            <button onClick={cancelarEdicao} className="btn-cancelar">
+              Cancelar
+            </button>
+          </div>
+        )}
+      </section>
     </>
   );
 }

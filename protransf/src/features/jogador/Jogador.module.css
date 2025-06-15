@@ -7,10 +7,10 @@
 }
 
 .perfilJogador {
-  max-width: 900px;
-  margin: 40px auto 80px;
+  max-width: 1000px;
+  margin: 40px auto 0px;
   padding: 30px 40px;
-  background-color: var(--surface);
+  background-color: transparent;
   border-radius: 12px;
   box-shadow: 0 8px 20px rgba(0,0,0,0.1);
   color: var(--text);
@@ -108,3 +108,86 @@ iframe {
   color: #83cfff;
   text-decoration: underline;
 }
+/* Nickname abaixo do nome do jogador */
+.nickname {
+  font-size: 1.2rem;
+  color: var(--text-muted);
+  margin-top: -6px;
+  margin-bottom: 12px;
+}
+
+/* Botão Editar Perfil */
+.btnEditar {
+  background-color: #5fbdf2;
+  color: #0d1b2a;
+  border: none;
+  padding: 0.5rem 1.2rem;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  margin-top: 10px;
+}
+
+.btnEditar:hover {
+  background-color: #4aa6e0;
+}
+
+/* Link para Jogadas */
+.btnVerJogadas {
+  display: inline-block;
+  margin-top: 12px;
+  padding: 0.5rem 1.2rem;
+  background-color: transparent;
+  border: 2px solid var(--primary);
+  color: var(--primary);
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 1rem;
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+.btnVerJogadas:hover {
+  background-color: var(--primary);
+  color: #0d1b2a;
+}
+.videoGrid {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.videoWrapper {
+  position: relative;
+  width: 180px;      /* largura fixa pequena */
+  height: 180px;     /* altura fixa igual para ficar quadrado */
+  overflow: hidden;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+}
+
+.videoWrapper iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100% !important;
+  height: 100% !important;
+  border: 0;
+}
+
+.iconLink {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s ease;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.iconLink:hover {
+  transform: scale(1.1);
+}
+

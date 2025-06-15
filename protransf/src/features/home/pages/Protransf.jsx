@@ -22,7 +22,6 @@ export default function Home() {
         <h2>MERCADO DE TRANSFERÊNCIAS</h2>
         <p>Buscando um novo clube ou reforços? No PROTRANSF você encontra as melhores oportunidades.</p>
         <div className="buttons">
-          <button className="btn-primary">VER JOGADORES</button>
           <a href="/cadastro" className="btn-secondary">CADASTRAR-SE</a>
         </div>
       </div>

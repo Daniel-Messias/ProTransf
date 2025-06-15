@@ -9,7 +9,7 @@ import Cadastro from './features/Cadastro/pages/Cadastro';
 import Login from './features/auth/pages/Login';
 import PerfilJogadorPage from './features/jogador/pages/PerfilJogadorPage';
 import PerfilClubePage from './features/clube/pages/PerfilClubePage';
-import RankingPage from './features/ranking/RankingPage';
+import RankingPage from '../src/features/ranking/pages/Ranking';
 
 function Header() {
   return (

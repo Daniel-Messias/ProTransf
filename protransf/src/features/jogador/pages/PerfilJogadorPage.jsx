@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { auth, db } from '../../../services/firebase';
+import { auth, db, storage } from '../../../services/firebase';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import styles from '../Jogador.module.css';
 
 export default function PerfilJogadorPage() {
@@ -33,6 +34,7 @@ export default function PerfilJogadorPage() {
   }, []);
 
   const handleEditar = () => setEditando(true);
+
   const handleCancelar = () => {
     setEditando(false);
     setFormData(jogador);
@@ -58,6 +60,24 @@ export default function PerfilJogadorPage() {
     }
   };
 
+  const handleFotoChange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    try {
+      const user = auth.currentUser;
+      if (!user) return;
+
+      const storageRef = ref(storage, `avatars/${user.uid}`);
+      await uploadBytes(storageRef, file);
+
+      const url = await getDownloadURL(storageRef);
+      setFormData((prev) => ({ ...prev, avatarUrl: url }));
+    } catch (error) {
+      console.error("Erro ao fazer upload da imagem:", error);
+    }
+  };
+
   if (!formData) return <p>Carregando perfil...</p>;
 
   return (
@@ -70,6 +90,20 @@ export default function PerfilJogadorPage() {
         />
 
         <div className={styles.infoJogador}>
+          {editando && (
+            <div className={styles.uploadContainer}>
+              <label className={styles.btnUpload}>
+                Alterar foto
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFotoChange}
+                  style={{ display: 'none' }}
+                />
+              </label>
+            </div>
+          )}
+
           {editando ? (
             <>
               <input name="nome" value={formData.nome || ''} onChange={handleChange} placeholder="Nome" />

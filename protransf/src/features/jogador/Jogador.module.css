@@ -190,4 +190,81 @@ iframe {
 .iconLink:hover {
   transform: scale(1.1);
 }
+/* Inputs, selects e textareas com visual moderno */
+.inputEdicao,
+.selectEdicao,
+.textareaEdicao {
+  width: 100%;
+  padding: 10px 14px;
+  margin-bottom: 16px;
+  background-color: var(--surface);
+  color: var(--text);
+  border: 2px solid var(--primary);
+  border-radius: 8px;
+  font-size: 1rem;
+  outline: none;
+  transition: border-color 0.3s ease;
+}
+
+.inputEdicao:focus,
+.selectEdicao:focus,
+.textareaEdicao:focus {
+  border-color: #83cfff;
+}
+
+.botoesEdicao {
+  display: flex;
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.btnSalvar {
+  background-color: var(--primary);
+  color: var(--background);
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.btnSalvar:hover {
+  background-color: #4aa6e0;
+}
+
+.btnCancelar {
+  background-color: transparent;
+  color: var(--primary);
+  border: 2px solid var(--primary);
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.btnCancelar:hover {
+  background-color: var(--primary);
+  color: var(--background);
+}
+.uploadContainer {
+  margin-top: 10px;
+}
+
+.btnUpload {
+  background-color: #007bff;
+  color: white;
+  padding: 8px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  display: inline-block;
+  margin-top: 10px;
+  transition: background 0.3s ease;
+}
+
+.btnUpload:hover {
+  background-color: #0056b3;
+}
 

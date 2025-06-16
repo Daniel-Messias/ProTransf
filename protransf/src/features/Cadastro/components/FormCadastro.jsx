@@ -1,5 +1,20 @@
 import React, { useState } from "react";
 import styles from "../cadastro.module.css";
+import { auth, db, storage } from '../../../services/firebase';
+import {
+  createUserWithEmailAndPassword,
+  updateProfile,
+} from "firebase/auth";
+import {
+  ref as storageRef,
+  uploadBytes,
+  getDownloadURL,
+} from "firebase/storage";
+import {
+  doc,
+  setDoc,
+  serverTimestamp,
+} from "firebase/firestore";
 
 const posicoes = [
   "",
@@ -41,7 +56,7 @@ export default function FormCadastro() {
     username: "",
     email: "",
     senha: "",
-    senhaConfirm: "",  // novo campo para repetir senha
+    senhaConfirm: "",
     nascimento: "",
     plataforma: "",
     posicaoPrimaria: "",
@@ -53,19 +68,19 @@ export default function FormCadastro() {
   const [preview, setPreview] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [errors, setErrors] = useState({});
+  const [loading, setLoading] = useState(false);
+  const [firebaseError, setFirebaseError] = useState(null);
 
   const validate = () => {
     const newErrors = {};
     if (!formData.nome.trim()) newErrors.nome = "Nome é obrigatório";
     if (!formData.username.trim()) newErrors.username = "Usuário é obrigatório";
-    if (!formData.email.includes("@"))
-      newErrors.email = "Email deve ser válido";
+    if (!formData.email.includes("@")) newErrors.email = "Email deve ser válido";
     if (formData.senha.length < 6)
       newErrors.senha = "Senha deve ter pelo menos 6 caracteres";
     if (formData.senha !== formData.senhaConfirm)
       newErrors.senhaConfirm = "As senhas não coincidem";
-    if (!formData.senhaConfirm)
-      newErrors.senhaConfirm = "Confirme sua senha";
+    if (!formData.senhaConfirm) newErrors.senhaConfirm = "Confirme sua senha";
     if (!formData.nascimento) newErrors.nascimento = "Data é obrigatória";
     if (!formData.plataforma) newErrors.plataforma = "Escolha uma plataforma";
     if (!formData.posicaoPrimaria)
@@ -89,19 +104,72 @@ export default function FormCadastro() {
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (validate()) {
+    setFirebaseError(null);
+    if (!validate()) return;
+
+    setLoading(true);
+
+    try {
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        formData.email,
+        formData.senha
+      );
+      const user = userCredential.user;
+
+      let photoURL = null;
+      if (formData.foto) {
+        const imageRef = storageRef(storage, `avatars/${user.uid}/${formData.foto.name}`);
+        await uploadBytes(imageRef, formData.foto);
+        photoURL = await getDownloadURL(imageRef);
+      }
+
+      await updateProfile(user, {
+        displayName: formData.username,
+        photoURL: photoURL,
+      });
+
+      await setDoc(doc(db, "usuarios", user.uid), {
+        nome: formData.nome,
+        username: formData.username,
+        email: formData.email,
+        nascimento: formData.nascimento,
+        plataforma: formData.plataforma,
+        posicaoPrimaria: formData.posicaoPrimaria,
+        posicaoSecundaria: formData.posicaoSecundaria || null,
+        termosAceitos: formData.termos,
+        fotoURL: photoURL,
+        criadoEm: serverTimestamp(),
+      });
+
       setShowModal(true);
+      setFormData({
+        nome: "",
+        username: "",
+        email: "",
+        senha: "",
+        senhaConfirm: "",
+        nascimento: "",
+        plataforma: "",
+        posicaoPrimaria: "",
+        posicaoSecundaria: "",
+        termos: false,
+        foto: null,
+      });
+      setPreview(null);
+      setErrors({});
+    } catch (error) {
+      console.error("Erro ao cadastrar usuário:", error);
+      setFirebaseError(error.message);
+    } finally {
+      setLoading(false);
     }
   };
 
   const fecharModal = () => {
     setShowModal(false);
-    // resetar o formulário se quiser
-    // setFormData({ ...estado inicial });
-    // setPreview(null);
-    // setErrors({});
   };
 
   return (
@@ -112,6 +180,11 @@ export default function FormCadastro() {
       </p>
 
       <form className={styles.formulario} onSubmit={handleSubmit} noValidate>
+        {/* Exibe erro do Firebase */}
+        {firebaseError && (
+          <div className={styles.errorMsg}>Erro: {firebaseError}</div>
+        )}
+
         {/* Upload Foto */}
         <div className={styles.formGroup}>
           <label htmlFor="foto">Foto/avatar:</label>
@@ -305,10 +378,10 @@ export default function FormCadastro() {
           <button
             type="submit"
             className={styles.btnSecondary}
-            disabled={!formData.termos}
-            aria-disabled={!formData.termos}
+            disabled={!formData.termos || loading}
+            aria-disabled={!formData.termos || loading}
           >
-            Cadastrar
+            {loading ? "Cadastrando..." : "Cadastrar"}
           </button>
         </div>
       </form>

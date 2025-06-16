@@ -1,8 +1,11 @@
-import React from "react";
-import { BrowserRouter as Router, Routes, Route, Link, useLocation } from "react-router-dom";
-import './style.css';
+import React, { useEffect, useState } from "react";
+import { BrowserRouter as Router, Routes, Route, Link, useLocation, useNavigate } from "react-router-dom";
+import { onAuthStateChanged, signOut } from "firebase/auth";
+import { auth } from './services/firebase'; // ajuste o caminho se necessário
 
+import './style.css';
 import bola from "../src/assets/fotos/bola.png";
+
 import Home from './features/home/pages/Protransf';
 import Transferencia from './features/transferencias/pages/Transferencia';
 import Cadastro from './features/Cadastro/pages/Cadastro';
@@ -11,7 +14,14 @@ import PerfilJogadorPage from './features/jogador/pages/PerfilJogadorPage';
 import PerfilClubePage from './features/clube/pages/PerfilClubePage';
 import RankingPage from '../src/features/ranking/pages/Ranking';
 
-function Header() {
+function Header({ user }) {
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    await signOut(auth);
+    navigate("/");
+  };
+
   return (
     <header>
       <Link to="/" className="logo">
@@ -19,27 +29,40 @@ function Header() {
       </Link>
 
       <nav>
-        <Link to="/transferencias">Transferências</Link>
-        <Link to="/jogador">Jogador</Link>
         <Link to="/clube">Clube</Link>
+        <Link to="/transferencias">Transferências</Link>
+        <Link to="/jogador">{user ? "Perfil" : "Jogador"}</Link>
         <Link to="/ranking">Ranking</Link>
-        <Link to="/cadastro">Cadastrar-se</Link> 
+        {!user && <Link to="/cadastro">Cadastrar-se</Link>}
       </nav>
-      <Link to="/login" className="btn-login">Entrar</Link>
+
+      {!user ? (
+        <Link to="/login" className="btn-login">Entrar</Link>
+      ) : (
+        <button onClick={handleLogout} className="btn-login">Sair</button>
+      )}
     </header>
   );
 }
 
-// Novo componente para gerenciar rotas com header condicional
+// Gerencia rotas e controle de header
 function LayoutRoutes() {
   const location = useLocation();
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+      setUser(firebaseUser);
+    });
+    return () => unsubscribe();
+  }, []);
 
   const hideHeaderOnRoutes = ["/login"];
   const hideHeader = hideHeaderOnRoutes.includes(location.pathname);
 
   return (
     <div className="imagem-fundo">
-      {!hideHeader && <Header />}
+      {!hideHeader && <Header user={user} />}
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/transferencias" element={<Transferencia />} />

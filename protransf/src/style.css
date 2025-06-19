@@ -469,3 +469,29 @@ td.defense {
   padding: 50px 50px; 
   
 }
+/* Base comum para os dois botões */
+.btn-cadastrar,
+.btn-ver-perfil {
+  display: inline-block;
+  padding: 6px 12px;
+  margin-top: 32px;
+  background-color: var(--primary);
+  color: #fff; /* texto branco normal */
+  border-radius: 8px;
+  margin: 0 8px;
+  text-decoration: none;
+  font-weight: 650; /* texto mais grosso */
+  cursor: pointer;
+  border: none;
+  text-align: center;
+  transition: all 0.2s ease;
+}
+
+.btn-cadastrar:hover,
+.btn-ver-perfil:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 8px 20px rgba(95, 189, 242, 0.5);
+  background-color: var(--primary);
+  color: #000; /* texto preto no hover */
+}
+

@@ -48,10 +48,11 @@ export default function Home() {
         <p>Buscando um novo clube ou reforços? No PROTRANSF você encontra as melhores oportunidades.</p>
         <div className="buttons">
           {!user ? (
-            <Link to="/cadastro" className="btn-secondary">CADASTRAR-SE</Link>
-          ) : (
-            <Link to="/jogador" className="btn-secondary">VER PERFIL</Link>
-          )}
+            <Link to="/cadastro" className="btn-cadastrar">CADASTRAR-SE</Link>
+            ) : (
+            <Link to="/jogador" className="btn-ver-perfil">PERFIL</Link>
+            )}
+
         </div>
       </div>
 
@@ -68,13 +69,22 @@ export default function Home() {
             </tr>
           </thead>
           <tbody>
-            {jogadores.map((jogador) => (
-              <tr key={jogador.id}>
+            {jogadores.slice(0, 5).map((jogador) => (
+              <tr
+                key={jogador.id}
+                style={{ cursor: "pointer" }}
+                onClick={() => window.location.href = `/perfil-jogador/${jogador.id}`}
+              >
                 <td>
                   <img
                     src={jogador.foto || "https://via.placeholder.com/50"}
                     alt={`Foto de ${jogador.nome}`}
-                    style={{ width: "50px", height: "50px", borderRadius: "50%", objectFit: "cover" }}
+                    style={{
+                      width: "50px",
+                      height: "50px",
+                      borderRadius: "50%",
+                      objectFit: "cover",
+                    }}
                   />
                 </td>
                 <td>{jogador.nome}</td>
@@ -102,7 +112,7 @@ export default function Home() {
           <div className="column">
             <h3>RANKING DE CLUBES</h3>
             <ul className="ranking-list">
-              {[ 
+              {[
                 { nome: "FC Virtual", pontos: 72 },
                 { nome: "Eleven United", pontos: 68 },
                 { nome: "VPG Stars", pontos: 65 },
@@ -120,7 +130,7 @@ export default function Home() {
           <div className="column">
             <h3>ÚLTIMAS TRANSFERÊNCIAS</h3>
             <ul className="transfer-list">
-              {[ 
+              {[
                 { de: "RapidShot55", para: "Cyber FC" },
                 { de: "Playmaker08", para: "Final Josoada" },
                 { de: "SolidDefender", para: "Dreamerz" },

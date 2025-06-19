@@ -1,7 +1,15 @@
 import React, { useEffect, useState } from "react";
-import { BrowserRouter as Router, Routes, Route, Link, useLocation, useNavigate } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Link,
+  useLocation,
+  useNavigate
+} from "react-router-dom";
 import { onAuthStateChanged, signOut } from "firebase/auth";
-import { auth } from './services/firebase'; // ajuste o caminho se necessário
+import { doc, getDoc } from "firebase/firestore";
+import { auth, db } from './services/firebase';
 
 import './style.css';
 import bola from "../src/assets/fotos/bola.png";
@@ -15,13 +23,17 @@ import PerfilClubePage from './features/clube/pages/PerfilClubePage';
 import RankingPage from '../src/features/ranking/pages/Ranking';
 import PerfilPublicoJogador from './features/jogador/pages/PerfilPublicoJogador';
 
-function Header({ user }) {
+function Header({ user, tipo }) {
   const navigate = useNavigate();
 
   const handleLogout = async () => {
     await signOut(auth);
     navigate("/");
   };
+
+  const isJogador = tipo === "jogador";
+  const isClubeJogador = tipo === "clube_jogador";
+  const isVisitante = !user;
 
   return (
     <header>
@@ -30,11 +42,35 @@ function Header({ user }) {
       </Link>
 
       <nav>
-        <Link to="/clube">Clube</Link>
-        <Link to="/transferencias">Transferências</Link>
-        <Link to="/jogador">{user ? "Perfil" : "Jogador"}</Link>
-        <Link to="/ranking">Ranking</Link>
-        {!user && <Link to="/cadastro">Cadastrar-se</Link>}
+        {/* Visitante (não logado) */}
+        {isVisitante && (
+          <>
+            <Link to="/clube">Clube</Link>
+            <Link to="/transferencias">Transferências</Link>
+            <Link to="/jogador">Jogador</Link>
+            <Link to="/ranking">Ranking</Link>
+            <Link to="/cadastro">Cadastrar-se</Link>
+          </>
+        )}
+
+        {/* Jogador */}
+        {user && isJogador && (
+          <>
+            <Link to="/transferencias">Transferências</Link>
+            <Link to="/jogador">Perfil</Link>
+            <Link to="/ranking">Ranking</Link>
+          </>
+        )}
+
+        {/* Clube + Jogador */}
+        {user && isClubeJogador && (
+          <>
+            <Link to="/clube">Clube</Link>
+            <Link to="/transferencias">Transferências</Link>
+            <Link to="/jogador">Perfil</Link>
+            <Link to="/ranking">Ranking</Link>
+          </>
+        )}
       </nav>
 
       {!user ? (
@@ -46,15 +82,33 @@ function Header({ user }) {
   );
 }
 
-// Gerencia rotas e controle de header
 function LayoutRoutes() {
   const location = useLocation();
   const [user, setUser] = useState(null);
+  const [tipo, setTipo] = useState(null);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       setUser(firebaseUser);
+
+      if (firebaseUser) {
+        try {
+          const docRef = doc(db, "usuarios", firebaseUser.uid);
+          const docSnap = await getDoc(docRef);
+          if (docSnap.exists()) {
+            setTipo(docSnap.data().tipo || null);
+          } else {
+            setTipo(null);
+          }
+        } catch (error) {
+          console.error("Erro ao buscar tipo de usuário:", error);
+          setTipo(null);
+        }
+      } else {
+        setTipo(null);
+      }
     });
+
     return () => unsubscribe();
   }, []);
 
@@ -63,7 +117,7 @@ function LayoutRoutes() {
 
   return (
     <div className="imagem-fundo">
-      {!hideHeader && <Header user={user} />}
+      {!hideHeader && <Header user={user} tipo={tipo} />}
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/transferencias" element={<Transferencia />} />

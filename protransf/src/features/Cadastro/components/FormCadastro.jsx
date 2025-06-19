@@ -63,6 +63,7 @@ export default function FormCadastro() {
     posicaoSecundaria: "",
     termos: false,
     foto: null,
+    tipoUsuario: "jogador", // novo campo para tipo
   });
 
   const [preview, setPreview] = useState(null);
@@ -137,11 +138,12 @@ export default function FormCadastro() {
         email: formData.email,
         nascimento: formData.nascimento,
         plataforma: formData.plataforma,
-        posicaoPrimaria: formData.posicaoPrimaria,
+        posicao: formData.posicaoPrimaria,       // salvo com nome posicao para facilitar exibição
         posicaoSecundaria: formData.posicaoSecundaria || null,
         termosAceitos: formData.termos,
         fotoURL: photoURL,
         criadoEm: serverTimestamp(),
+        tipo: formData.tipoUsuario,              // salva o tipo escolhido no cadastro
       });
 
       setShowModal(true);
@@ -157,6 +159,7 @@ export default function FormCadastro() {
         posicaoSecundaria: "",
         termos: false,
         foto: null,
+        tipoUsuario: "jogador", // resetar para default
       });
       setPreview(null);
       setErrors({});
@@ -180,7 +183,6 @@ export default function FormCadastro() {
       </p>
 
       <form className={styles.formulario} onSubmit={handleSubmit} noValidate>
-        {/* Exibe erro do Firebase */}
         {firebaseError && (
           <div className={styles.errorMsg}>Erro: {firebaseError}</div>
         )}
@@ -357,6 +359,22 @@ export default function FormCadastro() {
                 {pos || "Nenhuma"}
               </option>
             ))}
+          </select>
+        </div>
+
+        {/* Tipo Usuário (novo) */}
+        <div className={styles.formGroup}>
+          <label htmlFor="tipoUsuario">Você está cadastrando como:</label>
+          <select
+            id="tipoUsuario"
+            name="tipoUsuario"
+            value={formData.tipoUsuario}
+            onChange={handleChange}
+            className={styles.formInput}
+          >
+            <option value="jogador">Jogador</option>
+            <option value="clube">Clube</option>
+            <option value="clube_jogador">Clube + Jogador</option>
           </select>
         </div>
 

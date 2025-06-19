@@ -2,10 +2,13 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import bola from "../../../assets/fotos/bola.png";
 import { onAuthStateChanged } from "firebase/auth";
-import { auth } from "../../../services/firebase"; // ajuste o caminho se precisar
+import { auth } from "../../../services/firebase";
+import { buscarJogadores } from "../../../services/firestoreService";
 
 export default function Home() {
   const [user, setUser] = useState(null);
+  const [jogadores, setJogadores] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
@@ -14,12 +17,24 @@ export default function Home() {
     return () => unsubscribe();
   }, []);
 
-  const jogadores = [
-    { nome: "ProGamer97", posicao: "Volante", status: "Livre", plataforma: "Xbox", foto: "https://randomuser.me/api/portraits/men/1.jpg" },
-    { nome: "SoccerKing11", posicao: "Atacante", status: "Contrato ativo", plataforma: "PlayStation", foto: "https://randomuser.me/api/portraits/men/2.jpg" },
-    { nome: "ElitePlayer22", posicao: "Goleiro", status: "Aberto a propostas", plataforma: "PC", foto: "https://randomuser.me/api/portraits/men/3.jpg" },
-    { nome: "SkillMaster09", posicao: "Meia", status: "Livre", plataforma: "Xbox", foto: "https://randomuser.me/api/portraits/men/4.jpg" },
-  ];
+  useEffect(() => {
+    async function carregarJogadores() {
+      setLoading(true);
+      try {
+        const jogadoresReais = await buscarJogadores();
+        setJogadores(jogadoresReais);
+      } catch (error) {
+        console.error("Erro ao buscar jogadores:", error);
+      }
+      setLoading(false);
+    }
+
+    carregarJogadores();
+  }, []);
+
+  if (loading) {
+    return <p style={{ textAlign: "center" }}>Carregando jogadores...</p>;
+  }
 
   return (
     <>
@@ -40,33 +55,36 @@ export default function Home() {
         </div>
       </div>
 
-      {/* restante do seu código */}
       <section>
         <h3>JOGADORES EM DESTAQUE</h3>
         <table>
           <thead>
             <tr>
               <th></th>
-              <th>Jogador</th> 
+              <th>Jogador</th>
               <th>Posição</th>
               <th>Status</th>
               <th>Plataforma</th>
             </tr>
           </thead>
           <tbody>
-            {jogadores.map((jogador, index) => (
-              <tr key={index}>
+            {jogadores.map((jogador) => (
+              <tr key={jogador.id}>
                 <td>
-                  <img 
-                    src={jogador.foto} 
-                    alt={`Foto de ${jogador.nome}`} 
-                    style={{ width: "50px", height: "50px", borderRadius: "50%", objectFit: "cover" }} 
+                  <img
+                    src={jogador.foto || "https://via.placeholder.com/50"}
+                    alt={`Foto de ${jogador.nome}`}
+                    style={{ width: "50px", height: "50px", borderRadius: "50%", objectFit: "cover" }}
                   />
                 </td>
                 <td>{jogador.nome}</td>
                 <td>
                   <span
-                    className={`posicao ${["Goleiro", "Zagueiro", "Lateral", "Volante"].includes(jogador.posicao) ? "defense" : "attack"}`}
+                    className={`posicao ${
+                      ["Goleiro", "Zagueiro", "Lateral", "Volante"].includes(jogador.posicao)
+                        ? "defense"
+                        : "attack"
+                    }`}
                   >
                     {jogador.posicao}
                   </span>
@@ -84,7 +102,7 @@ export default function Home() {
           <div className="column">
             <h3>RANKING DE CLUBES</h3>
             <ul className="ranking-list">
-              {[
+              {[ 
                 { nome: "FC Virtual", pontos: 72 },
                 { nome: "Eleven United", pontos: 68 },
                 { nome: "VPG Stars", pontos: 65 },
@@ -102,7 +120,7 @@ export default function Home() {
           <div className="column">
             <h3>ÚLTIMAS TRANSFERÊNCIAS</h3>
             <ul className="transfer-list">
-              {[
+              {[ 
                 { de: "RapidShot55", para: "Cyber FC" },
                 { de: "Playmaker08", para: "Final Josoada" },
                 { de: "SolidDefender", para: "Dreamerz" },

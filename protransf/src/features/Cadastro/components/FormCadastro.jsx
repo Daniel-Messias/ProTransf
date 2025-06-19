@@ -122,7 +122,7 @@ export default function FormCadastro() {
 
       let photoURL = null;
       if (formData.foto) {
-        const imageRef = storageRef(storage, `avatars/${user.uid}/${formData.foto.name}`);
+        const imageRef = storageRef(storage, `avatars/${user.uid}/avatar.jpg`);
         await uploadBytes(imageRef, formData.foto);
         photoURL = await getDownloadURL(imageRef);
       }

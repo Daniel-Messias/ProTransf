@@ -65,22 +65,28 @@ export default function PerfilJogadorPage() {
   };
 
   const handleFotoChange = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
+  const file = e.target.files[0];
+  if (!file) return;
 
-    try {
-      const user = auth.currentUser;
-      if (!user) return;
+  try {
+    const user = auth.currentUser;
+    if (!user) return;
 
-      const storageRef = ref(storage, `avatars/${user.uid}`);
-      await uploadBytes(storageRef, file);
+    const avatarRef = ref(storage, `avatars/${user.uid}/avatar.jpg`);
+    await uploadBytes(avatarRef, file);
 
-      const url = await getDownloadURL(storageRef);
-      setFormData((prev) => ({ ...prev, fotoURL: url }));
-    } catch (error) {
-      console.error("Erro ao fazer upload da imagem:", error);
-    }
-  };
+    const url = await getDownloadURL(avatarRef);
+
+    setFormData((prev) => ({ ...prev, fotoURL: url }));
+
+    // Atualiza também no Firestore para garantir persistência
+    const docRef = doc(db, 'usuarios', user.uid);
+    await updateDoc(docRef, { fotoURL: url });
+  } catch (error) {
+    console.error("Erro ao fazer upload da imagem:", error);
+  }
+};
+
 
   if (!formData) return <p>Carregando perfil...</p>;
 

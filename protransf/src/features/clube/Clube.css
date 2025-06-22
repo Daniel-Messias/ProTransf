@@ -335,3 +335,14 @@ footer {
     overflow-x: auto;
   }
 }
+
+.jogador-link {
+  color: #2a7ae2;
+  text-decoration: none;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.jogador-link:hover {
+  text-decoration: underline;
+}

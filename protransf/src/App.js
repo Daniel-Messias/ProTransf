@@ -23,6 +23,7 @@ import PerfilClubePage from "./features/clube/pages/PerfilClubePage";
 import RankingPage from "../src/features/ranking/pages/Ranking";
 import PerfilPublicoJogador from "./features/jogador/pages/PerfilPublicoJogador";
 
+
 function Header({ user, tipo }) {
   const navigate = useNavigate();
 
@@ -129,9 +130,13 @@ function LayoutRoutes() {
         <Route path="/cadastro" element={<Cadastro />} />
         <Route path="/login" element={<Login />} />
         <Route path="/jogador" element={<PerfilJogadorPage />} />
-        <Route path="/clube" element={<PerfilClubePage />} />
+        <Route path="/clube" element={<PerfilClubePage modoLeitura={false} />} />
         <Route path="/ranking" element={<RankingPage />} />
         <Route path="/perfil-jogador/:id" element={<PerfilPublicoJogador />} />
+        <Route
+          path="/perfil-clube/:id"
+          element={<PerfilClubePage modoLeitura={true} />}
+        />
       </Routes>
     </div>
   );

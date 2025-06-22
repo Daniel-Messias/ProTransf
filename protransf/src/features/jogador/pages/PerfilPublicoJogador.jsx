@@ -1,26 +1,27 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { auth, db } from '../../../services/firebase';
-import { doc, getDoc } from 'firebase/firestore';
+import { collection, query, where, getDocs } from 'firebase/firestore';
 import styles from '../Jogador.module.css';
 
 export default function PerfilPublicoJogador() {
-  const { id } = useParams();
+  const { id } = useParams(); // id = username do jogador
   const [jogador, setJogador] = useState(null);
   const [dono, setDono] = useState(false);
 
   useEffect(() => {
     const buscarDados = async () => {
       try {
-        const docRef = doc(db, 'usuarios', id);
-        const docSnap = await getDoc(docRef);
+        const usuariosRef = collection(db, "usuarios");
+        const q = query(usuariosRef, where("username", "==", id));
+        const querySnapshot = await getDocs(q);
 
-        if (docSnap.exists()) {
-          const data = docSnap.data();
-          setJogador(data);
+        if (!querySnapshot.empty) {
+          const jogadorData = querySnapshot.docs[0].data();
+          setJogador(jogadorData);
 
           const user = auth.currentUser;
-          if (user && user.uid === id) {
+          if (user && user.uid === querySnapshot.docs[0].id) {
             setDono(true);
           }
         } else {

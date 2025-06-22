@@ -12,9 +12,11 @@ import {
   serverTimestamp
 } from 'firebase/firestore';
 import { auth, db } from '../../../services/firebase';
+import { Link, useParams } from 'react-router-dom';
 import '../Clube.css';
 
-export default function PerfilClubePage() {
+export default function PerfilClubePage({ modoLeitura = false }) {
+  const { id } = useParams(); // id do clube para modo leitura
   const [isEditing, setIsEditing] = useState(false);
   const [isOwner, setIsOwner] = useState(false);
   const [clubeExiste, setClubeExiste] = useState(false);
@@ -25,16 +27,21 @@ export default function PerfilClubePage() {
   const [procura, setProcura] = useState('sim');
   const [campeonatos, setCampeonatos] = useState([]);
   const [novoCampeonato, setNovoCampeonato] = useState('');
-  // Estado novoJogador usa email agora para convite
   const [novoJogador, setNovoJogador] = useState({ email: '', posicao: '', status: '', plataforma: '' });
   const [jogadores, setJogadores] = useState([]);
 
   useEffect(() => {
     const fetchClube = async () => {
-      const user = auth.currentUser;
-      if (!user) return;
+      let clubeId = null;
+      if (modoLeitura) {
+        clubeId = id;
+      } else {
+        const user = auth.currentUser;
+        if (!user) return;
+        clubeId = user.uid;
+      }
 
-      const clubeRef = doc(db, 'clubes', user.uid);
+      const clubeRef = doc(db, 'clubes', clubeId);
       const docSnap = await getDoc(clubeRef);
 
       if (docSnap.exists()) {
@@ -45,17 +52,27 @@ export default function PerfilClubePage() {
         setProcura(data.procura || 'nao');
         setCampeonatos(data.campeonatos || []);
         setJogadores(data.jogadores || []);
-        setIsOwner(data.donoUid === user.uid);
         setClubeExiste(true);
-        setIsEditing(false);
+
+        if (!modoLeitura) {
+          const user = auth.currentUser;
+          setIsOwner(data.donoUid === user.uid);
+          setIsEditing(false);
+        } else {
+          setIsOwner(false);
+          setIsEditing(false);
+        }
       } else {
-        setIsOwner(true);
-        setIsEditing(true);
+        if (!modoLeitura) {
+          setIsOwner(true);
+          setIsEditing(true);
+        }
+        setClubeExiste(false);
       }
     };
 
     fetchClube();
-  }, []);
+  }, [id, modoLeitura]);
 
   const handleProcuraChange = (e) => setProcura(e.target.value);
 
@@ -70,7 +87,6 @@ export default function PerfilClubePage() {
     setCampeonatos(campeonatos.filter((_, i) => i !== index));
   };
 
-  // Busca jogador pelo email para validar existência
   async function jogadorExiste(email) {
     if (!email) return false;
     const usuariosRef = collection(db, 'usuarios');
@@ -79,7 +95,33 @@ export default function PerfilClubePage() {
     return !querySnapshot.empty;
   }
 
-  // Adicionar jogador envia convite pelo email
+  async function buscarDadosJogador(email) {
+    if (!email) {
+      setNovoJogador({ email: '', posicao: '', status: '', plataforma: '' });
+      return;
+    }
+    const usuariosRef = collection(db, 'usuarios');
+    const q = query(usuariosRef, where('email', '==', email.trim().toLowerCase()));
+    const querySnapshot = await getDocs(q);
+
+    if (!querySnapshot.empty) {
+      const jogadorData = querySnapshot.docs[0].data();
+      setNovoJogador({
+        email: email.trim().toLowerCase(),
+        posicao: jogadorData.posicao || '',
+        status: jogadorData.status || '',
+        plataforma: jogadorData.plataforma || '',
+      });
+    } else {
+      setNovoJogador({
+        email: email.trim().toLowerCase(),
+        posicao: '',
+        status: '',
+        plataforma: '',
+      });
+    }
+  }
+
   const adicionarJogador = async () => {
     if (!novoJogador.email || !novoJogador.posicao || !novoJogador.status || !novoJogador.plataforma) {
       alert('Preencha todos os campos do jogador.');
@@ -91,11 +133,6 @@ export default function PerfilClubePage() {
       alert(`Jogador com e-mail "${novoJogador.email}" não encontrado. Peça para ele se cadastrar primeiro.`);
       return;
     }
-
-    // Verifica se jogador já está no elenco (compara username, mas temos só email no convite)
-    // Assumindo que lista de jogadores tem username, vamos permitir duplicados de email, 
-    // pois o convite é por email, mas elenco mantém username.
-    // Se quiser evitar duplicatas por email, precisaria mapear email nos jogadores.
 
     const convitesRef = collection(db, 'convites');
     const conviteQuery = query(
@@ -129,42 +166,41 @@ export default function PerfilClubePage() {
     }
   };
 
- const removerJogador = async (index) => {
-  const jogadorRemovido = jogadores[index];
-  const user = auth.currentUser;
-  if (!jogadorRemovido || !user) return;
+  const removerJogador = async (index) => {
+    const jogadorRemovido = jogadores[index];
+    const user = auth.currentUser;
+    if (!jogadorRemovido || !user) return;
 
-  const confirmar = window.confirm(`Deseja realmente remover o jogador ${jogadorRemovido.username}?`);
-  if (!confirmar) return;
+    const confirmar = window.confirm(`Deseja realmente remover o jogador ${jogadorRemovido.username}?`);
+    if (!confirmar) return;
 
-  const novoElenco = jogadores.filter((_, i) => i !== index);
-  setJogadores(novoElenco); // atualiza localmente
+    const novoElenco = jogadores.filter((_, i) => i !== index);
+    setJogadores(novoElenco);
 
-  try {
-    const clubeRef = doc(db, 'clubes', user.uid);
-    await updateDoc(clubeRef, {
-      jogadores: novoElenco,
-    });
-
-    // Busca o documento do jogador pelo username
-    const usuariosRef = collection(db, 'usuarios');
-    const q = query(usuariosRef, where('username', '==', jogadorRemovido.username));
-    const snapshot = await getDocs(q);
-
-    if (!snapshot.empty) {
-      const jogadorDoc = snapshot.docs[0];
-      await updateDoc(jogadorDoc.ref, {
-        status: 'Livre no mercado',
-        clubeAtual: '',
+    try {
+      const clubeRef = doc(db, 'clubes', user.uid);
+      await updateDoc(clubeRef, {
+        jogadores: novoElenco,
       });
-    }
 
-    alert(`Jogador ${jogadorRemovido.username} removido com sucesso.`);
-  } catch (error) {
-    console.error('Erro ao remover jogador:', error);
-    alert('Erro ao remover jogador. Tente novamente.');
-  }
-};
+      const usuariosRef = collection(db, 'usuarios');
+      const q = query(usuariosRef, where('username', '==', jogadorRemovido.username));
+      const snapshot = await getDocs(q);
+
+      if (!snapshot.empty) {
+        const jogadorDoc = snapshot.docs[0];
+        await updateDoc(jogadorDoc.ref, {
+          status: 'Livre no mercado',
+          clubeAtual: '',
+        });
+      }
+
+      alert(`Jogador ${jogadorRemovido.username} removido com sucesso.`);
+    } catch (error) {
+      console.error('Erro ao remover jogador:', error);
+      alert('Erro ao remover jogador. Tente novamente.');
+    }
+  };
 
   const salvarAlteracoes = async () => {
     const user = auth.currentUser;
@@ -221,12 +257,18 @@ export default function PerfilClubePage() {
     }
   };
 
+  const handleEmailChange = (e) => {
+    const email = e.target.value;
+    setNovoJogador((prev) => ({ ...prev, email }));
+    buscarDadosJogador(email);
+  };
+
   return (
     <section className="clube-info">
       <h2>{nomeClube || 'Novo Clube'}</h2>
 
       <div className="clube-detalhes">
-        {!clubeExiste && isEditing && (
+        {!clubeExiste && isEditing && !modoLeitura && (
           <>
             <div className="campo-edicao">
               <label><strong>Nome do Clube:</strong></label>
@@ -264,7 +306,7 @@ export default function PerfilClubePage() {
 
         <div>
           <strong>Descrição:</strong><br />
-          {isEditing ? (
+          {isEditing && !modoLeitura ? (
             <textarea
               value={descricao}
               onChange={(e) => setDescricao(e.target.value)}
@@ -283,13 +325,13 @@ export default function PerfilClubePage() {
           {campeonatos.map((campeonato, index) => (
             <li key={index}>
               {campeonato}
-              {isEditing && (
+              {!modoLeitura && isEditing && (
                 <button onClick={() => removerCampeonato(index)} className="btn-remover">🗑</button>
               )}
             </li>
           ))}
         </ul>
-        {isEditing && (
+        {!modoLeitura && isEditing && (
           <div className="adicionar-campeonato">
             <input
               type="text"
@@ -305,21 +347,25 @@ export default function PerfilClubePage() {
 
       <div className="info-procura-jogadores">
         <h3>Procurando Jogadores?</h3>
-        <label htmlFor="procura-jogadores">
-          <select
-            id="procura-jogadores"
-            value={procura}
-            onChange={handleProcuraChange}
-          >
-            <option value="sim">Sim!</option>
-            <option value="nao">Não.</option>
-          </select>
-        </label>
-        <p id="msg-procura">
-          {procura === 'sim'
-            ? 'Sim, estamos em busca de novos talentos para nosso elenco!'
-            : 'Não, o elenco está fechado no momento.'}
-        </p>
+        {!modoLeitura ? (
+          <label htmlFor="procura-jogadores">
+            <select
+              id="procura-jogadores"
+              value={procura}
+              onChange={handleProcuraChange}
+              disabled={modoLeitura}
+            >
+              <option value="sim">Sim!</option>
+              <option value="nao">Não.</option>
+            </select>
+          </label>
+        ) : (
+          <p id="msg-procura">
+            {procura === 'sim'
+              ? 'Sim, estamos em busca de novos talentos para nosso elenco!'
+              : 'Não, o elenco está fechado no momento.'}
+          </p>
+        )}
       </div>
 
       <div className="jogadores-lista">
@@ -331,17 +377,24 @@ export default function PerfilClubePage() {
               <th>Posição</th>
               <th>Status</th>
               <th>Plataforma</th>
-              {isEditing && <th>Ações</th>}
+              {!modoLeitura && isEditing && <th>Ações</th>}
             </tr>
           </thead>
           <tbody>
             {jogadores.map((jogador, index) => (
               <tr key={index}>
-                <td>{jogador.username || 'N/A'}</td>
+                <td>
+                  <Link
+                    to={`/perfil-jogador/${jogador.username}`}
+                    className="jogador-link"
+                  >
+                    {jogador.username || 'N/A'}
+                  </Link>
+                </td>
                 <td>{jogador.posicao}</td>
                 <td>{jogador.status}</td>
                 <td>{jogador.plataforma}</td>
-                {isEditing && (
+                {!modoLeitura && isEditing && (
                   <td><button onClick={() => removerJogador(index)} className="btn-remover">❌</button></td>
                 )}
               </tr>
@@ -349,12 +402,12 @@ export default function PerfilClubePage() {
           </tbody>
         </table>
 
-        {isEditing && (
+        {!modoLeitura && isEditing && (
           <div className="adicionar-campeonato">
             <input
               placeholder="E-mail do Jogador"
               value={novoJogador.email || ''}
-              onChange={(e) => setNovoJogador({ ...novoJogador, email: e.target.value })}
+              onChange={handleEmailChange}
               className="input-edit"
             />
             <input
@@ -380,13 +433,13 @@ export default function PerfilClubePage() {
         )}
       </div>
 
-      {!isEditing && isOwner && (
+      {!modoLeitura && !isEditing && isOwner && (
         <button onClick={() => setIsEditing(true)} className="btn-login" style={{ marginTop: 20 }}>
           Editar Clube
         </button>
       )}
 
-      {isEditing && (
+      {!modoLeitura && isEditing && (
         <div style={{ marginTop: 20 }}>
           <button onClick={salvarAlteracoes} className="btn-login" style={{ marginRight: 10 }}>
             Salvar Alterações

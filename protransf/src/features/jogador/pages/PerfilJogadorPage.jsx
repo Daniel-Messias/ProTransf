@@ -4,13 +4,13 @@ import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import styles from '../Jogador.module.css';
 import ConvitesPendentes from '../components/ConvitesPendentes';
+import { Link } from 'react-router-dom'; // 👈 Adicionado aqui
 
 export default function PerfilJogadorPage() {
   const [jogador, setJogador] = useState(null);
   const [formData, setFormData] = useState(null);
   const [editando, setEditando] = useState(false);
 
-  // Extraí a função para poder usar fora do useEffect também
   const fetchDadosJogador = async () => {
     try {
       const user = auth.currentUser;
@@ -27,6 +27,7 @@ export default function PerfilJogadorPage() {
           status: data.status || 'Livre no mercado',
           fotoURL: data.fotoURL || null,
           clubeAtual: data.clubeAtual || '',
+          clubeAtualId: data.clubeAtualId || '', // 👈 importante para o link funcionar
         });
       } else {
         console.log('Documento do jogador não encontrado.');
@@ -41,7 +42,6 @@ export default function PerfilJogadorPage() {
   }, []);
 
   const handleEditar = () => setEditando(true);
-
   const handleCancelar = () => {
     setEditando(false);
     setFormData(jogador);
@@ -81,9 +81,7 @@ export default function PerfilJogadorPage() {
       const url = await getDownloadURL(avatarRef);
 
       setFormData((prev) => ({ ...prev, fotoURL: url }));
-
-      const docRef = doc(db, 'usuarios', user.uid);
-      await updateDoc(docRef, { fotoURL: url });
+      await updateDoc(doc(db, 'usuarios', user.uid), { fotoURL: url });
     } catch (error) {
       console.error("Erro ao fazer upload da imagem:", error);
     }
@@ -95,7 +93,6 @@ export default function PerfilJogadorPage() {
 
   return (
     <section className={styles.perfilJogador}>
-      {/* Passa a função fetchDadosJogador para o componente ConvitesPendentes */}
       <ConvitesPendentes onAtualizarPerfil={fetchDadosJogador} />
 
       <div className={styles.perfilTopo}>
@@ -122,18 +119,8 @@ export default function PerfilJogadorPage() {
 
           {editando ? (
             <>
-              <input
-                name="nome"
-                value={formData.nome || ''}
-                onChange={handleChange}
-                placeholder="Nome"
-              />
-              <input
-                name="username"
-                value={formData.username || ''}
-                onChange={handleChange}
-                placeholder="Username"
-              />
+              <input name="nome" value={formData.nome || ''} onChange={handleChange} placeholder="Nome" />
+              <input name="username" value={formData.username || ''} onChange={handleChange} placeholder="Username" />
             </>
           ) : (
             <h1>
@@ -141,67 +128,28 @@ export default function PerfilJogadorPage() {
             </h1>
           )}
 
-          <p>
-            <strong>Posição Primária:</strong>{' '}
-            {editando ? (
-              <input
-                name="posicaoPrimaria"
-                value={formData.posicaoPrimaria || ''}
-                onChange={handleChange}
-              />
-            ) : (
-              formData.posicaoPrimaria || 'Não informado'
-            )}
-          </p>
+          <p><strong>Posição Primária:</strong> {editando ? (
+            <input name="posicaoPrimaria" value={formData.posicaoPrimaria || ''} onChange={handleChange} />
+          ) : (formData.posicaoPrimaria || 'Não informado')}</p>
 
-          <p>
-            <strong>Posição Secundária:</strong>{' '}
-            {editando ? (
-              <input
-                name="posicaoSecundaria"
-                value={formData.posicaoSecundaria || ''}
-                onChange={handleChange}
-              />
-            ) : (
-              formData.posicaoSecundaria || 'Não informado'
-            )}
-          </p>
+          <p><strong>Posição Secundária:</strong> {editando ? (
+            <input name="posicaoSecundaria" value={formData.posicaoSecundaria || ''} onChange={handleChange} />
+          ) : (formData.posicaoSecundaria || 'Não informado')}</p>
 
-          <p>
-            <strong>Plataforma:</strong>{' '}
-            {editando ? (
-              <input
-                name="plataforma"
-                value={formData.plataforma || ''}
-                onChange={handleChange}
-              />
-            ) : (
-              formData.plataforma || 'Não informado'
-            )}
-          </p>
+          <p><strong>Plataforma:</strong> {editando ? (
+            <input name="plataforma" value={formData.plataforma || ''} onChange={handleChange} />
+          ) : (formData.plataforma || 'Não informado')}</p>
 
-          <p>
-            <strong>Status:</strong>{' '}
-            {editando ? (
-              <select
-                name="status"
-                value={formData.status || 'Livre no mercado'}
-                onChange={handleChange}
-                disabled={estaContratado}
-              >
-                <option value="Livre no mercado">Livre no mercado</option>
-                <option value="Contratado">Contratado</option>
-              </select>
-            ) : (
-              <span
-                className={`${styles.status} ${
-                  formData.status === 'Livre no mercado' ? styles.livre : styles.contratado
-                }`}
-              >
-                {formData.status}
-              </span>
-            )}
-          </p>
+          <p><strong>Status:</strong> {editando ? (
+            <select name="status" value={formData.status || 'Livre no mercado'} onChange={handleChange} disabled={estaContratado}>
+              <option value="Livre no mercado">Livre no mercado</option>
+              <option value="Contratado">Contratado</option>
+            </select>
+          ) : (
+            <span className={`${styles.status} ${formData.status === 'Livre no mercado' ? styles.livre : styles.contratado}`}>
+              {formData.status}
+            </span>
+          )}</p>
 
           <p>
             <strong>Clube Atual:</strong>{' '}
@@ -212,12 +160,19 @@ export default function PerfilJogadorPage() {
                 onChange={handleChange}
                 disabled={estaContratado}
               />
+            ) : formData.clubeAtual ? (
+              formData.clubeAtualId ? (
+                <Link
+                  to={`/perfil-clube/${formData.clubeAtualId}`}
+                  style={{ textDecoration: 'none', color: '#007bff', fontWeight: '500' }}
+                >
+                  {formData.clubeAtual}
+                </Link>
+              ) : (
+                <span>{formData.clubeAtual}</span>
+              )
             ) : (
-              <span>
-                {formData.clubeAtual
-                  ? ` ${formData.clubeAtual}`
-                  : 'Atualmente sem clube — disponível para propostas!'}
-              </span>
+              <span>Atualmente sem clube — disponível para propostas!</span>
             )}
           </p>
 
@@ -227,9 +182,7 @@ export default function PerfilJogadorPage() {
               <button onClick={handleCancelar}>Cancelar</button>
             </>
           ) : (
-            <button className={styles.btnEditar} onClick={handleEditar}>
-              Editar Perfil
-            </button>
+            <button className={styles.btnEditar} onClick={handleEditar}>Editar Perfil</button>
           )}
         </div>
       </div>
@@ -237,11 +190,7 @@ export default function PerfilJogadorPage() {
       <div className={styles.descricaoJogador}>
         <h2>Sobre o Jogador</h2>
         {editando ? (
-          <textarea
-            name="bio"
-            value={formData.bio || ''}
-            onChange={handleChange}
-          />
+          <textarea name="bio" value={formData.bio || ''} onChange={handleChange} />
         ) : (
           <p>{formData.bio || 'Sem descrição adicionada ainda.'}</p>
         )}
@@ -269,12 +218,7 @@ export default function PerfilJogadorPage() {
           <div className={styles.videoGrid}>
             {formData.videos.map((url, i) => (
               <div key={i} className={styles.videoWrapper}>
-                <iframe
-                  src={url}
-                  title={`Video ${i + 1}`}
-                  frameBorder="0"
-                  allowFullScreen
-                />
+                <iframe src={url} title={`Video ${i + 1}`} frameBorder="0" allowFullScreen />
               </div>
             ))}
           </div>
@@ -287,38 +231,16 @@ export default function PerfilJogadorPage() {
         <h2>Entre em contato com o jogador</h2>
         {editando ? (
           <>
-            <input
-              name="whatsapp"
-              placeholder="WhatsApp com DDD"
-              value={formData.whatsapp || ''}
-              onChange={handleChange}
-            />
-            <input
-              name="instagram"
-              placeholder="Instagram (sem @)"
-              value={formData.instagram || ''}
-              onChange={handleChange}
-            />
+            <input name="whatsapp" placeholder="WhatsApp com DDD" value={formData.whatsapp || ''} onChange={handleChange} />
+            <input name="instagram" placeholder="Instagram (sem @)" value={formData.instagram || ''} onChange={handleChange} />
           </>
         ) : (
           <p>
             {formData.whatsapp && (
-              <a
-                href={`https://wa.me/${formData.whatsapp}`}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                WhatsApp
-              </a>
+              <a href={`https://wa.me/${formData.whatsapp}`} target="_blank" rel="noopener noreferrer">WhatsApp</a>
             )}{' '}
             {formData.instagram && (
-              <a
-                href={`https://instagram.com/${formData.instagram}`}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Instagram
-              </a>
+              <a href={`https://instagram.com/${formData.instagram}`} target="_blank" rel="noopener noreferrer">Instagram</a>
             )}
           </p>
         )}

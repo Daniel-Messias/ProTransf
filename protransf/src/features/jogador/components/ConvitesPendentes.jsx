@@ -13,7 +13,7 @@ import {
 } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
 
-import './ConvitesPendentes.css'; // crie esse arquivo CSS
+import './ConvitesPendentes.css';
 
 export default function ConvitesPendentes() {
   const [convites, setConvites] = useState([]);
@@ -77,7 +77,6 @@ export default function ConvitesPendentes() {
         return;
       }
 
-      // Atualiza jogadores no clube
       await updateDoc(clubeRef, {
         jogadores: arrayUnion({
           username: jogadorInfo.username,
@@ -87,13 +86,11 @@ export default function ConvitesPendentes() {
         }),
       });
 
-      // Atualiza convite para aceito
       await updateDoc(doc(db, 'convites', convite.id), {
         status: 'aceito',
         respondidoEm: serverTimestamp(),
       });
 
-      // Busca nome do clube direto no documento do clube
       const clubeDoc = await getDoc(clubeRef);
       if (!clubeDoc.exists()) {
         alert('Clube não encontrado.');
@@ -102,10 +99,10 @@ export default function ConvitesPendentes() {
       const clubeData = clubeDoc.data();
       const nomeDoClube = clubeData.nome;
 
-      // Atualiza perfil do jogador com status e nome do clube atual
       await updateDoc(doc(db, 'usuarios', jogadorInfo.uid), {
         status: 'Contratado',
         clubeAtual: nomeDoClube,
+        clubeAtualId: convite.clubeId, // ← CAMPO ADICIONADO AQUI
       });
 
       setConvites(convites.filter(c => c.id !== convite.id));
@@ -132,7 +129,7 @@ export default function ConvitesPendentes() {
   };
 
   if (loading) return <p>Carregando convites...</p>;
-  if (convites.length === 0) return null; // não mostrar nada se não houver convites
+  if (convites.length === 0) return null;
 
   return (
     <div className="convites-container">

@@ -3,37 +3,40 @@ import { auth, db, storage } from '../../../services/firebase';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import styles from '../Jogador.module.css';
+import ConvitesPendentes from '../components/ConvitesPendentes';
 
 export default function PerfilJogadorPage() {
   const [jogador, setJogador] = useState(null);
   const [formData, setFormData] = useState(null);
   const [editando, setEditando] = useState(false);
 
-  useEffect(() => {
-    const fetchDadosJogador = async () => {
-      try {
-        const user = auth.currentUser;
-        if (!user) return;
+  // Extraí a função para poder usar fora do useEffect também
+  const fetchDadosJogador = async () => {
+    try {
+      const user = auth.currentUser;
+      if (!user) return;
 
-        const docRef = doc(db, 'usuarios', user.uid);
-        const docSnap = await getDoc(docRef);
+      const docRef = doc(db, 'usuarios', user.uid);
+      const docSnap = await getDoc(docRef);
 
-        if (docSnap.exists()) {
-          const data = docSnap.data();
-          setJogador(data);
-          setFormData({
-            ...data,
-            status: data.status || 'Livre no mercado', // define status padrão se não existir
-            fotoURL: data.fotoURL || null, // garante que não quebre a imagem
-          });
-        } else {
-          console.log('Documento não encontrado.');
-        }
-      } catch (error) {
-        console.error('Erro ao buscar dados do jogador:', error);
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        setJogador(data);
+        setFormData({
+          ...data,
+          status: data.status || 'Livre no mercado',
+          fotoURL: data.fotoURL || null,
+          clubeAtual: data.clubeAtual || '',
+        });
+      } else {
+        console.log('Documento do jogador não encontrado.');
       }
-    };
+    } catch (error) {
+      console.error('Erro ao buscar dados do jogador:', error);
+    }
+  };
 
+  useEffect(() => {
     fetchDadosJogador();
   }, []);
 
@@ -65,33 +68,36 @@ export default function PerfilJogadorPage() {
   };
 
   const handleFotoChange = async (e) => {
-  const file = e.target.files[0];
-  if (!file) return;
+    const file = e.target.files[0];
+    if (!file) return;
 
-  try {
-    const user = auth.currentUser;
-    if (!user) return;
+    try {
+      const user = auth.currentUser;
+      if (!user) return;
 
-    const avatarRef = ref(storage, `avatars/${user.uid}/avatar.jpg`);
-    await uploadBytes(avatarRef, file);
+      const avatarRef = ref(storage, `avatars/${user.uid}/avatar.jpg`);
+      await uploadBytes(avatarRef, file);
 
-    const url = await getDownloadURL(avatarRef);
+      const url = await getDownloadURL(avatarRef);
 
-    setFormData((prev) => ({ ...prev, fotoURL: url }));
+      setFormData((prev) => ({ ...prev, fotoURL: url }));
 
-    // Atualiza também no Firestore para garantir persistência
-    const docRef = doc(db, 'usuarios', user.uid);
-    await updateDoc(docRef, { fotoURL: url });
-  } catch (error) {
-    console.error("Erro ao fazer upload da imagem:", error);
-  }
-};
-
+      const docRef = doc(db, 'usuarios', user.uid);
+      await updateDoc(docRef, { fotoURL: url });
+    } catch (error) {
+      console.error("Erro ao fazer upload da imagem:", error);
+    }
+  };
 
   if (!formData) return <p>Carregando perfil...</p>;
 
+  const estaContratado = formData.status === 'Contratado';
+
   return (
     <section className={styles.perfilJogador}>
+      {/* Passa a função fetchDadosJogador para o componente ConvitesPendentes */}
+      <ConvitesPendentes onAtualizarPerfil={fetchDadosJogador} />
+
       <div className={styles.perfilTopo}>
         <img
           src={formData.fotoURL || "/default-avatar.jpg"}
@@ -181,6 +187,7 @@ export default function PerfilJogadorPage() {
                 name="status"
                 value={formData.status || 'Livre no mercado'}
                 onChange={handleChange}
+                disabled={estaContratado}
               >
                 <option value="Livre no mercado">Livre no mercado</option>
                 <option value="Contratado">Contratado</option>
@@ -192,6 +199,24 @@ export default function PerfilJogadorPage() {
                 }`}
               >
                 {formData.status}
+              </span>
+            )}
+          </p>
+
+          <p>
+            <strong>Clube Atual:</strong>{' '}
+            {editando ? (
+              <input
+                name="clubeAtual"
+                value={formData.clubeAtual || ''}
+                onChange={handleChange}
+                disabled={estaContratado}
+              />
+            ) : (
+              <span>
+                {formData.clubeAtual
+                  ? ` ${formData.clubeAtual}`
+                  : 'Atualmente sem clube — disponível para propostas!'}
               </span>
             )}
           </p>
@@ -219,19 +244,6 @@ export default function PerfilJogadorPage() {
           />
         ) : (
           <p>{formData.bio || 'Sem descrição adicionada ainda.'}</p>
-        )}
-      </div>
-
-      <div className={styles.clubeAtual}>
-        <h2>Clube Atual</h2>
-        {editando ? (
-          <input
-            name="clubeAtual"
-            value={formData.clubeAtual || ''}
-            onChange={handleChange}
-          />
-        ) : (
-          <p>{formData.clubeAtual || 'Atualmente sem clube — disponível para propostas!'}</p>
         )}
       </div>
 
@@ -298,8 +310,7 @@ export default function PerfilJogadorPage() {
               >
                 WhatsApp
               </a>
-            )}
-            {' '}
+            )}{' '}
             {formData.instagram && (
               <a
                 href={`https://instagram.com/${formData.instagram}`}

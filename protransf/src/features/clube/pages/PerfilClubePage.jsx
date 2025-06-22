@@ -1,6 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { doc, getDoc, setDoc, updateDoc, collection, query, where, getDocs } from 'firebase/firestore';
-import { auth, db } from '../../../services/firebase'; // ajuste o caminho se necessário
+import {
+  doc,
+  getDoc,
+  setDoc,
+  updateDoc,
+  collection,
+  query,
+  where,
+  getDocs,
+  addDoc,
+  serverTimestamp
+} from 'firebase/firestore';
+import { auth, db } from '../../../services/firebase';
 import '../Clube.css';
 
 export default function PerfilClubePage() {
@@ -14,8 +25,9 @@ export default function PerfilClubePage() {
   const [procura, setProcura] = useState('sim');
   const [campeonatos, setCampeonatos] = useState([]);
   const [novoCampeonato, setNovoCampeonato] = useState('');
+  // Estado novoJogador usa email agora para convite
+  const [novoJogador, setNovoJogador] = useState({ email: '', posicao: '', status: '', plataforma: '' });
   const [jogadores, setJogadores] = useState([]);
-  const [novoJogador, setNovoJogador] = useState({ nickname: '', posicao: '', status: '', plataforma: '' });
 
   useEffect(() => {
     const fetchClube = async () => {
@@ -58,39 +70,101 @@ export default function PerfilClubePage() {
     setCampeonatos(campeonatos.filter((_, i) => i !== index));
   };
 
-  async function jogadorExiste(nickname) {
-    if (!nickname) return false;
+  // Busca jogador pelo email para validar existência
+  async function jogadorExiste(email) {
+    if (!email) return false;
     const usuariosRef = collection(db, 'usuarios');
-    const q = query(usuariosRef, where('nickname', '==', nickname.trim()));
+    const q = query(usuariosRef, where('email', '==', email.trim().toLowerCase()));
     const querySnapshot = await getDocs(q);
     return !querySnapshot.empty;
   }
 
+  // Adicionar jogador envia convite pelo email
   const adicionarJogador = async () => {
-    if (!novoJogador.nickname || !novoJogador.posicao || !novoJogador.status || !novoJogador.plataforma) {
+    if (!novoJogador.email || !novoJogador.posicao || !novoJogador.status || !novoJogador.plataforma) {
       alert('Preencha todos os campos do jogador.');
       return;
     }
 
-    const existe = await jogadorExiste(novoJogador.nickname);
+    const existe = await jogadorExiste(novoJogador.email);
     if (!existe) {
-      alert(`Jogador "${novoJogador.nickname}" não encontrado. Peça para ele se cadastrar primeiro.`);
+      alert(`Jogador com e-mail "${novoJogador.email}" não encontrado. Peça para ele se cadastrar primeiro.`);
       return;
     }
 
-    // Evitar duplicatas
-    if (jogadores.some(j => j.nickname.toLowerCase() === novoJogador.nickname.trim().toLowerCase())) {
-      alert('Este jogador já está no elenco.');
+    // Verifica se jogador já está no elenco (compara username, mas temos só email no convite)
+    // Assumindo que lista de jogadores tem username, vamos permitir duplicados de email, 
+    // pois o convite é por email, mas elenco mantém username.
+    // Se quiser evitar duplicatas por email, precisaria mapear email nos jogadores.
+
+    const convitesRef = collection(db, 'convites');
+    const conviteQuery = query(
+      convitesRef,
+      where('clubeId', '==', auth.currentUser.uid),
+      where('jogadorEmail', '==', novoJogador.email.trim().toLowerCase()),
+      where('status', '==', 'pendente')
+    );
+    const conviteSnapshot = await getDocs(conviteQuery);
+    if (!conviteSnapshot.empty) {
+      alert(`Já existe um convite pendente para o jogador com e-mail "${novoJogador.email}".`);
       return;
     }
 
-    setJogadores([...jogadores, { ...novoJogador, nickname: novoJogador.nickname.trim() }]);
-    setNovoJogador({ nickname: '', posicao: '', status: '', plataforma: '' });
+    try {
+      await addDoc(convitesRef, {
+        clubeId: auth.currentUser.uid,
+        clubeNome: nomeClube,
+        jogadorEmail: novoJogador.email.trim().toLowerCase(),
+        posicao: novoJogador.posicao,
+        status: 'pendente',
+        criadoEm: serverTimestamp(),
+        plataforma: novoJogador.plataforma,
+        statusJogador: novoJogador.status,
+      });
+      alert(`Convite enviado para o jogador com e-mail "${novoJogador.email}".`);
+      setNovoJogador({ email: '', posicao: '', status: '', plataforma: '' });
+    } catch (error) {
+      console.error('Erro ao enviar convite:', error);
+      alert('Erro ao enviar convite. Tente novamente.');
+    }
   };
 
-  const removerJogador = (index) => {
-    setJogadores(jogadores.filter((_, i) => i !== index));
-  };
+ const removerJogador = async (index) => {
+  const jogadorRemovido = jogadores[index];
+  const user = auth.currentUser;
+  if (!jogadorRemovido || !user) return;
+
+  const confirmar = window.confirm(`Deseja realmente remover o jogador ${jogadorRemovido.username}?`);
+  if (!confirmar) return;
+
+  const novoElenco = jogadores.filter((_, i) => i !== index);
+  setJogadores(novoElenco); // atualiza localmente
+
+  try {
+    const clubeRef = doc(db, 'clubes', user.uid);
+    await updateDoc(clubeRef, {
+      jogadores: novoElenco,
+    });
+
+    // Busca o documento do jogador pelo username
+    const usuariosRef = collection(db, 'usuarios');
+    const q = query(usuariosRef, where('username', '==', jogadorRemovido.username));
+    const snapshot = await getDocs(q);
+
+    if (!snapshot.empty) {
+      const jogadorDoc = snapshot.docs[0];
+      await updateDoc(jogadorDoc.ref, {
+        status: 'Livre no mercado',
+        clubeAtual: '',
+      });
+    }
+
+    alert(`Jogador ${jogadorRemovido.username} removido com sucesso.`);
+  } catch (error) {
+    console.error('Erro ao remover jogador:', error);
+    alert('Erro ao remover jogador. Tente novamente.');
+  }
+};
 
   const salvarAlteracoes = async () => {
     const user = auth.currentUser;
@@ -253,7 +327,7 @@ export default function PerfilClubePage() {
         <table>
           <thead>
             <tr>
-              <th>Nickname</th>
+              <th>Username</th>
               <th>Posição</th>
               <th>Status</th>
               <th>Plataforma</th>
@@ -263,7 +337,7 @@ export default function PerfilClubePage() {
           <tbody>
             {jogadores.map((jogador, index) => (
               <tr key={index}>
-                <td>{jogador.nickname}</td>
+                <td>{jogador.username || 'N/A'}</td>
                 <td>{jogador.posicao}</td>
                 <td>{jogador.status}</td>
                 <td>{jogador.plataforma}</td>
@@ -278,9 +352,9 @@ export default function PerfilClubePage() {
         {isEditing && (
           <div className="adicionar-campeonato">
             <input
-              placeholder="Nickname"
-              value={novoJogador.nickname || ''}
-              onChange={(e) => setNovoJogador({ ...novoJogador, nickname: e.target.value })}
+              placeholder="E-mail do Jogador"
+              value={novoJogador.email || ''}
+              onChange={(e) => setNovoJogador({ ...novoJogador, email: e.target.value })}
               className="input-edit"
             />
             <input
@@ -301,7 +375,7 @@ export default function PerfilClubePage() {
               onChange={(e) => setNovoJogador({ ...novoJogador, plataforma: e.target.value })}
               className="input-edit"
             />
-            <button onClick={adicionarJogador} className="btn-login">Adicionar Jogador</button>
+            <button onClick={adicionarJogador} className="btn-login">Enviar Convite</button>
           </div>
         )}
       </div>

@@ -5,23 +5,23 @@ import {
   Route,
   Link,
   useLocation,
-  useNavigate
+  useNavigate,
 } from "react-router-dom";
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
-import { auth, db } from './services/firebase';
+import { auth, db } from "./services/firebase";
 
-import './style.css';
+import "./style.css";
 import bola from "../src/assets/fotos/bola.png";
 
-import Home from './features/home/pages/Protransf';
-import Transferencia from './features/transferencias/pages/Transferencia';
-import Cadastro from './features/Cadastro/pages/Cadastro';
-import Login from './features/auth/pages/Login';
-import PerfilJogadorPage from './features/jogador/pages/PerfilJogadorPage';
-import PerfilClubePage from './features/clube/pages/PerfilClubePage';
-import RankingPage from '../src/features/ranking/pages/Ranking';
-import PerfilPublicoJogador from './features/jogador/pages/PerfilPublicoJogador';
+import Home from "./features/home/pages/Protransf";
+import Transferencia from "./features/transferencias/pages/Transferencia";
+import Cadastro from "./features/Cadastro/pages/Cadastro";
+import Login from "./features/auth/pages/Login";
+import PerfilJogadorPage from "./features/jogador/pages/PerfilJogadorPage";
+import PerfilClubePage from "./features/clube/pages/PerfilClubePage";
+import RankingPage from "../src/features/ranking/pages/Ranking";
+import PerfilPublicoJogador from "./features/jogador/pages/PerfilPublicoJogador";
 
 function Header({ user, tipo }) {
   const navigate = useNavigate();
@@ -38,7 +38,8 @@ function Header({ user, tipo }) {
   return (
     <header>
       <Link to="/" className="logo">
-        PR<img src={bola} alt="Bola" className="logo-bola" /><span>TRANSFER</span>
+        PR<img src={bola} alt="Bola" className="logo-bola" />
+        <span>TRANSFER</span>
       </Link>
 
       <nav>
@@ -74,9 +75,13 @@ function Header({ user, tipo }) {
       </nav>
 
       {!user ? (
-        <Link to="/login" className="btn-login">Entrar</Link>
+        <Link to="/login" className="btn-login">
+          Entrar
+        </Link>
       ) : (
-        <button onClick={handleLogout} className="btn-login">Sair</button>
+        <button onClick={handleLogout} className="btn-login">
+          Sair
+        </button>
       )}
     </header>
   );
@@ -121,7 +126,7 @@ function LayoutRoutes() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/transferencias" element={<Transferencia />} />
-        <Route path="/cadastro" element={<Cadastro />} /> 
+        <Route path="/cadastro" element={<Cadastro />} />
         <Route path="/login" element={<Login />} />
         <Route path="/jogador" element={<PerfilJogadorPage />} />
         <Route path="/clube" element={<PerfilClubePage />} />

@@ -267,4 +267,19 @@ iframe {
 .btnUpload:hover {
   background-color: #0056b3;
 }
+.convitesPendentes {
+  background-color: #f9f9f9;
+  border: 1px solid #ddd;
+  padding: 15px;
+  margin-bottom: 20px;
+  border-radius: 8px;
+}
+
+.conviteItem {
+  margin-bottom: 10px;
+}
+
+.conviteItem button {
+  margin-right: 10px;
+}
 

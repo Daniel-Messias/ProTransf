@@ -1,22 +1,49 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { doc, getDoc, setDoc, updateDoc, collection, query, where, getDocs } from 'firebase/firestore';
+import { auth, db } from '../../../services/firebase'; // ajuste o caminho se necessário
 import '../Clube.css';
 
 export default function PerfilClubePage() {
   const [isEditing, setIsEditing] = useState(false);
+  const [isOwner, setIsOwner] = useState(false);
+  const [clubeExiste, setClubeExiste] = useState(false);
+
+  const [nomeClube, setNomeClube] = useState('');
+  const [fundacao, setFundacao] = useState('');
+  const [descricao, setDescricao] = useState('');
   const [procura, setProcura] = useState('sim');
-  const [descricao, setDescricao] = useState("O The Horse FC é um clube focado em competições online, com uma equipe dedicada e apaixonada por jogos de futebol digital. Busca jogadores comprometidos e talentosos para reforçar seu elenco.");
-  const [campeonatos, setCampeonatos] = useState([
-    "Campeonato Nacional Virtual 2025",
-    "Liga Digital de Futebol 2025",
-    "Campeonato Paulista eSports 2025"
-  ]);
+  const [campeonatos, setCampeonatos] = useState([]);
   const [novoCampeonato, setNovoCampeonato] = useState('');
-  const [jogadores, setJogadores] = useState([
-    { nome: "ProGamer97", posicao: "Volante", status: "Contrato ativo", plataforma: "Xbox" },
-    { nome: "SoccerKing11", posicao: "Atacante", status: "Contrato ativo", plataforma: "PlayStation" },
-    { nome: "ElitePlayer22", posicao: "Goleiro", status: "Contrato ativo", plataforma: "PC" }
-  ]);
-  const [novoJogador, setNovoJogador] = useState({ nome: '', posicao: '', status: '', plataforma: '' });
+  const [jogadores, setJogadores] = useState([]);
+  const [novoJogador, setNovoJogador] = useState({ nickname: '', posicao: '', status: '', plataforma: '' });
+
+  useEffect(() => {
+    const fetchClube = async () => {
+      const user = auth.currentUser;
+      if (!user) return;
+
+      const clubeRef = doc(db, 'clubes', user.uid);
+      const docSnap = await getDoc(clubeRef);
+
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        setNomeClube(data.nome || '');
+        setFundacao(data.fundacao || '');
+        setDescricao(data.descricao || '');
+        setProcura(data.procura || 'nao');
+        setCampeonatos(data.campeonatos || []);
+        setJogadores(data.jogadores || []);
+        setIsOwner(data.donoUid === user.uid);
+        setClubeExiste(true);
+        setIsEditing(false);
+      } else {
+        setIsOwner(true);
+        setIsEditing(true);
+      }
+    };
+
+    fetchClube();
+  }, []);
 
   const handleProcuraChange = (e) => setProcura(e.target.value);
 
@@ -31,147 +58,270 @@ export default function PerfilClubePage() {
     setCampeonatos(campeonatos.filter((_, i) => i !== index));
   };
 
-  const adicionarJogador = () => {
-    if (novoJogador.nome && novoJogador.posicao && novoJogador.status && novoJogador.plataforma) {
-      setJogadores([...jogadores, novoJogador]);
-      setNovoJogador({ nome: '', posicao: '', status: '', plataforma: '' });
+  async function jogadorExiste(nickname) {
+    if (!nickname) return false;
+    const usuariosRef = collection(db, 'usuarios');
+    const q = query(usuariosRef, where('nickname', '==', nickname.trim()));
+    const querySnapshot = await getDocs(q);
+    return !querySnapshot.empty;
+  }
+
+  const adicionarJogador = async () => {
+    if (!novoJogador.nickname || !novoJogador.posicao || !novoJogador.status || !novoJogador.plataforma) {
+      alert('Preencha todos os campos do jogador.');
+      return;
     }
+
+    const existe = await jogadorExiste(novoJogador.nickname);
+    if (!existe) {
+      alert(`Jogador "${novoJogador.nickname}" não encontrado. Peça para ele se cadastrar primeiro.`);
+      return;
+    }
+
+    // Evitar duplicatas
+    if (jogadores.some(j => j.nickname.toLowerCase() === novoJogador.nickname.trim().toLowerCase())) {
+      alert('Este jogador já está no elenco.');
+      return;
+    }
+
+    setJogadores([...jogadores, { ...novoJogador, nickname: novoJogador.nickname.trim() }]);
+    setNovoJogador({ nickname: '', posicao: '', status: '', plataforma: '' });
   };
 
   const removerJogador = (index) => {
     setJogadores(jogadores.filter((_, i) => i !== index));
   };
 
-  const salvarAlteracoes = () => {
-    setIsEditing(false);
-    alert('Alterações salvas! (simulação)');
+  const salvarAlteracoes = async () => {
+    const user = auth.currentUser;
+    if (!user) return;
+
+    const clubeRef = doc(db, 'clubes', user.uid);
+
+    try {
+      if (!clubeExiste) {
+        if (!nomeClube.trim() || !fundacao.trim()) {
+          alert('Por favor, preencha o nome do clube e a fundação.');
+          return;
+        }
+
+        await setDoc(clubeRef, {
+          donoUid: user.uid,
+          nome: nomeClube.trim(),
+          fundacao: fundacao.trim(),
+          descricao,
+          procura,
+          campeonatos,
+          jogadores,
+          classificacao: 'Sem classificação',
+        });
+        setClubeExiste(true);
+      } else {
+        await updateDoc(clubeRef, {
+          descricao,
+          procura,
+          campeonatos,
+          jogadores
+        });
+      }
+
+      setIsEditing(false);
+      alert('Clube salvo com sucesso!');
+    } catch (error) {
+      console.error("Erro ao salvar clube:", error);
+      alert('Erro ao salvar clube.');
+    }
   };
 
   const cancelarEdicao = () => {
-    setIsEditing(false);
+    if (!clubeExiste) {
+      setNomeClube('');
+      setFundacao('');
+      setDescricao('');
+      setProcura('sim');
+      setCampeonatos([]);
+      setJogadores([]);
+      setIsEditing(false);
+    } else {
+      setIsEditing(false);
+    }
   };
 
   return (
-    <>
-      <section className="clube-info">
-        <h2>The Horse FC</h2>
+    <section className="clube-info">
+      <h2>{nomeClube || 'Novo Clube'}</h2>
 
-        <div className="clube-detalhes">
-          <p><strong>Fundação:</strong> 2020</p>
-          <p><strong>Classificação:</strong> Top 1 no ranking</p>
-          <div>
-            <strong>Descrição:</strong><br />
-            {isEditing ? (
-              <textarea
-                value={descricao}
-                onChange={(e) => setDescricao(e.target.value)}
-                rows={4}
-                style={{ width: '100%', padding: 10, borderRadius: 6 }}
-              />
-            ) : (
-              <p>{descricao}</p>
-            )}
-          </div>
-        </div>
-
-        <div className="info-campeonatos">
-          <h3>Campeonatos que Participa</h3>
-          <ul>
-            {campeonatos.map((campeonato, index) => (
-              <li key={index}>
-                {campeonato}
-                {isEditing && (
-                  <button onClick={() => removerCampeonato(index)} className="btn-remover">🗑</button>
-                )}
-              </li>
-            ))}
-          </ul>
-          {isEditing && (
-            <div className="adicionar-campeonato">
+      <div className="clube-detalhes">
+        {!clubeExiste && isEditing && (
+          <>
+            <div className="campo-edicao">
+              <label><strong>Nome do Clube:</strong></label>
               <input
                 type="text"
-                placeholder="Novo campeonato"
-                value={novoCampeonato}
-                onChange={(e) => setNovoCampeonato(e.target.value)}
+                value={nomeClube}
+                onChange={(e) => setNomeClube(e.target.value)}
                 className="input-edit"
+                placeholder="Ex: The Horse FC"
+                required
               />
-              <button onClick={adicionarCampeonato} className="btn-login">Adicionar</button>
             </div>
+
+            <div className="campo-edicao">
+              <label><strong>Data de Fundação:</strong></label>
+              <input
+                type="text"
+                value={fundacao}
+                onChange={(e) => setFundacao(e.target.value)}
+                className="input-edit"
+                placeholder="Ex: 2020"
+                required
+              />
+            </div>
+          </>
+        )}
+
+        {clubeExiste && (
+          <>
+            <p><strong>Nome do Clube:</strong> {nomeClube}</p>
+            <p><strong>Fundação:</strong> {fundacao}</p>
+            <p><strong>Classificação:</strong> Top 1 no ranking</p>
+          </>
+        )}
+
+        <div>
+          <strong>Descrição:</strong><br />
+          {isEditing ? (
+            <textarea
+              value={descricao}
+              onChange={(e) => setDescricao(e.target.value)}
+              rows={4}
+              style={{ width: '100%', padding: 10, borderRadius: 6 }}
+            />
+          ) : (
+            <p>{descricao}</p>
           )}
         </div>
+      </div>
 
-        <div className="info-procura-jogadores">
-          <h3>Procurando Jogadores?</h3>
-          <label htmlFor="procura-jogadores">
-            <select
-              id="procura-jogadores"
-              value={procura}
-              onChange={handleProcuraChange}
-            >
-              <option value="sim">Sim!</option>
-              <option value="nao">Não.</option>
-            </select>
-          </label>
-          <p id="msg-procura">
-            {procura === 'sim'
-              ? 'Sim, estamos em busca de novos talentos para nosso elenco!'
-              : 'Não, o elenco está fechado no momento.'}
-          </p>
-        </div>
-
-        <div className="jogadores-lista">
-          <h3>Jogadores do Clube</h3>
-          <table>
-            <thead>
-              <tr>
-                <th>Nome</th>
-                <th>Posição</th>
-                <th>Status</th>
-                <th>Plataforma</th>
-                {isEditing && <th>Ações</th>}
-              </tr>
-            </thead>
-            <tbody>
-              {jogadores.map((jogador, index) => (
-                <tr key={index}>
-                  <td>{jogador.nome}</td>
-                  <td>{jogador.posicao}</td>
-                  <td>{jogador.status}</td>
-                  <td>{jogador.plataforma}</td>
-                  {isEditing && (
-                    <td><button onClick={() => removerJogador(index)} className="btn-remover">❌</button></td>
-                  )}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-
-          {isEditing && (
-            <div className="adicionar-campeonato">
-              <input placeholder="Nome" value={novoJogador.nome} onChange={(e) => setNovoJogador({ ...novoJogador, nome: e.target.value })} className="input-edit" />
-              <input placeholder="Posição" value={novoJogador.posicao} onChange={(e) => setNovoJogador({ ...novoJogador, posicao: e.target.value })} className="input-edit" />
-              <input placeholder="Status" value={novoJogador.status} onChange={(e) => setNovoJogador({ ...novoJogador, status: e.target.value })} className="input-edit" />
-              <input placeholder="Plataforma" value={novoJogador.plataforma} onChange={(e) => setNovoJogador({ ...novoJogador, plataforma: e.target.value })} className="input-edit" />
-              <button onClick={adicionarJogador} className="btn-login">Adicionar Jogador</button>
-            </div>
-          )}
-        </div>
-
-        {!isEditing ? (
-          <button onClick={() => setIsEditing(true)} className="btn-login" style={{ marginTop: 20 }}>
-            Editar Clube
-          </button>
-        ) : (
-          <div style={{ marginTop: 20 }}>
-            <button onClick={salvarAlteracoes} className="btn-login" style={{ marginRight: 10 }}>
-              Salvar Alterações
-            </button>
-            <button onClick={cancelarEdicao} className="btn-cancelar">
-              Cancelar
-            </button>
+      <div className="info-campeonatos">
+        <h3>Campeonatos que Participa</h3>
+        <ul>
+          {campeonatos.map((campeonato, index) => (
+            <li key={index}>
+              {campeonato}
+              {isEditing && (
+                <button onClick={() => removerCampeonato(index)} className="btn-remover">🗑</button>
+              )}
+            </li>
+          ))}
+        </ul>
+        {isEditing && (
+          <div className="adicionar-campeonato">
+            <input
+              type="text"
+              placeholder="Novo campeonato"
+              value={novoCampeonato}
+              onChange={(e) => setNovoCampeonato(e.target.value)}
+              className="input-edit"
+            />
+            <button onClick={adicionarCampeonato} className="btn-login">Adicionar</button>
           </div>
         )}
-      </section>
-    </>
+      </div>
+
+      <div className="info-procura-jogadores">
+        <h3>Procurando Jogadores?</h3>
+        <label htmlFor="procura-jogadores">
+          <select
+            id="procura-jogadores"
+            value={procura}
+            onChange={handleProcuraChange}
+          >
+            <option value="sim">Sim!</option>
+            <option value="nao">Não.</option>
+          </select>
+        </label>
+        <p id="msg-procura">
+          {procura === 'sim'
+            ? 'Sim, estamos em busca de novos talentos para nosso elenco!'
+            : 'Não, o elenco está fechado no momento.'}
+        </p>
+      </div>
+
+      <div className="jogadores-lista">
+        <h3>Jogadores do Clube</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Nickname</th>
+              <th>Posição</th>
+              <th>Status</th>
+              <th>Plataforma</th>
+              {isEditing && <th>Ações</th>}
+            </tr>
+          </thead>
+          <tbody>
+            {jogadores.map((jogador, index) => (
+              <tr key={index}>
+                <td>{jogador.nickname}</td>
+                <td>{jogador.posicao}</td>
+                <td>{jogador.status}</td>
+                <td>{jogador.plataforma}</td>
+                {isEditing && (
+                  <td><button onClick={() => removerJogador(index)} className="btn-remover">❌</button></td>
+                )}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+
+        {isEditing && (
+          <div className="adicionar-campeonato">
+            <input
+              placeholder="Nickname"
+              value={novoJogador.nickname || ''}
+              onChange={(e) => setNovoJogador({ ...novoJogador, nickname: e.target.value })}
+              className="input-edit"
+            />
+            <input
+              placeholder="Posição"
+              value={novoJogador.posicao || ''}
+              onChange={(e) => setNovoJogador({ ...novoJogador, posicao: e.target.value })}
+              className="input-edit"
+            />
+            <input
+              placeholder="Status"
+              value={novoJogador.status || ''}
+              onChange={(e) => setNovoJogador({ ...novoJogador, status: e.target.value })}
+              className="input-edit"
+            />
+            <input
+              placeholder="Plataforma"
+              value={novoJogador.plataforma || ''}
+              onChange={(e) => setNovoJogador({ ...novoJogador, plataforma: e.target.value })}
+              className="input-edit"
+            />
+            <button onClick={adicionarJogador} className="btn-login">Adicionar Jogador</button>
+          </div>
+        )}
+      </div>
+
+      {!isEditing && isOwner && (
+        <button onClick={() => setIsEditing(true)} className="btn-login" style={{ marginTop: 20 }}>
+          Editar Clube
+        </button>
+      )}
+
+      {isEditing && (
+        <div style={{ marginTop: 20 }}>
+          <button onClick={salvarAlteracoes} className="btn-login" style={{ marginRight: 10 }}>
+            Salvar Alterações
+          </button>
+          <button onClick={cancelarEdicao} className="btn-cancelar">
+            Cancelar
+          </button>
+        </div>
+      )}
+    </section>
   );
 }

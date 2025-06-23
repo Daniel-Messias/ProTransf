@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigate } from 'react-router-dom';  // Importa o hook
 import styles from "../cadastro.module.css";
 import { auth, db, storage } from '../../../services/firebase';
 import {
@@ -51,6 +52,8 @@ function Modal({ onClose }) {
 }
 
 export default function FormCadastro() {
+  const navigate = useNavigate(); // hook para redirecionar
+
   const [formData, setFormData] = useState({
     nome: "",
     username: "",
@@ -63,7 +66,7 @@ export default function FormCadastro() {
     posicaoSecundaria: "",
     termos: false,
     foto: null,
-    tipoUsuario: "jogador", // novo campo para tipo
+    tipoUsuario: "jogador",
   });
 
   const [preview, setPreview] = useState(null);
@@ -138,12 +141,12 @@ export default function FormCadastro() {
         email: formData.email,
         nascimento: formData.nascimento,
         plataforma: formData.plataforma,
-        posicao: formData.posicaoPrimaria,       // salvo com nome posicao para facilitar exibição
+        posicao: formData.posicaoPrimaria,
         posicaoSecundaria: formData.posicaoSecundaria || null,
         termosAceitos: formData.termos,
         fotoURL: photoURL,
         criadoEm: serverTimestamp(),
-        tipo: formData.tipoUsuario,              // salva o tipo escolhido no cadastro
+        tipo: formData.tipoUsuario,
       });
 
       setShowModal(true);
@@ -159,7 +162,7 @@ export default function FormCadastro() {
         posicaoSecundaria: "",
         termos: false,
         foto: null,
-        tipoUsuario: "jogador", // resetar para default
+        tipoUsuario: "jogador",
       });
       setPreview(null);
       setErrors({});
@@ -173,6 +176,7 @@ export default function FormCadastro() {
 
   const fecharModal = () => {
     setShowModal(false);
+    navigate('/');  // Redireciona para a página principal ao fechar modal
   };
 
   return (

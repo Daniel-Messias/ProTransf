@@ -24,14 +24,18 @@ export default function CardTransferencia({ dados, tipo }) {
   };
 
   if (isTransferencia) {
-    return (
-      <div className={styles.cardTransferencia} role="region" aria-label="Transferência">
-        <span className={styles.clubeNome}>{dados.clubeNome}</span>
-        <span className={styles.seta}>→</span>
-        <span className={styles.jogadorNome}>{dados.jogadorNome}</span>
-      </div>
-    );
-  }
+  return (
+    <div
+      className={`${styles.cardTransferencia} ${styles[dados.status] || ''}`}
+      role="region"
+      aria-label={`Transferência ${dados.status}`}
+    >
+      <span className={styles.clubeNome}>{dados.clubeNome}</span>
+      <span className={styles.seta}>→</span>
+      <span className={styles.jogadorNome}>{dados.jogadorNome}</span>
+    </div>
+  );
+}
 
   // Layout padrão para jogadores e clubes na busca
   return (

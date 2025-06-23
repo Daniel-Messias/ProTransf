@@ -1,156 +1,98 @@
-/* Container geral do card padrão */
-.card {
-  background-color: rgba(255, 255, 255, 0.07); /* fundo transparente */
-  border-radius: 8px;
-  padding: 16px;
-  margin-bottom: 12px;
-  box-shadow: 0 0 8px rgba(0,0,0,0.15);
-  color: #fff;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-}
+/* CardTransferencia.module.css */
 
-/* Informações do jogador ou clube */
-.info {
-  flex: 1;
-}
-
-.info h4 {
-  margin: 0 0 6px 0;
-  font-weight: 700;
-  font-size: 1.2rem;
-}
-
-.info p {
-  margin: 4px 0;
-  font-size: 0.9rem;
-  color: #ddd;
-}
-
-/* Link de perfil */
-.link {
-  display: inline-block;
-  margin-top: 8px;
-  color: #00aaff;
-  text-decoration: none;
-  font-weight: 600;
-  transition: color 0.2s ease-in-out;
-}
-
-.link:hover {
-  color: #0088cc;
-  text-decoration: underline;
-}
-
-/* Botão enviar convite/pedido */
-.btn {
-  background-color: #00aaff;
-  border: none;
-  border-radius: 6px;
-  padding: 8px 14px;
-  color: white;
-  font-weight: 700;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-  margin-left: 16px;
-  flex-shrink: 0;
-  user-select: none;
-}
-
-.btn:hover {
-  background-color: #0088cc;
-}
-
-/* ===========================
-   Layout da transferência (Clube → Jogador)
-   =========================== */
-
+/* Card de transferência */
 .cardTransferencia {
-  background-color: rgba(255, 255, 255, 0.07);
-  border-radius: 8px;
-  padding: 14px 20px;
-  margin-bottom: 12px;
-  box-shadow: 0 0 10px rgba(0,0,0,0.2);
   display: flex;
   align-items: center;
-  justify-content: center;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  justify-content: space-between;
+  background-color: rgba(0, 0, 0, 0.4);
+  border: 1px solid #00aaff66;
+  border-radius: 12px;
+  padding: 15px 20px;
+  margin-bottom: 10px;
+  font-weight: 600;
   color: #fff;
-  font-weight: 700;
-  font-size: 1.1rem;
-  user-select: none;
+  gap: 20px;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.cardTransferencia:hover {
+  background-color: rgba(0, 0, 0, 0.5);
+  transform: scale(1.01);
 }
 
 .clubeNome {
-  color: #00e5ff;
-  margin-right: 12px;
-}
-
-.seta {
-  font-size: 1.6rem;
-  margin: 0 12px;
-  color: #00aaff;
-  font-weight: 900;
-  user-select: none;
-  transition: color 0.3s ease;
+  color: #00d0ff;
+  font-size: 1rem;
 }
 
 .jogadorNome {
-  color: #ffd600;
-  margin-left: 12px;
+  color: #ffc107;
+  font-size: 1rem;
 }
 
-/* Pode adicionar efeito legal na seta se quiser */
-.cardTransferencia:hover .seta {
-  color: #66ffff;
-  cursor: default;
-}
-
-/* ===========================
-   Mensagem de lista vazia
-   =========================== */
-.msgVazio {
-  color: #ccc;
-  font-style: italic;
-  font-size: 0.95rem;
-  padding: 12px 0;
-  text-align: center;
-}
-
-/* ===========================
-   Seções de transferência
-   =========================== */
-.transferenciaSection {
-  margin-bottom: 32px;
-}
-
-/* ===========================
-   Filtros e resultados (deixa aqui, caso use)
-   =========================== */
-.filtros {
-  margin: 20px 0 12px 0;
-  display: flex;
-  gap: 16px;
-}
-
-.filtros select {
-  background-color: rgba(255,255,255,0.1);
-  border: none;
-  padding: 8px 12px;
-  border-radius: 6px;
+.seta {
+  font-size: 1.5rem;
   color: white;
-  font-weight: 600;
+}
+
+/* Status colorido por tipo */
+.aceito {
+  border-left: 6px solid #28a745;
+}
+
+.recusado {
+  border-left: 6px solid #dc3545;
+}
+
+.pendente {
+  border-left: 6px solid #ffc107;
+}
+
+/* Card padrão (jogador/clube) */
+.card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid #00aaff33;
+  border-radius: 10px;
+  padding: 16px;
+  margin-bottom: 12px;
+  color: #fff;
+  backdrop-filter: blur(5px);
+  transition: transform 0.2s ease, background-color 0.3s ease;
+}
+
+.card:hover {
+  transform: scale(1.02);
+  background-color: rgba(255, 255, 255, 0.08);
+}
+
+.info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.link {
+  margin-top: 6px;
+  color: #00cfff;
+  text-decoration: underline;
+  font-size: 0.9rem;
+}
+
+.btn {
+  background-color: #007bff;
+  border: none;
+  color: white;
+  padding: 10px 14px;
+  border-radius: 8px;
   cursor: pointer;
-  min-width: 160px;
-  transition: background-color 0.3s ease;
+  transition: background-color 0.2s ease;
+  font-weight: bold;
 }
 
-.filtros select:hover {
-  background-color: rgba(255,255,255,0.2);
-}
-
-.resultados {
-  margin-top: 16px;
+.btn:hover {
+  background-color: #005fcc;
 }

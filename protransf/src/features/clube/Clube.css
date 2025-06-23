@@ -346,3 +346,40 @@ footer {
 .jogador-link:hover {
   text-decoration: underline;
 }
+.pedidos-recebidos table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.pedidos-recebidos th,
+.pedidos-recebidos td {
+  padding: 8px 12px;
+  border: 1px solid #ccc;
+  text-align: left;
+}
+
+.btn-aceitar {
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.btn-aceitar:hover {
+  background-color: #45a049;
+}
+
+.btn-recusar {
+  background-color: #f44336;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.btn-recusar:hover {
+  background-color: #da190b;
+}

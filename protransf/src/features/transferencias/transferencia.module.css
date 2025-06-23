@@ -6,8 +6,10 @@
   --text-muted: #9ca3af;
   --background: #0d1b2a;
   --surface: #1b263b;
+  --surface-alt: #243b53;
   --text: #ffffff;
   --text-muted-alt: #cccccc;
+  --success: #10b981;
 }
 
 .flex {
@@ -22,81 +24,42 @@
   min-height: 100vh;
 }
 
-.bg-gray-900 {
-  background-color: var(--dark-bg);
-}
 
 .text-white {
   color: var(--text);
 }
 
-
-
-.logo {
-  font-size: 24px;
-  font-weight: 700;
-  cursor: default;
-  color: var(--primary);
-}
-
-.navLink {
-  color: var(--text);
-  text-decoration: none;
-  margin: 0 15px;
-  font-weight: 500;
-  transition: color 0.2s ease;
-}
-
-.navLink:hover {
-  color: var(--primary);
-}
-
-.btnLogin {
-  padding: 8px 18px;
-  background-color: transparent;
-  border: 2px solid var(--primary);
-  color: var(--primary);
-  border-radius: 8px;
-  font-weight: 600;
-  text-decoration: none;
-  transition: all 0.3s ease;
-  cursor: pointer;
-}
-
-.btnLogin:hover {
-  background-color: var(--primary);
-  color: #000;
-}
-
 .main {
   flex-grow: 1;
-  padding: 30px 40px;
+  padding: 30px 5%;
   max-width: 1200px;
   margin: 0 auto;
 }
 
 .h1 {
-  font-size: 2.5rem;
-  font-weight: 700;
-  margin-bottom: 25px;
+  font-size: 2.8rem;
+  font-weight: 800;
+  margin-bottom: 30px;
   color: var(--primary);
+  text-align: center;
 }
 
 .searchBar {
   display: flex;
-  margin-bottom: 30px;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 35px;
 }
 
 .searchInput {
   flex-grow: 1;
-  padding: 10px 15px;
+  padding: 12px 15px;
   font-size: 1rem;
   border: 2px solid var(--primary);
-  border-radius: 8px 0 0 8px;
-  outline: none;
-  color: var(--text);
+  border-radius: 8px;
   background-color: var(--surface);
-  transition: border-color 0.3s ease;
+  color: var(--text);
+  transition: 0.3s;
 }
 
 .searchInput::placeholder {
@@ -104,16 +67,18 @@
 }
 
 .searchInput:focus {
+  outline: none;
   border-color: #3ea6ff;
+  background-color: var(--surface-alt);
 }
 
 .searchButton {
-  background-color: var(--primary);
+  padding: 12px 20px;
+  font-weight: bold;
   border: none;
-  padding: 0 25px;
-  border-radius: 0 8px 8px 0;
+  background-color: var(--primary);
   color: #000;
-  font-weight: 700;
+  border-radius: 8px;
   cursor: pointer;
   transition: background-color 0.3s ease;
 }
@@ -122,36 +87,24 @@
   background-color: #3ea6ff;
 }
 
+/* Carrossel */
 .carouselContainer {
   overflow-x: auto;
-  margin-bottom: 40px;
-  padding: 0 20px;
-
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none;  /* IE 10+ */
   scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  margin-bottom: 40px;
+  padding: 0 10px;
   position: relative;
 }
 
 .carouselContainer::-webkit-scrollbar {
-  display: none; /* Chrome, Safari e Opera */
-}
-
-.carouselContainer::after {
-  content: "";
-  position: absolute;
-  top: 0;
-  right: 0;
-  width: 40px;
-  height: 100%;
-  pointer-events: none;
-  background: linear-gradient(to left, var(--dark-bg), transparent);
+  display: none;
 }
 
 .carouselTrack {
   display: flex;
   gap: 20px;
-  padding-bottom: 10px;
   scroll-snap-type: x mandatory;
   scroll-padding-left: 20px;
 }
@@ -159,55 +112,62 @@
 .card {
   min-width: 250px;
   background-color: var(--surface);
-  border-radius: 12px;
+  border-radius: 14px;
   padding: 20px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-  cursor: pointer;
-  user-select: none;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
   scroll-snap-align: start;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .card:hover {
-  transform: translateY(-8px);
-  box-shadow: 0 6px 20px rgba(95, 189, 242, 0.5);
+  transform: translateY(-6px);
+  box-shadow: 0 10px 20px rgba(95, 189, 242, 0.3);
 }
 
 .cardTitle {
   font-weight: 600;
-  color: var(--primary);
   font-size: 1.1rem;
+  color: var(--primary);
+}
+
+/* Seções de Jogadores e Clubes */
+.sectionTitle {
+  font-size: 1.9rem;
+  font-weight: 700;
+  margin-bottom: 20px;
+  color: var(--primary);
+  border-left: 6px solid var(--primary);
+  padding-left: 15px;
 }
 
 .jogadoresProcurando,
 .horariosClubes {
-  margin-bottom: 40px;
-}
-
-.sectionTitle {
-  font-size: 1.8rem;
-  font-weight: 700;
-  margin-bottom: 15px;
-  color: var(--primary);
+  margin-bottom: 50px;
 }
 
 .jogadorItem,
 .horarioItem {
   background-color: var(--surface);
   padding: 15px 20px;
-  margin-bottom: 12px;
+  margin-bottom: 15px;
   border-radius: 10px;
-  box-shadow: 0 0 8px rgba(0,0,0,0.5);
-  font-weight: 500;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.3);
   display: flex;
   justify-content: space-between;
   align-items: center;
+  transition: transform 0.2s ease;
+}
+
+.jogadorItem:hover,
+.horarioItem:hover {
+  transform: scale(1.01);
 }
 
 .jogadorPosicao {
   color: var(--text-muted);
   font-style: italic;
   margin-left: 10px;
+  font-size: 0.95rem;
 }
 
 .footer {
@@ -217,6 +177,7 @@
   justify-content: center;
   gap: 40px;
   flex-shrink: 0;
+  border-top: 1px solid var(--surface-alt);
 }
 
 .footerLink {
@@ -228,4 +189,53 @@
 
 .footerLink:hover {
   color: var(--primary);
+}
+.statuspendente {
+  background-color: #fbbf24;
+  color: #000;
+  font-weight: bold;
+  padding: 4px 10px;
+  border-radius: 6px;
+}
+
+.statusaceito {
+  background-color: #10b981;
+  color: #fff;
+  font-weight: bold;
+  padding: 4px 10px;
+  border-radius: 6px;
+}
+
+.statusrecusado {
+  background-color: #ef4444;
+  color: #fff;
+  font-weight: bold;
+  padding: 4px 10px;
+  border-radius: 6px;
+}
+.filtrosContainer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  margin-bottom: 30px;
+}
+.btnEnviarConvite {
+  margin-left: 15px;
+  background-color: var(--primary);
+  color: #000;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.btnEnviarConvite:disabled {
+  background-color: #a5c9f5;
+  cursor: not-allowed;
+}
+
+.btnEnviarConvite:hover:not(:disabled) {
+  background-color: #3ea6ff;
 }

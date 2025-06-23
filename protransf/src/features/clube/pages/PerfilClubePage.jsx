@@ -30,6 +30,8 @@ export default function PerfilClubePage({ modoLeitura = false }) {
   const [novoJogador, setNovoJogador] = useState({ email: '', posicao: '', status: '', plataforma: '' });
   const [jogadores, setJogadores] = useState([]);
 
+  const [pedidosRecebidos, setPedidosRecebidos] = useState([]);
+
   useEffect(() => {
     const fetchClube = async () => {
       let clubeId = null;
@@ -73,6 +75,52 @@ export default function PerfilClubePage({ modoLeitura = false }) {
 
     fetchClube();
   }, [id, modoLeitura]);
+
+  // Atualização: Busca os convites pendentes para esse clube com username do jogador via email
+  useEffect(() => {
+    if (!isOwner) return;
+
+    const fetchPedidos = async () => {
+      try {
+        const convitesRef = collection(db, 'convites');
+        const q = query(
+          convitesRef,
+          where('clubeId', '==', auth.currentUser.uid),
+          where('status', '==', 'pendente')
+        );
+        const querySnapshot = await getDocs(q);
+
+        const pedidos = await Promise.all(
+          querySnapshot.docs.map(async (doc) => {
+            const convite = doc.data();
+            const jogadorEmail = convite.jogadorEmail;
+
+            // Busca usuário pelo email
+            const usuariosRef = collection(db, 'usuarios');
+            const userQuery = query(usuariosRef, where('email', '==', jogadorEmail));
+            const userSnapshot = await getDocs(userQuery);
+
+            let jogadorUsername = convite.jogadorUsername || jogadorEmail; // fallback
+            if (!userSnapshot.empty) {
+              jogadorUsername = userSnapshot.docs[0].data().username || jogadorUsername;
+            }
+
+            return {
+              id: doc.id,
+              ...convite,
+              jogadorUsername,
+            };
+          })
+        );
+
+        setPedidosRecebidos(pedidos);
+      } catch (error) {
+        console.error('Erro ao buscar pedidos recebidos:', error);
+      }
+    };
+
+    fetchPedidos();
+  }, [isOwner]);
 
   const handleProcuraChange = (e) => setProcura(e.target.value);
 
@@ -263,6 +311,26 @@ export default function PerfilClubePage({ modoLeitura = false }) {
     buscarDadosJogador(email);
   };
 
+  async function atualizarStatusConvite(id, novoStatus) {
+    try {
+      const conviteRef = doc(db, 'convites', id);
+      await updateDoc(conviteRef, {
+        status: novoStatus,
+        respondidoEm: serverTimestamp(),
+      });
+
+      // Atualizar lista local para refletir mudança imediata
+      setPedidosRecebidos((prev) => prev.filter((pedido) => pedido.id !== id));
+
+      // Opcional: atualizar jogador no elenco, etc. conforme regra de negócio
+
+      alert(`Convite ${novoStatus === 'aceito' ? 'aceito' : 'recusado'} com sucesso.`);
+    } catch (error) {
+      console.error('Erro ao atualizar status do convite:', error);
+      alert('Erro ao atualizar status do convite. Tente novamente.');
+    }
+  }
+
   return (
     <section className="clube-info">
       <h2>{nomeClube || 'Novo Clube'}</h2>
@@ -432,6 +500,60 @@ export default function PerfilClubePage({ modoLeitura = false }) {
           </div>
         )}
       </div>
+
+      {/* Seção Pedidos Recebidos - MOSTRAR APENAS PENDENTES */}
+      {!modoLeitura && isOwner && (
+        <div className="pedidos-recebidos" style={{ marginTop: 40 }}>
+          <h3>Pedidos Recebidos</h3>
+
+          {pedidosRecebidos.length === 0 && (
+            <p>Nenhum pedido pendente no momento.</p>
+          )}
+
+          {pedidosRecebidos.length > 0 && (
+            <table>
+              <thead>
+                <tr>
+                  <th>Jogador</th>
+                  <th>Posição</th>
+                  <th>Plataforma</th>
+                  <th>Status</th>
+                  <th>Ações</th>
+                </tr>
+              </thead>
+              <tbody>
+                {pedidosRecebidos.map((pedido) => (
+                  <tr key={pedido.id}>
+                    <td>
+                      <Link to={`/perfil-jogador/${pedido.jogadorUsername || pedido.jogadorEmail}`}>
+                        {pedido.jogadorUsername || pedido.jogadorEmail}
+                      </Link>
+                    </td>
+                    <td>{pedido.posicao}</td>
+                    <td>{pedido.plataforma}</td>
+                    <td>Pendente</td>
+                    <td>
+                      <button
+                        onClick={() => atualizarStatusConvite(pedido.id, 'aceito')}
+                        className="btn-aceitar"
+                        style={{ marginRight: 6 }}
+                      >
+                        Aceitar
+                      </button>
+                      <button
+                        onClick={() => atualizarStatusConvite(pedido.id, 'recusado')}
+                        className="btn-recusar"
+                      >
+                        Recusar
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </div>
+      )}
 
       {!modoLeitura && !isEditing && isOwner && (
         <button onClick={() => setIsEditing(true)} className="btn-login" style={{ marginTop: 20 }}>

@@ -1,281 +1,180 @@
-import React, { useEffect, useState } from "react";
-import styles from "../transferencia.module.css";
-import { db, auth } from "../../../services/firebase";
-import {
-  collection,
-  query,
-  orderBy,
-  limit,
-  onSnapshot,
-  addDoc,
-  serverTimestamp,
-  where,
-  getDocs,
-} from "firebase/firestore";
+import React, { useEffect, useState, useCallback } from 'react';
+import { collection, query, where, onSnapshot, getDocs, doc, getDoc } from 'firebase/firestore';
+import { db } from '../../../services/firebase';
+import styles from '../transferencia.module.css';
+import CardTransferencia from '../components/CardTransferencia';
 
-const Transferencia = () => {
-  const [transferencias, setTransferencias] = useState([]);
-  const [jogadores, setJogadores] = useState([]);
-  const [clubes, setClubes] = useState([]);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [filtroPosicao, setFiltroPosicao] = useState("");
-  const [userPerfil, setUserPerfil] = useState(null);
-  const [enviandoConvite, setEnviandoConvite] = useState(false);
+export default function Transferencia() {
+  const [transferenciasAceitas, setTransferenciasAceitas] = useState([]);
+  const [transferenciasRecusadas, setTransferenciasRecusadas] = useState([]);
+  const [transferenciasPendentes, setTransferenciasPendentes] = useState([]);
+  const [filtro, setFiltro] = useState('todos');
+  const [posicaoFiltro, setPosicaoFiltro] = useState('');
+  const [resultadosBusca, setResultadosBusca] = useState([]);
 
-  // Busca perfil do usuário logado
-  useEffect(() => {
-    const unsubscribeAuth = auth.onAuthStateChanged(async (firebaseUser) => {
-      if (firebaseUser) {
-        try {
-          const q = query(collection(db, "usuarios"), where("uid", "==", firebaseUser.uid));
-          const querySnapshot = await getDocs(q);
-          let perfil = null;
-          querySnapshot.forEach((doc) => {
-            perfil = { id: doc.id, ...doc.data() };
-          });
-          setUserPerfil(perfil);
-        } catch (error) {
-          console.error("Erro ao buscar perfil do usuário:", error);
-          setUserPerfil(null);
-        }
-      } else {
-        setUserPerfil(null);
+  // Função para buscar nome do clube e do jogador baseado na transferência
+  async function enriquecerTransferencia(item) {
+    let clubeNome = 'Time não encontrado';
+    if (item.idClube) {
+      const clubeDoc = await getDoc(doc(db, 'clubes', item.idClube));
+      if (clubeDoc.exists()) {
+        clubeNome = clubeDoc.data().nome || clubeNome;
       }
-    });
-
-    return () => unsubscribeAuth();
-  }, []);
-
-  // Últimas 5 transferências
-  useEffect(() => {
-    const q = query(collection(db, "convites"), orderBy("criadoEm", "desc"), limit(5));
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const data = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-      setTransferencias(data);
-    });
-
-    return () => unsubscribe();
-  }, []);
-
-  // Busca jogadores
-  useEffect(() => {
-    const q = query(
-      collection(db, "usuarios"),
-      where("tipoUsuario", "==", "jogador"),
-      orderBy("username"),
-      limit(50)
-    );
-
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const data = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-      setJogadores(data);
-    });
-
-    return () => unsubscribe();
-  }, []);
-
-  // Busca clubes
-  useEffect(() => {
-    const q = query(
-      collection(db, "usuarios"),
-      where("tipoUsuario", "in", ["clube", "clube_jogador"]),
-      orderBy("clubeNome"),
-      limit(50)
-    );
-
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const data = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-      setClubes(data);
-    });
-
-    return () => unsubscribe();
-  }, []);
-
-  const jogadoresFiltrados = jogadores.filter((j) => {
-    const nomeMatch = j.username?.toLowerCase().includes(searchTerm.toLowerCase());
-    const posicaoMatch = filtroPosicao
-      ? j.posicao?.toLowerCase() === filtroPosicao.toLowerCase()
-      : true;
-    return nomeMatch && posicaoMatch;
-  });
-
-  const clubesFiltrados = clubes.filter((c) =>
-    c.clubeNome?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  async function enviarConvite(jogador) {
-    if (!userPerfil || !userPerfil.clubeId) {
-      alert("Você precisa estar logado como clube para enviar convites.");
-      return;
     }
 
-    setEnviandoConvite(true);
-    try {
-      await addDoc(collection(db, "convites"), {
-        clubeId: userPerfil.clubeId,
-        clubeNome: userPerfil.clubeNome,
-        jogadorUsername: jogador.username,
-        jogadorEmail: jogador.email,
-        posicao: jogador.posicao,
-        plataforma: jogador.plataforma,
-        status: "pendente",
-        criadoEm: serverTimestamp(),
-        respondidoEm: null,
-      });
-      alert(`Convite enviado para ${jogador.username || jogador.email}!`);
-    } catch (err) {
-      console.error(err);
-      alert("Erro ao enviar convite.");
-    } finally {
-      setEnviandoConvite(false);
+    let jogadorNome = 'Jogador não encontrado';
+    if (item.idJogador) {
+      const jogadorDoc = await getDoc(doc(db, 'usuarios', item.idJogador));
+      if (jogadorDoc.exists()) {
+        const data = jogadorDoc.data();
+        jogadorNome = data.username || data.nome || jogadorNome;
+      }
     }
+
+    return { ...item, clubeNome, jogadorNome };
   }
 
-  async function enviarPedido(clube) {
-    if (!userPerfil || userPerfil.tipoUsuario !== "jogador") {
-      alert("Você precisa estar logado como jogador para enviar pedido.");
-      return;
+  const buscar = useCallback(async () => {
+    const usuariosRef = collection(db, 'usuarios');
+    const clubesRef = collection(db, 'clubes');
+
+    const promessas = [];
+
+    if (filtro === 'jogadores' || filtro === 'todos') {
+      let q = query(usuariosRef, where('status', '==', 'Livre no mercado'));
+      if (posicaoFiltro) {
+        q = query(
+          usuariosRef,
+          where('status', '==', 'Livre no mercado'),
+          where('posicaoPrimaria', '==', posicaoFiltro)
+        );
+      }
+      promessas.push(getDocs(q));
     }
 
-    setEnviandoConvite(true);
-    try {
-      await addDoc(collection(db, "pedidos"), {
-        jogadorId: userPerfil.id,
-        jogadorUsername: userPerfil.username,
-        jogadorEmail: userPerfil.email,
-        posicao: userPerfil.posicao,
-        plataforma: userPerfil.plataforma,
-        clubeId: clube.clubeId || clube.id,
-        clubeNome: clube.clubeNome || clube.nome,
-        status: "pendente",
-        criadoEm: serverTimestamp(),
-        respondidoEm: null,
-      });
-      alert(`Pedido enviado para o clube ${clube.clubeNome || clube.nome}!`);
-    } catch (err) {
-      console.error(err);
-      alert("Erro ao enviar pedido.");
-    } finally {
-      setEnviandoConvite(false);
+    if (filtro === 'clubes' || filtro === 'todos') {
+      let q = query(clubesRef, where('procura', '==', 'sim'));
+      promessas.push(getDocs(q));
     }
-  }
+
+    const [jogadoresSnap, clubesSnap] = await Promise.all([
+      filtro === 'clubes' ? { docs: [] } : promessas[0],
+      filtro === 'jogadores' ? { docs: [] } : promessas[1] || promessas[0],
+    ]);
+
+    const jogadores = jogadoresSnap.docs.map(doc => ({ id: doc.id, tipo: 'jogador', ...doc.data() }));
+    const clubes = clubesSnap.docs.map(doc => ({ id: doc.id, tipo: 'clube', ...doc.data() }));
+
+    setResultadosBusca([...jogadores, ...clubes]);
+  }, [filtro, posicaoFiltro]);
+
+  useEffect(() => {
+    const ref = collection(db, 'convites');
+
+    const qAceitas = query(ref, where('status', '==', 'aceito'));
+    const qRecusadas = query(ref, where('status', '==', 'recusado'));
+    const qPendentes = query(ref, where('status', '==', 'pendente'));
+
+    async function carregarTransferencias(snap, setFunc) {
+      const docs = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      const docsEnriquecidos = await Promise.all(docs.map(enriquecerTransferencia));
+      setFunc(docsEnriquecidos.slice(-5).reverse());
+    }
+
+    const unsubAceitas = onSnapshot(qAceitas, snap => {
+      carregarTransferencias(snap, setTransferenciasAceitas);
+    });
+
+    const unsubRecusadas = onSnapshot(qRecusadas, snap => {
+      carregarTransferencias(snap, setTransferenciasRecusadas);
+    });
+
+    const unsubPendentes = onSnapshot(qPendentes, snap => {
+      carregarTransferencias(snap, setTransferenciasPendentes);
+    });
+
+    return () => {
+      unsubAceitas();
+      unsubRecusadas();
+      unsubPendentes();
+    };
+  }, []);
+
+  useEffect(() => {
+    buscar();
+  }, [buscar]);
 
   return (
-    <div className={styles.flexColumn}>
-      <main className={styles.main}>
-        <h1 className={styles.h1}>Transferências</h1>
+  <section className={styles.container}>
+    <h2>🔍 Buscar Jogadores e Clubes</h2>
 
-        <div className={styles.filtrosContainer}>
-          <input
-            type="text"
-            placeholder="Buscar jogador ou clube..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className={styles.searchInput}
-          />
-          <select
-            value={filtroPosicao}
-            onChange={(e) => setFiltroPosicao(e.target.value)}
-            className={styles.searchInput}
-          >
-            <option value="">Todas as posições</option>
-            <option value="goleiro">Goleiro</option>
-            <option value="zagueiro">Zagueiro</option>
-            <option value="lateral">Lateral</option>
-            <option value="volante">Volante</option>
-            <option value="meia">Meia</option>
-            <option value="atacante">Atacante</option>
-          </select>
-        </div>
+    {/* Filtros sempre visíveis */}
+    <div className={styles.filtros}>
+      <select value={filtro} onChange={e => setFiltro(e.target.value)}>
+        <option value="todos">Todos</option>
+        <option value="jogadores">Jogadores livres</option>
+        <option value="clubes">Clubes buscando jogadores</option>
+      </select>
 
-        {/* Lista de jogadores para clube logado */}
-        {userPerfil?.tipoUsuario === "clube" || userPerfil?.tipoUsuario === "clube_jogador" ? (
-          <>
-            <h2 className={styles.sectionTitle}>Jogadores disponíveis</h2>
-            {jogadoresFiltrados.length === 0 ? (
-              <p style={{ color: "#ccc" }}>Nenhum jogador encontrado.</p>
-            ) : (
-              jogadoresFiltrados.map((jogador) => (
-                <div key={jogador.id} className={styles.jogadorItem}>
-                  <span>
-                    <strong>{jogador.username}</strong> ({jogador.posicao} - {jogador.plataforma})
-                  </span>
-                  <button
-                    disabled={enviandoConvite}
-                    className={styles.btnEnviarConvite}
-                    onClick={() => enviarConvite(jogador)}
-                  >
-                    {enviandoConvite ? "Enviando..." : "Enviar convite"}
-                  </button>
-                </div>
-              ))
-            )}
-          </>
-        ) : null}
-
-        {/* Lista de clubes para jogador logado */}
-        {userPerfil?.tipoUsuario === "jogador" ? (
-          <>
-            <h2 className={styles.sectionTitle}>Clubes disponíveis</h2>
-            {clubesFiltrados.length === 0 ? (
-              <p style={{ color: "#ccc" }}>Nenhum clube encontrado.</p>
-            ) : (
-              clubesFiltrados.map((clube) => (
-                <div key={clube.id} className={styles.jogadorItem}>
-                  <span>
-                    <strong>{clube.clubeNome}</strong>
-                  </span>
-                  <button
-                    disabled={enviandoConvite}
-                    className={styles.btnEnviarConvite}
-                    onClick={() => enviarPedido(clube)}
-                  >
-                    {enviandoConvite ? "Enviando..." : "Enviar pedido"}
-                  </button>
-                </div>
-              ))
-            )}
-          </>
-        ) : null}
-
-        {/* Transferências em formato de card */}
-        <section className={styles.transferenciasCards}>
-          <h2 className={styles.sectionTitle}>Últimas Transferências</h2>
-          {transferencias.length === 0 ? (
-            <p style={{ color: "#ccc" }}>Nenhuma transferência encontrada.</p>
-          ) : (
-            transferencias.map((item) => (
-              <div key={item.id} className={styles.cardTransferencia}>
-                <div className={styles.cardConteudo}>
-                  <strong>{item.clubeNome}</strong>
-                 <span className={styles.setaTransferencia}>⇄</span>
-                  <strong>{item.jogadorUsername || item.jogadorEmail}</strong>
-                </div>
-                <div className={styles.cardInfoSecundaria}>
-                  {item.posicao} | {item.plataforma}
-                  <span className={styles[`status${item.status?.toLowerCase()}`]}>
-                    {item.status?.toUpperCase()}
-                  </span>
-                </div>
-              </div>
-            ))
-          )}
-        </section>
-      </main>
-
-      <footer className={styles.footer}>
-        <a href="/" className={styles.footerLink}>
-          Política de Privacidade
-        </a>
-        <a href="/" className={styles.footerLink}>
-          Termos de Uso
-        </a>
-      </footer>
+      {/* Só mostrar filtro de posição se for jogadores */}
+      {filtro === 'jogadores' && (
+        <select value={posicaoFiltro} onChange={e => setPosicaoFiltro(e.target.value)}>
+          <option value="">Todas as posições</option>
+          <option value="Goleiro">Goleiro</option>
+          <option value="Zagueiro">Zagueiro</option>
+          <option value="Meio-campo">Meio-campo</option>
+          <option value="Atacante">Atacante</option>
+        </select>
+      )}
     </div>
-  );
-};
 
-export default Transferencia;
+    {/* Mostrar resultados só se filtro for diferente de "todos" */}
+    {filtro !== 'todos' && (
+      <div className={styles.resultados}>
+        {resultadosBusca.length === 0 ? (
+          <p>Nenhum resultado encontrado.</p>
+        ) : (
+          resultadosBusca.map((item, index) => (
+            <CardTransferencia key={index} dados={item} tipo={item.tipo} />
+          ))
+        )}
+      </div>
+    )}
+
+    <hr />
+
+    <h2>🔄 Últimas Transferências</h2>
+
+    {/* Aceitas */}
+    <div className={styles.transferenciaSection}>
+      <h3>Aceitas</h3>
+      {transferenciasAceitas.length === 0 ? (
+        <p className={styles.msgVazio}>Nenhuma transferência aceita.</p>
+      ) : (
+        transferenciasAceitas.map(item => <CardTransferencia key={item.id} dados={item} tipo="transferencia" />)
+      )}
+    </div>
+
+    {/* Recusadas */}
+    <div className={styles.transferenciaSection}>
+      <h3>Recusadas</h3>
+      {transferenciasRecusadas.length === 0 ? (
+        <p className={styles.msgVazio}>Nenhuma transferência recusada.</p>
+      ) : (
+        transferenciasRecusadas.map(item => <CardTransferencia key={item.id} dados={item} tipo="transferencia" />)
+      )}
+    </div>
+
+    {/* Pendentes */}
+    <div className={styles.transferenciaSection}>
+      <h3>Pendentes</h3>
+      {transferenciasPendentes.length === 0 ? (
+        <p className={styles.msgVazio}>Nenhuma transferência pendente.</p>
+      ) : (
+        transferenciasPendentes.map(item => <CardTransferencia key={item.id} dados={item} tipo="transferencia" />)
+      )}
+    </div>
+  </section>
+);
+
+}

@@ -23,8 +23,10 @@ import PerfilClubePage from "./features/clube/pages/PerfilClubePage";
 import RankingPage from "../src/features/ranking/pages/Ranking";
 import PerfilPublicoJogador from "./features/jogador/pages/PerfilPublicoJogador";
 
-
 function Header({ user, tipo }) {
+  console.log("Header renderizado — user:", user);
+  console.log("Header renderizado — tipo:", tipo);
+
   const navigate = useNavigate();
 
   const handleLogout = async () => {
@@ -95,6 +97,7 @@ function LayoutRoutes() {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      console.log("Auth state mudou:", firebaseUser);
       setUser(firebaseUser);
 
       if (firebaseUser) {
@@ -102,8 +105,11 @@ function LayoutRoutes() {
           const docRef = doc(db, "usuarios", firebaseUser.uid);
           const docSnap = await getDoc(docRef);
           if (docSnap.exists()) {
-            setTipo(docSnap.data().tipo || null);
+            const tipoUser = docSnap.data().tipo || null;
+            console.log("Tipo do usuário:", tipoUser);
+            setTipo(tipoUser);
           } else {
+            console.log("Documento do usuário não encontrado.");
             setTipo(null);
           }
         } catch (error) {

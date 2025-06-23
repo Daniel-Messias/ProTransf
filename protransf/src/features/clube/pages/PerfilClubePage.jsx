@@ -16,7 +16,7 @@ import { Link, useParams } from 'react-router-dom';
 import '../Clube.css';
 
 export default function PerfilClubePage({ modoLeitura = false }) {
-  const { id } = useParams(); // id do clube para modo leitura
+  const { id } = useParams();
   const [isEditing, setIsEditing] = useState(false);
   const [isOwner, setIsOwner] = useState(false);
   const [clubeExiste, setClubeExiste] = useState(false);
@@ -76,7 +76,6 @@ export default function PerfilClubePage({ modoLeitura = false }) {
     fetchClube();
   }, [id, modoLeitura]);
 
-  // Atualização: Busca os convites pendentes para esse clube com username do jogador via email
   useEffect(() => {
     if (!isOwner) return;
 
@@ -95,12 +94,11 @@ export default function PerfilClubePage({ modoLeitura = false }) {
             const convite = doc.data();
             const jogadorEmail = convite.jogadorEmail;
 
-            // Busca usuário pelo email
             const usuariosRef = collection(db, 'usuarios');
             const userQuery = query(usuariosRef, where('email', '==', jogadorEmail));
             const userSnapshot = await getDocs(userQuery);
 
-            let jogadorUsername = convite.jogadorUsername || jogadorEmail; // fallback
+            let jogadorUsername = convite.jogadorUsername || jogadorEmail;
             if (!userSnapshot.empty) {
               jogadorUsername = userSnapshot.docs[0].data().username || jogadorUsername;
             }
@@ -182,6 +180,16 @@ export default function PerfilClubePage({ modoLeitura = false }) {
       return;
     }
 
+    const usuariosRef = collection(db, 'usuarios');
+    const q = query(usuariosRef, where('email', '==', novoJogador.email.trim().toLowerCase()));
+    const snapshot = await getDocs(q);
+
+    let usernameFinal = novoJogador.email;
+    if (!snapshot.empty) {
+      const dados = snapshot.docs[0].data();
+      if (dados.username) usernameFinal = dados.username;
+    }
+
     const convitesRef = collection(db, 'convites');
     const conviteQuery = query(
       convitesRef,
@@ -200,6 +208,7 @@ export default function PerfilClubePage({ modoLeitura = false }) {
         clubeId: auth.currentUser.uid,
         clubeNome: nomeClube,
         jogadorEmail: novoJogador.email.trim().toLowerCase(),
+        jogadorUsername: usernameFinal,
         posicao: novoJogador.posicao,
         status: 'pendente',
         criadoEm: serverTimestamp(),
@@ -319,11 +328,7 @@ export default function PerfilClubePage({ modoLeitura = false }) {
         respondidoEm: serverTimestamp(),
       });
 
-      // Atualizar lista local para refletir mudança imediata
       setPedidosRecebidos((prev) => prev.filter((pedido) => pedido.id !== id));
-
-      // Opcional: atualizar jogador no elenco, etc. conforme regra de negócio
-
       alert(`Convite ${novoStatus === 'aceito' ? 'aceito' : 'recusado'} com sucesso.`);
     } catch (error) {
       console.error('Erro ao atualizar status do convite:', error);
@@ -331,7 +336,9 @@ export default function PerfilClubePage({ modoLeitura = false }) {
     }
   }
 
-  return (
+  // JSX retornado está na próxima mensagem por limite de caracteres.
+
+    return (
     <section className="clube-info">
       <h2>{nomeClube || 'Novo Clube'}</h2>
 
@@ -501,7 +508,6 @@ export default function PerfilClubePage({ modoLeitura = false }) {
         )}
       </div>
 
-      {/* Seção Pedidos Recebidos - MOSTRAR APENAS PENDENTES */}
       {!modoLeitura && isOwner && (
         <div className="pedidos-recebidos" style={{ marginTop: 40 }}>
           <h3>Pedidos Recebidos</h3>

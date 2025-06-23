@@ -17,13 +17,12 @@ const Transferencia = () => {
   const [transferencias, setTransferencias] = useState([]);
   const [jogadores, setJogadores] = useState([]);
   const [clubes, setClubes] = useState([]);
-
   const [searchTerm, setSearchTerm] = useState("");
   const [filtroPosicao, setFiltroPosicao] = useState("");
   const [userPerfil, setUserPerfil] = useState(null);
   const [enviandoConvite, setEnviandoConvite] = useState(false);
 
-  // Busca perfil do usuário logado para detectar tipoUsuario e clube
+  // Busca perfil do usuário logado
   useEffect(() => {
     const unsubscribeAuth = auth.onAuthStateChanged(async (firebaseUser) => {
       if (firebaseUser) {
@@ -47,47 +46,21 @@ const Transferencia = () => {
     return () => unsubscribeAuth();
   }, []);
 
-  // Busca últimas 5 transferências (convites) e adiciona username do jogador via email
+  // Últimas 5 transferências
   useEffect(() => {
-    const q = query(
-      collection(db, "convites"),
-      orderBy("criadoEm", "desc"),
-      limit(5)
-    );
-
-    const unsubscribe = onSnapshot(q, async (snapshot) => {
-      const convitesData = await Promise.all(
-        snapshot.docs.map(async (docSnap) => {
-          const convite = docSnap.data();
-
-          // Busca username do jogador via email
-          const usuariosRef = collection(db, "usuarios");
-          const qUser = query(
-            usuariosRef,
-            where("email", "==", convite.jogadorEmail)
-          );
-          const queryUserSnapshot = await getDocs(qUser);
-
-          let jogadorUsername = "N/A";
-          if (!queryUserSnapshot.empty) {
-            jogadorUsername = queryUserSnapshot.docs[0].data().username || "N/A";
-          }
-
-          return {
-            id: docSnap.id,
-            ...convite,
-            jogadorUsername,
-          };
-        })
-      );
-
-      setTransferencias(convitesData);
+    const q = query(collection(db, "convites"), orderBy("criadoEm", "desc"), limit(5));
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const data = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      setTransferencias(data);
     });
 
     return () => unsubscribe();
   }, []);
 
-  // Busca jogadores (tipoUsuario: jogador) ativos
+  // Busca jogadores
   useEffect(() => {
     const q = query(
       collection(db, "usuarios"),
@@ -104,7 +77,7 @@ const Transferencia = () => {
     return () => unsubscribe();
   }, []);
 
-  // Busca clubes (tipoUsuario: clube) ativos
+  // Busca clubes
   useEffect(() => {
     const q = query(
       collection(db, "usuarios"),
@@ -121,7 +94,6 @@ const Transferencia = () => {
     return () => unsubscribe();
   }, []);
 
-  // Filtra jogadores e clubes de acordo com pesquisa e posição
   const jogadoresFiltrados = jogadores.filter((j) => {
     const nomeMatch = j.username?.toLowerCase().includes(searchTerm.toLowerCase());
     const posicaoMatch = filtroPosicao
@@ -134,7 +106,6 @@ const Transferencia = () => {
     c.clubeNome?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  // Função enviar convite de clube para jogador
   async function enviarConvite(jogador) {
     if (!userPerfil || !userPerfil.clubeId) {
       alert("Você precisa estar logado como clube para enviar convites.");
@@ -154,7 +125,7 @@ const Transferencia = () => {
         criadoEm: serverTimestamp(),
         respondidoEm: null,
       });
-      alert(`Convite enviado para ${jogador.username}!`);
+      alert(`Convite enviado para ${jogador.username || jogador.email}!`);
     } catch (err) {
       console.error(err);
       alert("Erro ao enviar convite.");
@@ -163,7 +134,6 @@ const Transferencia = () => {
     }
   }
 
-  // Função enviar pedido de jogador para clube
   async function enviarPedido(clube) {
     if (!userPerfil || userPerfil.tipoUsuario !== "jogador") {
       alert("Você precisa estar logado como jogador para enviar pedido.");
@@ -194,9 +164,7 @@ const Transferencia = () => {
   }
 
   return (
-    <div
-      className={`${styles.flex} ${styles["flex-col"]} ${styles["min-h-screen"]}`}
-    >
+    <div className={styles.flexColumn}>
       <main className={styles.main}>
         <h1 className={styles.h1}>Transferências</h1>
 
@@ -223,8 +191,8 @@ const Transferencia = () => {
           </select>
         </div>
 
-        {/* Se for clube logado: lista jogadores com botão enviar convite */}
-        {(userPerfil?.tipoUsuario === "clube" || userPerfil?.tipoUsuario === "clube_jogador") && (
+        {/* Lista de jogadores para clube logado */}
+        {userPerfil?.tipoUsuario === "clube" || userPerfil?.tipoUsuario === "clube_jogador" ? (
           <>
             <h2 className={styles.sectionTitle}>Jogadores disponíveis</h2>
             {jogadoresFiltrados.length === 0 ? (
@@ -246,10 +214,10 @@ const Transferencia = () => {
               ))
             )}
           </>
-        )}
+        ) : null}
 
-        {/* Se for jogador logado: lista clubes com botão enviar pedido */}
-        {userPerfil?.tipoUsuario === "jogador" && (
+        {/* Lista de clubes para jogador logado */}
+        {userPerfil?.tipoUsuario === "jogador" ? (
           <>
             <h2 className={styles.sectionTitle}>Clubes disponíveis</h2>
             {clubesFiltrados.length === 0 ? (
@@ -271,22 +239,27 @@ const Transferencia = () => {
               ))
             )}
           </>
-        )}
+        ) : null}
 
-        <section className={styles.jogadoresProcurando}>
-          <h2 className={styles.sectionTitle}>Últimas 5 Transferências</h2>
+        {/* Transferências em formato de card */}
+        <section className={styles.transferenciasCards}>
+          <h2 className={styles.sectionTitle}>Últimas Transferências</h2>
           {transferencias.length === 0 ? (
             <p style={{ color: "#ccc" }}>Nenhuma transferência encontrada.</p>
           ) : (
             transferencias.map((item) => (
-              <div key={item.id} className={styles.jogadorItem}>
-                <span>
-                  <strong>{item.clubeNome}</strong> →{" "}
-                  <strong>{item.jogadorUsername}</strong> ({item.posicao} - {item.plataforma})
-                </span>
-                <span className={styles[`status${item.status?.toLowerCase()}`]}>
-                  {item.status?.toUpperCase()}
-                </span>
+              <div key={item.id} className={styles.cardTransferencia}>
+                <div className={styles.cardConteudo}>
+                  <strong>{item.clubeNome}</strong>
+                 <span className={styles.setaTransferencia}>⇄</span>
+                  <strong>{item.jogadorUsername || item.jogadorEmail}</strong>
+                </div>
+                <div className={styles.cardInfoSecundaria}>
+                  {item.posicao} | {item.plataforma}
+                  <span className={styles[`status${item.status?.toLowerCase()}`]}>
+                    {item.status?.toUpperCase()}
+                  </span>
+                </div>
               </div>
             ))
           )}

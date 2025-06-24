@@ -117,3 +117,47 @@ h2 {
     width: 100%;
   }
 }
+.cardBusca {
+  margin-bottom: 1rem;
+  padding: 0.5rem;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+}
+
+.botaoConvite {
+  margin-top: 0.5rem;
+  background-color: #1e90ff;
+  color: white;
+  border: none;
+  padding: 0.4rem 0.8rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.botaoConvite:hover {
+  background-color: #0c70c1;
+}
+
+.carrossel {
+  display: flex;
+  gap: 1rem;
+  overflow-x: auto;
+  padding: 0.5rem 0;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: thin;
+}
+
+.carrossel::-webkit-scrollbar {
+  height: 6px;
+}
+
+.carrossel::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 4px;
+}
+
+.carrossel > * {
+  scroll-snap-align: start;
+  flex: 0 0 auto;
+}

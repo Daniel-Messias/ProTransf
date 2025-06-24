@@ -1,98 +1,93 @@
-/* CardTransferencia.module.css */
-
-/* Card de transferência */
 .cardTransferencia {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background-color: rgba(0, 0, 0, 0.4);
-  border: 1px solid #00aaff66;
+  background: rgba(0, 0, 0, 0.6);
+  border: 1px solid #00bfff;
+  padding: 1rem 1.5rem;
   border-radius: 12px;
-  padding: 15px 20px;
-  margin-bottom: 10px;
-  font-weight: 600;
-  color: #fff;
-  gap: 20px;
-  transition: background-color 0.3s ease, transform 0.2s ease;
+  color: white;
+  font-weight: bold;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  animation: fadeIn 0.4s ease-in-out;
+  transition: transform 0.2s;
 }
 
 .cardTransferencia:hover {
-  background-color: rgba(0, 0, 0, 0.5);
-  transform: scale(1.01);
-}
-
-.clubeNome {
-  color: #00d0ff;
-  font-size: 1rem;
-}
-
-.jogadorNome {
-  color: #ffc107;
-  font-size: 1rem;
+  transform: scale(1.02);
 }
 
 .seta {
   font-size: 1.5rem;
-  color: white;
+  color: #00bfff;
+  margin: 0 10px;
 }
 
-/* Status colorido por tipo */
-.aceito {
-  border-left: 6px solid #28a745;
+.clubeNome {
+  color: #00bfff;
 }
 
-.recusado {
-  border-left: 6px solid #dc3545;
+.jogadorNome {
+  color: #ffcc00;
 }
 
-.pendente {
-  border-left: 6px solid #ffc107;
-}
-
-/* Card padrão (jogador/clube) */
+/* Layout de jogadores e clubes */
 .card {
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid #444;
+  border-radius: 12px;
+  padding: 1.5rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid #00aaff33;
-  border-radius: 10px;
-  padding: 16px;
-  margin-bottom: 12px;
+  gap: 1.5rem;
   color: #fff;
-  backdrop-filter: blur(5px);
-  transition: transform 0.2s ease, background-color 0.3s ease;
-}
-
-.card:hover {
-  transform: scale(1.02);
-  background-color: rgba(255, 255, 255, 0.08);
+  animation: fadeIn 0.4s ease-in-out;
 }
 
 .info {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
+  flex: 1;
+}
+
+h4 {
+  font-size: 1.2rem;
+  margin-bottom: 0.3rem;
+  color: #00bfff;
+}
+
+p {
+  margin: 0.2rem 0;
 }
 
 .link {
-  margin-top: 6px;
-  color: #00cfff;
+  margin-top: 0.5rem;
+  display: inline-block;
+  color: #00bfff;
   text-decoration: underline;
-  font-size: 0.9rem;
+  font-weight: 500;
 }
 
 .btn {
-  background-color: #007bff;
+  background-color: #00bfff;
+  color: #fff;
   border: none;
-  color: white;
-  padding: 10px 14px;
+  padding: 0.6rem 1.2rem;
   border-radius: 8px;
   cursor: pointer;
-  transition: background-color 0.2s ease;
   font-weight: bold;
+  transition: background-color 0.3s;
 }
 
 .btn:hover {
-  background-color: #005fcc;
+  background-color: #009acd;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }

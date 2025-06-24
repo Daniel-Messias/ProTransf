@@ -25,14 +25,21 @@ export default function CardTransferencia({ dados, tipo }) {
 
   if (isTransferencia) {
   return (
-    <div
-      className={`${styles.cardTransferencia} ${styles[dados.status] || ''}`}
-      role="region"
-      aria-label={`Transferência ${dados.status}`}
-    >
-      <span className={styles.clubeNome}>{dados.clubeNome}</span>
-      <span className={styles.seta}>→</span>
-      <span className={styles.jogadorNome}>{dados.jogadorNome}</span>
+    <div className={`${styles.cardTransferencia} ${styles[dados.status] || ''}`} role="region">
+      <div className={styles.transferBox}>
+        <div>
+          <strong className={styles.label}>Clube:</strong>
+          <p className={styles.value}>{dados.clubeNome}</p>
+        </div>
+        <div>
+          <strong className={styles.label}>Jogador:</strong>
+          <p className={styles.value}>{dados.jogadorNome}</p>
+        </div>
+        <div>
+          <strong className={styles.label}>Posição:</strong>
+          <p className={styles.value}>{dados.posicao}</p>
+        </div>
+      </div>
     </div>
   );
 }

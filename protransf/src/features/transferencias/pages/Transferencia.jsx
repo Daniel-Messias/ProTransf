@@ -14,12 +14,14 @@ export default function Transferencia() {
 
   // Usa os nomes já presentes no documento do convite
   function enriquecerTransferencia(item) {
-    return {
-      ...item,
-      clubeNome: item.clubeNome || 'Time não encontrado',
-      jogadorNome: item.jogadorUsername || 'Jogador não encontrado',
-    };
-  }
+  return {
+    ...item,
+    clubeNome: item.clubeNome || 'Time não encontrado',
+    jogadorNome: item.jogadorUsername || 'Jogador não encontrado',
+    posicao: item.posicao || 'N/A',
+  };
+}
+
 
   const buscar = useCallback(async () => {
     const usuariosRef = collection(db, 'usuarios');
@@ -106,6 +108,8 @@ export default function Transferencia() {
             <option value="">Todas as posições</option>
             <option value="Goleiro">Goleiro</option>
             <option value="Zagueiro">Zagueiro</option>
+            <option value="Lateral">Lateral</option>
+            <option value="Volante">Volante</option>
             <option value="Meio-campo">Meio-campo</option>
             <option value="Atacante">Atacante</option>
           </select>

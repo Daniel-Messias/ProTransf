@@ -91,3 +91,27 @@ p {
     transform: translateY(0);
   }
 }
+.transferBox {
+  display: flex;
+  justify-content: space-between;
+  background-color: rgba(255, 255, 255, 0.05);
+  padding: 12px 20px;
+  border-radius: 10px;
+  border: 1px solid #007bff;
+  color: #fff;
+  gap: 20px;
+  flex-wrap: wrap;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+}
+
+.label {
+  font-size: 0.85rem;
+  color: #00bfff;
+  margin-bottom: 2px;
+}
+
+.value {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #fff;
+}

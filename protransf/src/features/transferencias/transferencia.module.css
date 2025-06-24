@@ -1,9 +1,12 @@
 .container {
   max-width: 1000px;
   margin: auto;
-  padding: 2rem;
+  padding: 2rem 1rem;
   color: #fff;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
 }
 
 h2 {
@@ -20,18 +23,31 @@ h2 {
 .filtros {
   display: flex;
   flex-wrap: wrap;
-  gap: 1rem;
+  gap: 1.25rem;
   margin-bottom: 2rem;
+  justify-content: start;
 }
+
 
 .filtros select {
   background-color: #0a0f1c;
   color: #fff;
-  border: 1px solid #00bfff;
-  padding: 0.6rem 1rem;
-  border-radius: 8px;
+  border: 2px solid transparent;
+  padding: 0.75rem 1.25rem;
+  border-radius: 16px;
   font-size: 1rem;
+  min-width: 200px;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0, 191, 255, 0.15);
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
+
+.filtros select:focus {
+  outline: none;
+  border-color: #00bfff;
+  box-shadow: 0 0 8px #00bfff;
+}
+
 
 .resultados {
   display: flex;
@@ -40,23 +56,64 @@ h2 {
   margin-bottom: 3rem;
 }
 
+/* Seções de transferência - container das seções Aceitas, Recusadas e Pendentes */
 .transferenciaSection {
-  margin-bottom: 3rem;
-  padding: 1rem;
   background-color: rgba(255, 255, 255, 0.03);
   border: 1px solid rgba(255, 255, 255, 0.05);
   border-radius: 12px;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
 }
 
+/* Estilo dos títulos das seções, com ícones por status */
 .transferenciaSection h3 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   font-size: 1.3rem;
-  color: #00bfff;
+  font-weight: bold;
+  margin-bottom: 1rem;
   border-bottom: 2px solid #00bfff;
   padding-bottom: 5px;
-  margin-bottom: 1rem;
 }
 
+/* Ícones antes dos títulos para status */
+.status-aceitas::before {
+  content: '✅';
+}
+
+.status-recusadas::before {
+  content: '❌';
+}
+
+.status-pendentes::before {
+  content: '⏳';
+}
+
+/* Grid para os cards dentro das seções */
+.transferenciaSection > div {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1rem;
+}
+
+/* Mensagem para listas vazias */
 .msgVazio {
   font-style: italic;
   color: #ccc;
+  text-align: center;
+  padding: 1rem 0;
+}
+
+/* Responsividade para os filtros */
+@media (max-width: 600px) {
+  .filtros {
+    flex-direction: column;
+  }
+
+  .filtros select {
+    width: 100%;
+  }
 }

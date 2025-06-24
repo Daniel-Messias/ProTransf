@@ -12,16 +12,14 @@ export default function Transferencia() {
   const [posicaoFiltro, setPosicaoFiltro] = useState('');
   const [resultadosBusca, setResultadosBusca] = useState([]);
 
-  // Usa os nomes já presentes no documento do convite
   function enriquecerTransferencia(item) {
-  return {
-    ...item,
-    clubeNome: item.clubeNome || 'Time não encontrado',
-    jogadorNome: item.jogadorUsername || 'Jogador não encontrado',
-    posicao: item.posicao || 'N/A',
-  };
-}
-
+    return {
+      ...item,
+      clubeNome: item.clubeNome || 'Time não encontrado',
+      jogadorNome: item.jogadorUsername || 'Jogador não encontrado',
+      posicao: item.posicao || 'N/A',
+    };
+  }
 
   const buscar = useCallback(async () => {
     const usuariosRef = collection(db, 'usuarios');
@@ -133,35 +131,41 @@ export default function Transferencia() {
       <h2>🔄 Últimas Transferências</h2>
 
       <div className={styles.transferenciaSection}>
-        <h3>Aceitas</h3>
+        <h3 className={styles['status-aceitas']}>Aceitas</h3>
         {transferenciasAceitas.length === 0 ? (
           <p className={styles.msgVazio}>Nenhuma transferência aceita.</p>
         ) : (
-          transferenciasAceitas.map(item => (
-            <CardTransferencia key={item.id} dados={item} tipo="transferencia" />
-          ))
+          <div>
+            {transferenciasAceitas.map(item => (
+              <CardTransferencia key={item.id} dados={item} tipo="transferencia" />
+            ))}
+          </div>
         )}
       </div>
 
       <div className={styles.transferenciaSection}>
-        <h3>Recusadas</h3>
+        <h3 className={styles['status-recusadas']}>Melou</h3>
         {transferenciasRecusadas.length === 0 ? (
           <p className={styles.msgVazio}>Nenhuma transferência recusada.</p>
         ) : (
-          transferenciasRecusadas.map(item => (
-            <CardTransferencia key={item.id} dados={item} tipo="transferencia" />
-          ))
+          <div>
+            {transferenciasRecusadas.map(item => (
+              <CardTransferencia key={item.id} dados={item} tipo="transferencia" />
+            ))}
+          </div>
         )}
       </div>
 
       <div className={styles.transferenciaSection}>
-        <h3>Pendentes</h3>
+        <h3 className={styles['status-pendentes']}>Pendentes</h3>
         {transferenciasPendentes.length === 0 ? (
           <p className={styles.msgVazio}>Nenhuma transferência pendente.</p>
         ) : (
-          transferenciasPendentes.map(item => (
-            <CardTransferencia key={item.id} dados={item} tipo="transferencia" />
-          ))
+          <div>
+            {transferenciasPendentes.map(item => (
+              <CardTransferencia key={item.id} dados={item} tipo="transferencia" />
+            ))}
+          </div>
         )}
       </div>
     </section>

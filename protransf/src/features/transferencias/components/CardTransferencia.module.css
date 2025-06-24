@@ -1,20 +1,52 @@
-.cardTransferencia {
-  background: rgba(0, 0, 0, 0.6);
+.cardTransferencia, .card {
+  background: rgba(0, 0, 0, 0.65);
   border: 1px solid #00bfff;
-  padding: 1rem 1.5rem;
   border-radius: 12px;
+  padding: 1.5rem;
   color: white;
   font-weight: bold;
   display: flex;
+  flex-direction: column;
+  align-items: flex-start;
   justify-content: space-between;
-  align-items: center;
+  min-width: 280px;
+  max-width: 320px;
+  min-height: 220px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
   animation: fadeIn 0.4s ease-in-out;
-  transition: transform 0.2s;
+  transition: transform 0.3s ease;
 }
 
-.cardTransferencia:hover {
-  transform: scale(1.02);
+.cardTransferencia:hover, .card:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.5);
 }
+
+.transferBox {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  background-color: rgba(255, 255, 255, 0.07);
+  padding: 12px 16px;
+  border-radius: 12px;
+  border: 1px solid #007bff;
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+}
+
+.label {
+  font-size: 0.85rem;
+  color: #888888;
+  margin-bottom: 2px;
+}
+
+.value {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #00bfff; /* azul ProTransf */
+  text-shadow: 0 0 4px rgba(0, 191, 255, 0.3); /* leve brilho azul */
+}
+
 
 .seta {
   font-size: 1.5rem;
@@ -30,20 +62,6 @@
   color: #ffcc00;
 }
 
-/* Layout de jogadores e clubes */
-.card {
-  background: rgba(0, 0, 0, 0.5);
-  border: 1px solid #444;
-  border-radius: 12px;
-  padding: 1.5rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 1.5rem;
-  color: #fff;
-  animation: fadeIn 0.4s ease-in-out;
-}
-
 .info {
   flex: 1;
 }
@@ -56,6 +74,7 @@ h4 {
 
 p {
   margin: 0.2rem 0;
+  line-height: 1.3;
 }
 
 .link {
@@ -66,15 +85,52 @@ p {
   font-weight: 500;
 }
 
+.statusBadge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: bold;
+  margin-top: 8px;
+  text-transform: capitalize;
+}
+
+.status-aceito {
+  background-color: #28a745;
+  color: #fff;
+}
+
+.status-recusado {
+  background-color: #dc3545;
+  color: #fff;
+}
+
+.status-pendente {
+  background-color: #ffc107;
+  color: #000;
+}
+
+.posicaoBadge {
+  display: inline-block;
+  background-color: #007bff;
+  color: white;
+  padding: 3px 8px;
+  font-size: 0.75rem;
+  border-radius: 12px;
+  margin-left: 8px;
+  font-weight: 600;
+  vertical-align: middle;
+}
+
 .btn {
   background-color: #00bfff;
-  color: #fff;
+  color: white;
   border: none;
   padding: 0.6rem 1.2rem;
-  border-radius: 8px;
+  border-radius: 12px;
   cursor: pointer;
-  font-weight: bold;
-  transition: background-color 0.3s;
+  font-weight: 700;
+  transition: background-color 0.3s ease;
 }
 
 .btn:hover {
@@ -90,28 +146,4 @@ p {
     opacity: 1;
     transform: translateY(0);
   }
-}
-.transferBox {
-  display: flex;
-  justify-content: space-between;
-  background-color: rgba(255, 255, 255, 0.05);
-  padding: 12px 20px;
-  border-radius: 10px;
-  border: 1px solid #007bff;
-  color: #fff;
-  gap: 20px;
-  flex-wrap: wrap;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.4);
-}
-
-.label {
-  font-size: 0.85rem;
-  color: #00bfff;
-  margin-bottom: 2px;
-}
-
-.value {
-  font-size: 1rem;
-  font-weight: 600;
-  color: #fff;
 }

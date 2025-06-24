@@ -38,6 +38,17 @@ export default function CardTransferencia({ dados, tipo }) {
         <div>
           <strong className={styles.label}>Posição:</strong>
           <p className={styles.value}>{dados.posicao}</p>
+          <span
+    className={`${styles.statusBadge} ${
+      dados.status === 'aceito'
+        ? styles['status-aceito']
+        : dados.status === 'recusado'
+        ? styles['status-recusado']
+        : styles['status-pendente']
+    }`}
+  >
+    {dados.status}
+  </span>
         </div>
       </div>
     </div>
@@ -51,7 +62,12 @@ export default function CardTransferencia({ dados, tipo }) {
         {tipo === 'jogador' ? (
           <>
             <h4>@{dados.username || 'jogador'}</h4>
-            <p>Posição: {dados.posicaoPrimaria || 'N/A'}</p>
+            <p>Posição:
+  <span className={styles.posicaoBadge}>
+    {dados.posicaoPrimaria || 'N/A'}
+  </span>
+</p>
+
             <p>Status: {dados.status}</p>
             <p>Plataforma: {dados.plataforma || 'N/A'}</p>
             <Link to={`/perfil-jogador/${dados.username}`} className={styles.link} aria-label={`Ver perfil do jogador ${dados.username}`}>

@@ -1,0 +1,129 @@
+.container {
+  background: #fff;
+  padding: 24px;
+  border-radius: 16px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+  margin-bottom: 40px;
+}
+
+.title {
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 20px;
+  color: #222;
+}
+
+.infoItem {
+  font-size: 16px;
+  color: #444;
+  margin-bottom: 12px;
+}
+
+.bloqueado {
+  background-color: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+  text-align: center;
+  padding: 24px;
+  border-radius: 16px;
+}
+
+.btnUpgrade {
+  margin-top: 15px;
+  background-color: #dc3545;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background-color 0.3s ease;
+}
+
+.btnUpgrade:hover {
+  background-color: #b02a37;
+}
+
+/* Estilos do formulário de edição */
+
+.formGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px 20px;
+  margin-bottom: 24px;
+}
+
+.formGrid label {
+  display: flex;
+  flex-direction: column;
+  font-size: 14px;
+  font-weight: 500;
+  color: #333;
+}
+
+.formGrid input,
+.formGrid select {
+  margin-top: 6px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-size: 14px;
+  transition: border-color 0.3s ease;
+}
+
+.formGrid input:focus,
+.formGrid select:focus {
+  border-color: #007bff;
+  outline: none;
+}
+
+.buttonGroup {
+  display: flex;
+  gap: 12px;
+}
+
+.buttonGroup button {
+  padding: 10px 24px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-weight: 700;
+  background-color: #007bff;
+  color: white;
+  transition: background-color 0.3s ease;
+}
+
+.buttonGroup button:hover:not(:disabled) {
+  background-color: #0056b3;
+}
+
+.buttonGroup button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Botão editar na visualização normal */
+
+.editButton {
+  margin-top: 20px;
+  background-color: #007bff;
+  color: white;
+  padding: 10px 22px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background-color 0.3s ease;
+}
+
+.editButton:hover {
+  background-color: #0056b3;
+}
+
+/* Responsividade simples */
+
+@media (max-width: 600px) {
+  .formGrid {
+    grid-template-columns: 1fr;
+  }
+}

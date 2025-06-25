@@ -22,6 +22,8 @@ import PerfilJogadorPage from "./features/jogador/pages/PerfilJogadorPage";
 import PerfilClubePage from "./features/clube/pages/PerfilClubePage";
 import RankingPage from "../src/features/ranking/pages/Ranking";
 import PerfilPublicoJogador from "./features/jogador/pages/PerfilPublicoJogador";
+import PerfilPage from "./features/perfil/pages/PerfilPage";
+
 
 function Header({ user, tipo }) {
   console.log("Header renderizado — user:", user);
@@ -131,19 +133,18 @@ function LayoutRoutes() {
     <div className="imagem-fundo">
       {!hideHeader && <Header user={user} tipo={tipo} />}
       <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/transferencias" element={<Transferencia />} />
-        <Route path="/cadastro" element={<Cadastro />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/jogador" element={<PerfilJogadorPage />} />
-        <Route path="/clube" element={<PerfilClubePage modoLeitura={false} />} />
-        <Route path="/ranking" element={<RankingPage />} />
-        <Route path="/perfil-jogador/:id" element={<PerfilPublicoJogador />} />
-        <Route
-          path="/perfil-clube/:id"
-          element={<PerfilClubePage modoLeitura={true} />}
-        />
-      </Routes>
+  <Route path="/" element={<Home />} />
+  <Route path="/transferencias" element={<Transferencia />} />
+  <Route path="/cadastro" element={<Cadastro />} />
+  <Route path="/login" element={<Login />} />
+  <Route path="/jogador" element={<PerfilJogadorPage />} />
+  <Route path="/clube" element={<PerfilClubePage modoLeitura={false} />} />
+  <Route path="/ranking" element={<RankingPage />} />
+  <Route path="/perfil-jogador/:id" element={<PerfilPublicoJogador />} />
+  <Route path="/perfil-clube/:id" element={<PerfilClubePage modoLeitura={true} />} />
+  <Route path="/perfil" element={<PerfilPage />} /> {/* ← nova rota aqui */}
+</Routes>
+
     </div>
   );
 }

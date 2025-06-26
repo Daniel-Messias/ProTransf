@@ -1,0 +1,175 @@
+/* src/features/perfil/styles/SidebarPerfil.module.css */
+.sidebar {
+  width: 320px;
+  background-color: transparent;
+  padding: 20px;
+  border-right: 1px solid transparent;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.avatarContainer {
+  display: flex;
+  justify-content: center;
+}
+
+.avatar {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid #007bff;
+}
+
+.avatarPlaceholder {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  background-color: #ccc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 24px;
+  color: white;
+}
+
+.info {
+  text-align: center;
+}
+
+.status {
+  padding: 4px 8px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: bold;
+  margin-top: 5px;
+  display: inline-block;
+}
+
+.online {
+  background-color: #28a745;
+  color: white;
+}
+
+.offline {
+  background-color: #dc3545;
+  color: white;
+}
+
+.btn {
+  background-color: #007bff;
+  color: white;
+  padding: 10px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.section {
+  background-color: #f1f1f1;
+  padding: 10px;
+  border-radius: 8px;
+}
+.uploading {
+  font-size: 12px;
+  color: #555;
+  margin-top: 4px;
+  text-align: center;
+}
+.btnGroup {
+  margin-top: 16px;
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+}
+
+.editBtn, .cancelBtn, .btn {
+  background: #007bff;
+  color: #fff;
+  padding: 10px 18px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background 0.3s ease;
+}
+
+.editBtn:hover, .cancelBtn:hover, .btn:hover {
+  background: #0056b3;
+}
+.section label {
+  display: block;
+  margin-bottom: 10px;
+  font-weight: 600;
+}
+
+.section input {
+  width: 100%;
+  padding: 6px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  margin-top: 4px;
+}
+.contatosLinks {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  margin-top: 8px;
+}
+
+.naoInformado {
+  font-size: 14px;
+  color: #999;
+}
+.amistososList {
+  list-style: none;
+  padding-left: 0;
+  margin: 0;
+  font-size: 14px;
+  color: #444;
+}
+
+.amistososList li {
+  margin-bottom: 6px;
+  border-left: 3px solid #007bff;
+  padding-left: 8px;
+}
+.convitesList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.convitesList li {
+  margin-bottom: 10px;
+  font-size: 14px;
+}
+
+.acoesConvite {
+  display: flex;
+  gap: 8px;
+  margin-top: 5px;
+}
+
+.btnAceitar,
+.btnRecusar {
+  padding: 5px 10px;
+  border: none;
+  border-radius: 5px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.btnAceitar {
+  background-color: #28a745;
+  color: white;
+}
+
+.btnRecusar {
+  background-color: #dc3545;
+  color: white;
+}
+

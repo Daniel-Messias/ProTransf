@@ -5,25 +5,36 @@ import { auth, db } from '../../../services/firebase';
 
 export default function BlocoJogador({ jogador }) {
   const [modoEdicao, setModoEdicao] = useState(false);
-  const [formData, setFormData] = useState({ ...jogador });
+  const [formData, setFormData] = useState({
+    bio: jogador.bio || '',
+    posicaoPrimaria: jogador.posicaoPrimaria || '',
+    posicaoSecundaria: jogador.posicaoSecundaria || '',
+    videos: jogador.videos || []
+  });
+  const [novoVideo, setNovoVideo] = useState('');
   const [salvando, setSalvando] = useState(false);
 
   if (!jogador) return null;
 
   const handleChange = (e) => {
-    setFormData((prev) => ({
-      ...prev,
-      [e.target.name]: e.target.value,
-    }));
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleEditar = () => {
-    setModoEdicao(true);
+  const handleAddVideo = () => {
+    if (novoVideo.trim()) {
+      setFormData((prev) => ({
+        ...prev,
+        videos: [...prev.videos, novoVideo.trim()]
+      }));
+      setNovoVideo('');
+    }
   };
 
-  const handleCancelar = () => {
-    setModoEdicao(false);
-    setFormData({ ...jogador });
+  const handleRemoveVideo = (index) => {
+    const newVideos = [...formData.videos];
+    newVideos.splice(index, 1);
+    setFormData((prev) => ({ ...prev, videos: newVideos }));
   };
 
   const handleSalvar = async () => {
@@ -31,12 +42,18 @@ export default function BlocoJogador({ jogador }) {
     try {
       const uid = auth.currentUser.uid;
       const userRef = doc(db, 'usuarios', uid);
-      await updateDoc(userRef, formData);
+      await updateDoc(userRef, {
+        bio: formData.bio,
+        posicaoPrimaria: formData.posicaoPrimaria,
+        posicaoSecundaria: formData.posicaoSecundaria,
+        videos: formData.videos,
+      });
       alert('Perfil atualizado com sucesso!');
       setModoEdicao(false);
+      window.location.reload(); // Atualiza a interface com dados novos
     } catch (error) {
-      console.error('Erro ao salvar alterações:', error);
-      alert('Erro ao salvar. Verifique os campos e tente novamente.');
+      console.error('Erro ao salvar perfil:', error);
+      alert('Erro ao salvar. Tente novamente.');
     } finally {
       setSalvando(false);
     }
@@ -44,108 +61,157 @@ export default function BlocoJogador({ jogador }) {
 
   return (
     <div className={styles.container}>
-      <div className={styles.header}>
-        {jogador.fotoURL ? (
-          <img src={jogador.fotoURL} alt="Avatar" className={styles.avatar} />
-        ) : (
-          <div className={styles.avatarPlaceholder}>
-            {jogador.nome?.charAt(0).toUpperCase() || "?"}
+      <h2 className={styles.title}>@{jogador.username || 'Sem username'}</h2>
+
+      {!modoEdicao ? (
+        <div className={styles.infoGrid}>
+          <div className={styles.infoItem}>
+            <strong>Plataforma</strong>
+            <span>{jogador.plataforma}</span>
           </div>
-        )}
-
-        <div className={styles.userInfo}>
-          <h3 className={styles.nome}>{jogador.nome}</h3>
-          <p className={styles.username}>@{jogador.username}</p>
-        </div>
-      </div>
-
-      {modoEdicao ? (
-        <div className={styles.formGrid}>
-          <label>
-            Nome:
-            <input
-              type="text"
-              name="nome"
-              value={formData.nome}
-              onChange={handleChange}
-            />
-          </label>
-
-          <label>
-            Username:
-            <input
-              type="text"
-              name="username"
-              value={formData.username}
-              onChange={handleChange}
-            />
-          </label>
-
-          <label>
-            Plataforma:
-            <select
-              name="plataforma"
-              value={formData.plataforma}
-              onChange={handleChange}
-            >
-              <option value="Xbox">Xbox</option>
-              <option value="Playstation">Playstation</option>
-              <option value="PC">PC</option>
-            </select>
-          </label>
-
-          <label>
-            Posição Primária:
-            <input
-              type="text"
-              name="posicaoPrimaria"
-              value={formData.posicaoPrimaria}
-              onChange={handleChange}
-            />
-          </label>
-
-          <label>
-            Posição Secundária:
-            <input
-              type="text"
-              name="posicaoSecundaria"
-              value={formData.posicaoSecundaria}
-              onChange={handleChange}
-            />
-          </label>
-
-          <label>
-            Status:
-            <select
-              name="status"
-              value={formData.status}
-              onChange={handleChange}
-            >
-              <option value="Livre">Livre</option>
-              <option value="Contratado">Contratado</option>
-            </select>
-          </label>
+          <div className={styles.infoItem}>
+            <strong>Status</strong>
+            <span>{jogador.status}</span>
+          </div>
+          <div className={styles.infoItem}>
+            <strong>Clube atual</strong>
+            <span>{jogador.nomeClube || 'Nenhum'}</span>
+          </div>
+          <div className={styles.infoItem}>
+            <strong>Posição Primária</strong>
+            <span>{jogador.posicaoPrimaria}</span>
+          </div>
+          <div className={styles.infoItem}>
+            <strong>Posição Secundária</strong>
+            <span>{jogador.posicaoSecundaria || 'Não informada'}</span>
+          </div>
+          <div className={styles.infoItem}>
+            <strong>Bio</strong>
+            <span>
+              {jogador.bio?.trim()
+                ? jogador.bio
+                : <span className={styles.vazio}>Sem bio</span>}
+            </span>
+          </div>
         </div>
       ) : (
-        <div className={styles.infoGrid}>
-          <p><strong>Plataforma:</strong> {jogador.plataforma}</p>
-          <p><strong>Status:</strong> {jogador.status}</p>
-          <p><strong>Posição Primária:</strong> {jogador.posicaoPrimaria}</p>
-          <p><strong>Posição Secundária:</strong> {jogador.posicaoSecundaria || 'Não informada'}</p>
-        </div>
+        <>
+          <div className={styles.formGrid}>
+            <label>
+              Bio:
+              <textarea
+                name="bio"
+                value={formData.bio}
+                onChange={handleChange}
+                rows={4}
+              />
+            </label>
+
+            <label>
+              Posição Primária:
+              <select
+                name="posicaoPrimaria"
+                value={formData.posicaoPrimaria}
+                onChange={handleChange}
+              >
+                <option value="">Nenhuma</option>
+                <option value="Goleiro">Goleiro</option>
+                <option value="Zagueiro">Zagueiro</option>
+                <option value="Lateral">Lateral</option>
+                <option value="Volante">Volante</option>
+                <option value="Meio Campo">Meio Campo</option>
+                <option value="Ponta Esquerda">Ponta Esquerda</option>
+                <option value="Ponta Direita">Ponta Direita</option>
+                <option value="Atacante">Atacante</option>
+              </select>
+            </label>
+
+            <label>
+              Posição Secundária:
+              <select
+                name="posicaoSecundaria"
+                value={formData.posicaoSecundaria}
+                onChange={handleChange}
+              >
+                <option value="">Nenhuma</option>
+                <option value="Goleiro">Goleiro</option>
+                <option value="Zagueiro">Zagueiro</option>
+                <option value="Lateral">Lateral</option>
+                <option value="Volante">Volante</option>
+                <option value="Meio Campo">Meio Campo</option>
+                <option value="Ponta Esquerda">Ponta Esquerda</option>
+                <option value="Ponta Direita">Ponta Direita</option>
+                <option value="Atacante">Atacante</option>
+              </select>
+            </label>
+          </div>
+
+          <div className={styles.videosSection}>
+            <label>
+              Adicionar link de jogada:
+              <input
+                type="text"
+                value={novoVideo}
+                onChange={(e) => setNovoVideo(e.target.value)}
+              />
+              <button onClick={handleAddVideo}>Adicionar</button>
+            </label>
+            <ul className={styles.videosList}>
+              {formData.videos.map((link, idx) => (
+                <li key={idx}>
+                  <iframe
+                    width="300"
+                    height="180"
+                    src={link.replace('watch?v=', 'embed/')}
+                    frameBorder="0"
+                    allow="autoplay; encrypted-media"
+                    allowFullScreen
+                    title={`video-${idx}`}
+                  />
+                  <button onClick={() => handleRemoveVideo(idx)}>Remover</button>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div className={styles.buttonGroup}>
+            <button onClick={handleSalvar} disabled={salvando}>
+              {salvando ? 'Salvando...' : 'Salvar alterações'}
+            </button>
+            <button onClick={() => setModoEdicao(false)}>Cancelar</button>
+          </div>
+        </>
       )}
 
-      {modoEdicao ? (
-        <div className={styles.buttonGroup}>
-          <button onClick={handleSalvar} disabled={salvando}>
-            {salvando ? 'Salvando...' : 'Salvar alterações'}
+      {!modoEdicao && (
+        <>
+          <div className={styles.videosSection}>
+            <h3>Melhores Jogadas:</h3>
+            {jogador.videos?.length > 0 ? (
+              <ul className={styles.videosList}>
+                {jogador.videos.map((link, idx) => (
+                  <li key={idx}>
+                    <iframe
+                      width="300"
+                      height="180"
+                      src={link.replace('watch?v=', 'embed/')}
+                      frameBorder="0"
+                      allow="autoplay; encrypted-media"
+                      allowFullScreen
+                      title={`video-${idx}`}
+                    />
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className={styles.vazio}>Sem jogadas registradas.</p>
+            )}
+          </div>
+
+          <button className={styles.editButton} onClick={() => setModoEdicao(true)}>
+            Editar Perfil do Jogador
           </button>
-          <button onClick={handleCancelar}>Cancelar</button>
-        </div>
-      ) : (
-        <button className={styles.editButton} onClick={handleEditar}>
-          Editar Perfil do Jogador
-        </button>
+        </>
       )}
     </div>
   );

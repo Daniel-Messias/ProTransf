@@ -1,0 +1,6 @@
+/* src/features/perfil/styles/Perfil.module.css */
+.layout {
+  display: flex;
+  min-height: 100vh;
+  background-color: transparent;
+}

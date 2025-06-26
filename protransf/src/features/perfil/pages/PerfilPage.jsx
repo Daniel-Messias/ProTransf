@@ -1,77 +1,60 @@
+// src/features/perfil/pages/PerfilPage.jsx
 import React, { useEffect, useState } from 'react';
 import { auth, db } from '../../../services/firebase';
 import { doc, getDoc } from 'firebase/firestore';
 
-import BlocoJogador from '../components/BlocoJogador';
-import BlocoClube from '../components/BlocoClube';
-import styles from '../styles/Perfil.module.css';
+import SidebarPerfil from '../components/SidebarPerfil';
+import MainPerfil from '../components/MainPerfil';
 
+import styles from '../styles/Perfil.module.css';
 
 export default function PerfilPage() {
   const [jogador, setJogador] = useState(null);
-  const [loadingJogador, setLoadingJogador] = useState(true);
   const [clube, setClube] = useState(null);
-  const [loadingClube, setLoadingClube] = useState(true);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(async (user) => {
-      console.log('Usuário atual:', user);
       if (!user) {
         setJogador(null);
-        setLoadingJogador(false);
-        setLoadingClube(false);
+        setClube(null);
+        setLoading(false);
         return;
       }
 
       try {
-        const docRef = doc(db, 'usuarios', user.uid);
-        const docSnap = await getDoc(docRef);
+        const userRef = doc(db, 'usuarios', user.uid);
+        const userSnap = await getDoc(userRef);
 
-        if (docSnap.exists()) {
-          const jogadorData = docSnap.data();
-          setJogador(jogadorData);
-          setLoadingJogador(false);
+        if (userSnap.exists()) {
+          const data = userSnap.data();
+          setJogador(data);
 
-          if (jogadorData.tipo === 'clube_jogador' && jogadorData.clubeAtualId) {
-            setLoadingClube(true);
-            const clubeRef = doc(db, 'clubes', jogadorData.clubeAtualId);
+          if (data.tipo === 'clube_jogador' && data.clubeAtualId) {
+            const clubeRef = doc(db, 'clubes', data.clubeAtualId);
             const clubeSnap = await getDoc(clubeRef);
             if (clubeSnap.exists()) {
               setClube(clubeSnap.data());
-            } else {
-              setClube(null);
             }
-            setLoadingClube(false);
-          } else {
-            setClube(null);
-            setLoadingClube(false);
           }
-        } else {
-          setJogador(null);
-          setLoadingJogador(false);
-          setClube(null);
-          setLoadingClube(false);
         }
       } catch (error) {
-        console.error('Erro ao buscar dados:', error);
-        setJogador(null);
-        setLoadingJogador(false);
-        setClube(null);
-        setLoadingClube(false);
+        console.error('Erro ao buscar perfil:', error);
+      } finally {
+        setLoading(false);
       }
     });
 
     return () => unsubscribe();
   }, []);
 
-  if (loadingJogador) return <p>Carregando dados do jogador...</p>;
-  if (!jogador) return <p>Jogador não encontrado ou não logado.</p>;
+  if (loading) return <p>Carregando...</p>;
+  if (!jogador) return <p>Usuário não encontrado ou não logado.</p>;
 
   return (
-    <section className={styles.container}>
-       <h1 className={styles.title}>Perfil Unificado</h1>
-      <BlocoJogador jogador={jogador} />
-      <BlocoClube jogador={jogador} clube={clube} loading={loadingClube} />
-    </section>
+    <div className={styles.layout}>
+      <SidebarPerfil jogador={jogador} />
+      <MainPerfil jogador={jogador} clube={clube} />
+    </div>
   );
 }

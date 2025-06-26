@@ -1,0 +1,5 @@
+/* src/features/perfil/styles/MainPerfil.module.css */
+.main {
+  flex: 1;
+  padding: 40px;
+}

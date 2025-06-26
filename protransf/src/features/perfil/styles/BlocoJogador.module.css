@@ -1,117 +1,154 @@
 .container {
-  background: #fff;
-  padding: 24px;
+  background: transparent;
+  padding: 28px 32px;
   border-radius: 16px;
-  box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
   margin-bottom: 40px;
+  width: 100%;
+  max-width: 720px;
 }
 
-.header {
-  display: flex;
-  align-items: center;
-  gap: 20px;
+.title {
+  font-size: 26px;
+  font-weight: 800;
   margin-bottom: 20px;
-}
+  color: transparent;
+  text-align: center;
+  background: linear-gradient(to right, #006eff, #00c4ff);
 
-.avatar {
-  width: 90px;
-  height: 90px;
-  border-radius: 50%;
-  object-fit: cover;
-  border: 3px solid #ddd;
-}
+  /* Compatibilidade para background-clip no texto */
+  -webkit-background-clip: text;
+  background-clip: text;
 
-.avatarPlaceholder {
-  width: 90px;
-  height: 90px;
-  border-radius: 50%;
-  background: #ccc;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 14px;
-  color: #fff;
-  font-weight: bold;
-}
-
-.userInfo {
-  display: flex;
-  flex-direction: column;
-  color:#333
-}
-
-.nome {
-  margin: 0;
-  font-size: 24px;
-  font-weight: 700;
-  color:#333;
-}
-
-.username {
-  font-size: 16px;
-  color: #666;
+  -webkit-text-fill-color: transparent;
+  user-select: none;
+  letter-spacing: 1.2px;
 }
 
 .infoGrid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 10px 20px;
-  margin-bottom: 24px;
-  color:#666;
+  gap: 16px 30px;
+  margin-bottom: 32px;
+  font-size: 16px;
+  color: #444;
+}
+
+.infoItem {
+  background: #f0f5ff;
+  padding: 14px 18px;
+  border-radius: 10px;
+  border-left: 6px solid #007bff;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+  transition: border-color 0.3s ease;
+}
+
+.infoItem:hover {
+  border-color: #00aaff;
+}
+
+.infoItem strong {
+  font-size: 14px;
+  color: #555;
+  margin-bottom: 6px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.infoItem span {
+  font-size: 16px;
+  font-weight: 600;
+  color: #222;
+  line-height: 1.3;
+}
+
+.vazio {
+  font-style: italic;
+  color: #aaa;
+}
+
+.videosSection {
+  margin-top: 36px;
+}
+
+.videosSection h3 {
+  font-size: 20px;
+  margin-bottom: 14px;
+  color: #007bff;
+  font-weight: 800;
+  border-bottom: 3px solid #007bff;
+  padding-bottom: 6px;
+  letter-spacing: 0.05em;
+}
+
+.videosList {
+  list-style: none;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 22px;
+}
+
+.videosList li {
+  position: relative;
+  border: 1.5px solid #cce4ff;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 3px 8px rgba(0, 123, 255, 0.15);
+  transition: box-shadow 0.3s ease;
+}
+
+.videosList li:hover {
+  box-shadow: 0 6px 16px rgba(0, 123, 255, 0.3);
+}
+
+.videosList iframe {
+  width: 100%;
+  height: 180px;
+  border: none;
+}
+
+.videosList button {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: #e63946;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 7px 12px;
+  font-size: 13px;
+  cursor: pointer;
+  font-weight: 700;
+  box-shadow: 0 2px 6px rgba(230, 57, 70, 0.6);
+  transition: background 0.3s ease;
+}
+
+.videosList button:hover {
+  background: #b72a33;
 }
 
 .editButton {
+  display: block;
+  margin: 28px auto 0;
   background-color: #007bff;
   color: white;
-  padding: 10px 18px;
+  padding: 14px 36px;
   border: none;
-  border-radius: 8px;
+  border-radius: 14px;
+  font-size: 17px;
+  font-weight: 900;
   cursor: pointer;
-  transition: 0.3s;
+  letter-spacing: 0.05em;
+  box-shadow: 0 5px 15px rgba(0, 123, 255, 0.6);
+  transition: background-color 0.35s, box-shadow 0.35s;
+  user-select: none;
 }
 
 .editButton:hover {
   background-color: #0056b3;
-}
-.formGrid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 15px;
-  margin-bottom: 20px;
-}
-
-.formGrid label {
-  display: flex;
-  flex-direction: column;
-  font-size: 14px;
-  font-weight: 500;
-  color: #333;
-}
-
-.formGrid input,
-.formGrid select {
-  margin-top: 6px;
-  padding: 8px;
-  border-radius: 6px;
-  border: 1px solid #ccc;
-  font-size: 14px;
-}
-
-.buttonGroup {
-  display: flex;
-  gap: 10px;
-}
-
-.buttonGroup button {
-  padding: 10px 18px;
-  border-radius: 6px;
-  border: none;
-  cursor: pointer;
-  font-weight: bold;
-  background: #007bff;
-  color: white;
-}
-
-.buttonGroup button:hover {
-  background: #0056b3;
+  box-shadow: 0 8px 24px rgba(0, 86, 179, 0.8);
 }

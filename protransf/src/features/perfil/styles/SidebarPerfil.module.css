@@ -1,17 +1,20 @@
-/* src/features/perfil/styles/SidebarPerfil.module.css */
 .sidebar {
   width: 320px;
-  background-color: transparent;
+  background-color: #0f0f1a;
   padding: 20px;
-  border-right: 1px solid transparent;
+  border-right: 1px solid #222;
   display: flex;
   flex-direction: column;
   gap: 20px;
+  color: #eee;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 .avatarContainer {
   display: flex;
   justify-content: center;
+  cursor: pointer;
+  position: relative;
 }
 
 .avatar {
@@ -19,133 +22,204 @@
   height: 100px;
   border-radius: 50%;
   object-fit: cover;
-  border: 3px solid #007bff;
+  border: 3px solid #00f0ff;
+  box-shadow:
+    0 0 8px #00f0ff,
+    0 0 15px #00f0ff;
+  transition: box-shadow 0.3s ease;
+}
+
+.avatarContainer:hover .avatar {
+  box-shadow:
+    0 0 15px #00fff7,
+    0 0 30px #00fff7,
+    0 0 50px #00fff7;
 }
 
 .avatarPlaceholder {
   width: 100px;
   height: 100px;
   border-radius: 50%;
-  background-color: #ccc;
+  background: #222533;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: bold;
-  font-size: 24px;
-  color: white;
+  font-weight: 900;
+  font-size: 36px;
+  color: #00e0ff;
+  text-shadow:
+    0 0 5px #00e0ff,
+    0 0 10px #00e0ff;
 }
 
 .info {
   text-align: center;
 }
 
-.status {
-  padding: 4px 8px;
-  border-radius: 8px;
-  font-size: 12px;
-  font-weight: bold;
-  margin-top: 5px;
-  display: inline-block;
-}
-
-.online {
-  background-color: #28a745;
-  color: white;
-}
-
-.offline {
-  background-color: #dc3545;
-  color: white;
+.info h2 {
+  margin: 0;
+  font-size: 1.6rem;
+  text-shadow:
+    0 0 8px #00fff7;
 }
 
 .btn {
-  background-color: #007bff;
-  color: white;
+  background-color: #00b8d9;
+  color: #0f0f1a;
   padding: 10px;
   border: none;
-  border-radius: 8px;
+  border-radius: 10px;
   cursor: pointer;
-  font-weight: bold;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.1px;
+  box-shadow:
+    0 0 8px #00b8d9;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.btn:hover {
+  background-color: #00e0ff;
+  box-shadow:
+    0 0 15px #00e0ff,
+    0 0 30px #00e0ff;
 }
 
 .section {
-  background-color: #f1f1f1;
-  padding: 10px;
-  border-radius: 8px;
+  background-color: #1b1b2f;
+  padding: 12px 16px;
+  border-radius: 12px;
+  box-shadow:
+    inset 0 0 10px #004d66;
 }
+
+.section h4 {
+  margin-bottom: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #00d4ff;
+  text-shadow: 0 0 6px #00d4ff;
+}
+
 .uploading {
   font-size: 12px;
-  color: #555;
+  color: #55f6ff;
   margin-top: 4px;
   text-align: center;
+  font-weight: 600;
+  text-shadow: 0 0 5px #55f6ff;
 }
+
 .btnGroup {
   margin-top: 16px;
   display: flex;
   justify-content: center;
-  gap: 12px;
+  gap: 14px;
 }
 
 .editBtn, .cancelBtn, .btn {
-  background: #007bff;
-  color: #fff;
+  background: #007f9a;
+  color: #cdf6ff;
   padding: 10px 18px;
   border: none;
-  border-radius: 8px;
+  border-radius: 10px;
   cursor: pointer;
-  font-weight: 600;
-  transition: background 0.3s ease;
+  font-weight: 700;
+  transition: background 0.3s ease, box-shadow 0.3s ease;
+  box-shadow:
+    0 0 8px #00a8cc;
 }
 
 .editBtn:hover, .cancelBtn:hover, .btn:hover {
-  background: #0056b3;
+  background: #00cfff;
+  box-shadow:
+    0 0 15px #00e7ff,
+    0 0 30px #00e7ff;
 }
+
 .section label {
   display: block;
   margin-bottom: 10px;
   font-weight: 600;
+  color: #8ae9ff;
+  text-shadow: 0 0 6px #007f9a;
 }
 
 .section input {
   width: 100%;
-  padding: 6px;
-  border-radius: 6px;
-  border: 1px solid #ccc;
-  margin-top: 4px;
+  padding: 8px;
+  border-radius: 8px;
+  border: 1px solid #007f9a;
+  background-color: #121228;
+  color: #a5f1ff;
+  font-weight: 600;
+  box-shadow:
+    inset 0 0 5px #004d66;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
+
+.section input:focus {
+  outline: none;
+  border-color: #00f6ff;
+  box-shadow:
+    0 0 8px #00f6ff,
+    inset 0 0 8px #00f6ff;
+}
+
 .contatosLinks {
   display: flex;
-  gap: 16px;
+  gap: 20px;
   align-items: center;
   margin-top: 8px;
 }
 
+.contatosLinks a {
+  color: #00b3cc;
+  transition: color 0.3s ease, text-shadow 0.3s ease;
+}
+
+.contatosLinks a:hover {
+  color: #00f6ff;
+  text-shadow:
+    0 0 8px #00f6ff,
+    0 0 15px #00f6ff;
+}
+
 .naoInformado {
   font-size: 14px;
-  color: #999;
+  color: #555f6a;
+  font-style: italic;
 }
+
 .amistososList {
   list-style: none;
   padding-left: 0;
   margin: 0;
   font-size: 14px;
-  color: #444;
+  color: #88eaff;
 }
 
 .amistososList li {
   margin-bottom: 6px;
-  border-left: 3px solid #007bff;
+  border-left: 3px solid #00e1ff;
   padding-left: 8px;
 }
+
 .convitesList {
   list-style: none;
   padding: 0;
   margin: 0;
+  font-size: 14px;
+  color: #8ae9ff;
 }
 
 .convitesList li {
   margin-bottom: 10px;
-  font-size: 14px;
+  padding: 8px;
+  border-radius: 8px;
+  background: #071f2f;
+  box-shadow:
+    0 0 5px #00c9ff;
 }
 
 .acoesConvite {
@@ -156,20 +230,58 @@
 
 .btnAceitar,
 .btnRecusar {
-  padding: 5px 10px;
+  padding: 7px 14px;
   border: none;
-  border-radius: 5px;
+  border-radius: 6px;
   font-size: 13px;
   cursor: pointer;
+  font-weight: 700;
+  text-transform: uppercase;
+  box-shadow:
+    0 0 8px;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 .btnAceitar {
-  background-color: #28a745;
-  color: white;
+  background-color: #32ff7e;
+  color: #0d0d18;
+  box-shadow:
+    0 0 10px #32ff7e,
+    0 0 25px #32ff7e;
+}
+
+.btnAceitar:hover {
+  background-color: #22d361;
+  box-shadow:
+    0 0 18px #22d361,
+    0 0 35px #22d361;
 }
 
 .btnRecusar {
-  background-color: #dc3545;
-  color: white;
+  background-color: #ff6b6b;
+  color: #2b1212;
+  box-shadow:
+    0 0 10px #ff6b6b,
+    0 0 25px #ff6b6b;
 }
 
+.btnRecusar:hover {
+  background-color: #e53939;
+  box-shadow:
+    0 0 18px #e53939,
+    0 0 35px #e53939;
+}
+
+.badge {
+  background-color: #ff3b3b;
+  color: white;
+  border-radius: 50%;
+  padding: 3px 9px;
+  font-size: 0.75rem;
+  margin-left: 8px;
+  vertical-align: middle;
+  box-shadow:
+    0 0 10px #ff3b3b,
+    0 0 20px #ff3b3b;
+  font-weight: 700;
+}

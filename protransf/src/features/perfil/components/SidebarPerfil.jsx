@@ -1,12 +1,20 @@
-import React, { useRef, useState, useEffect } from 'react';  // <-- adiciona useEffect aqui
+import React, { useRef, useState, useEffect } from 'react';
 import styles from '../styles/SidebarPerfil.module.css';
 import { auth, db, storage } from '../../../services/firebase';
-import { doc, updateDoc, collection, query, where, orderBy, limit, getDocs } from 'firebase/firestore'; // <-- adiciona imports do Firestore
+import { doc, updateDoc, collection, query, where, orderBy, limit, getDocs } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+
+// Ícones gamer e sociais mais temáticos
 import { FaWhatsapp, FaInstagram } from 'react-icons/fa';
+import { GiGamepad, GiCardDiscard, GiChatBubble, GiConfirmed, GiCancel } from 'react-icons/gi';
+import { AiOutlineEdit, AiOutlineSave, AiOutlineClose, AiOutlineMail } from 'react-icons/ai';
+
+import ChatBox from '../../chat/components/ChatBox';
 
 export default function SidebarPerfil({ jogador }) {
   const inputRef = useRef();
+
+  const [mostrarChat, setMostrarChat] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [modoEdicao, setModoEdicao] = useState(false);
   const [contatos, setContatos] = useState({
@@ -15,16 +23,17 @@ export default function SidebarPerfil({ jogador }) {
   });
 
   const [convites, setConvites] = useState([]);
-const [loadingConvites, setLoadingConvites] = useState(true);
-
-  // Estado para os amistosos
+  const [loadingConvites, setLoadingConvites] = useState(true);
   const [amistosos, setAmistosos] = useState([]);
   const [loadingAmistosos, setLoadingAmistosos] = useState(true);
 
-  // Busca os 2 últimos amistosos do jogador no Firestore
+  const [chatId, setChatId] = useState(null);
+  const [mensagens, setMensagens] = useState([]);
+  const currentUser = auth.currentUser;
+
   useEffect(() => {
     async function carregarAmistosos() {
-      if (!jogador.uid) return; // garante que uid existe
+      if (!jogador.uid) return;
       setLoadingAmistosos(true);
       try {
         const q = query(
@@ -48,32 +57,50 @@ const [loadingConvites, setLoadingConvites] = useState(true);
     carregarAmistosos();
   }, [jogador.uid]);
 
-  // Funções existentes (handleImageClick, handleFileChange, etc) ...
+  useEffect(() => {
+    async function carregarConvites() {
+      if (!jogador.uid) return;
+      setLoadingConvites(true);
+      try {
+        const q = query(
+          collection(db, 'convites'),
+          where('jogadorId', '==', jogador.uid)
+        );
+        const snapshot = await getDocs(q);
+        const lista = snapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        setConvites(lista);
+      } catch (err) {
+        console.error('Erro ao carregar convites:', err);
+      } finally {
+        setLoadingConvites(false);
+      }
+    }
+    carregarConvites();
+  }, [jogador.uid]);
 
   useEffect(() => {
-  async function carregarConvites() {
-    if (!jogador.uid) return;
-    setLoadingConvites(true);
-    try {
-      const q = query(
-        collection(db, 'convites'),
-        where('jogadorId', '==', jogador.uid)
-      );
-      const snapshot = await getDocs(q);
-      const lista = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-      setConvites(lista);
-    } catch (err) {
-      console.error('Erro ao carregar convites:', err);
-    } finally {
-      setLoadingConvites(false);
+    async function iniciarChat() {
+      if (!currentUser || !jogador.uid) return;
+      const { criarOuAbrirChat } = await import('../../chat/services/chatService');
+      const id = await criarOuAbrirChat(currentUser.uid, jogador.uid);
+      setChatId(id);
     }
-  }
+    iniciarChat();
+  }, [currentUser, jogador.uid]);
 
-  carregarConvites();
-}, [jogador.uid]);
+  useEffect(() => {
+    if (!chatId) return;
+    const { ouvirMensagens } = require('../../chat/services/chatService');
+    const unsubscribe = ouvirMensagens(chatId, (msgs) => {
+      setMensagens(msgs);
+    });
+    return () => unsubscribe();
+  }, [chatId]);
+
+  const mensagensNaoLidas = mensagens.filter((msg) => msg.remetente === jogador.uid).length;
 
   const handleImageClick = () => {
     if (modoEdicao) inputRef.current.click();
@@ -93,7 +120,7 @@ const [loadingConvites, setLoadingConvites] = useState(true);
       const userRef = doc(db, 'usuarios', uid);
       await updateDoc(userRef, { fotoURL: downloadURL });
 
-      window.location.reload(); // Força reload após salvar a imagem
+      window.location.reload();
     } catch (error) {
       console.error('Erro ao enviar imagem:', error);
       alert('Erro ao atualizar foto.');
@@ -102,13 +129,8 @@ const [loadingConvites, setLoadingConvites] = useState(true);
     }
   };
 
-  const handleEditar = () => {
-    setModoEdicao(true);
-  };
-
-  const handleCancelarEdicao = () => {
-    setModoEdicao(false);
-  };
+  const handleEditar = () => setModoEdicao(true);
+  const handleCancelarEdicao = () => setModoEdicao(false);
 
   const handleChangeContato = (e) => {
     const { name, value } = e.target;
@@ -138,43 +160,40 @@ const [loadingConvites, setLoadingConvites] = useState(true);
       .then(() => alert('Link de redefinição de senha enviado.'))
       .catch((err) => alert('Erro ao enviar email: ' + err.message));
   };
+
   const handleAtualizarStatusConvite = async (conviteId, novoStatus, nomeClube) => {
-  try {
-    const conviteRef = doc(db, 'convites', conviteId);
-    await updateDoc(conviteRef, { status: novoStatus });
-
-    // Atualiza localmente
-    setConvites(prev =>
-      prev.map(conv =>
-        conv.id === conviteId ? { ...conv, status: novoStatus } : conv
-      )
-    );
-
-    // Se aceitou, atualiza status do jogador
-    if (novoStatus === 'aceito') {
-      const userRef = doc(db, 'usuarios', jogador.uid);
-      await updateDoc(userRef, {
-        status: 'Contratado',
-        nomeClube: nomeClube
-      });
+    try {
+      const conviteRef = doc(db, 'convites', conviteId);
+      await updateDoc(conviteRef, { status: novoStatus });
+      setConvites(prev =>
+        prev.map(conv =>
+          conv.id === conviteId ? { ...conv, status: novoStatus } : conv
+        )
+      );
+      if (novoStatus === 'aceito') {
+        const userRef = doc(db, 'usuarios', jogador.uid);
+        await updateDoc(userRef, {
+          status: 'Contratado',
+          nomeClube: nomeClube
+        });
+      }
+      alert(`Convite ${novoStatus === 'aceito' ? 'aceito' : 'recusado'} com sucesso!`);
+    } catch (error) {
+      console.error('Erro ao atualizar convite:', error);
+      alert('Erro ao atualizar convite. Tente novamente.');
     }
-
-    alert(`Convite ${novoStatus === 'aceito' ? 'aceito' : 'recusado'} com sucesso!`);
-  } catch (error) {
-    console.error('Erro ao atualizar convite:', error);
-    alert('Erro ao atualizar convite. Tente novamente.');
-  }
-};
-
+  };
 
   return (
     <aside className={styles.sidebar}>
-      <div className={styles.avatarContainer} onClick={handleImageClick}>
+      {/* Avatar e nome */}
+      <div className={styles.avatarContainer} onClick={handleImageClick} title="Clique para mudar avatar">
         {jogador.fotoURL ? (
           <img src={jogador.fotoURL} alt="Avatar" className={styles.avatar} />
         ) : (
           <div className={styles.avatarPlaceholder}>
-            {jogador.nome?.charAt(0).toUpperCase() || "?"}
+            <GiGamepad size={60} color="#00FFF7" />
+            <span className={styles.avatarInitial}>{jogador.nome?.charAt(0).toUpperCase() || '?'}</span>
           </div>
         )}
         {uploading && <p className={styles.uploading}>Enviando...</p>}
@@ -193,12 +212,15 @@ const [loadingConvites, setLoadingConvites] = useState(true);
       </div>
 
       {modoEdicao && (
-        <button className={styles.btn} onClick={handleMudarSenha}>Mudar Senha</button>
+        <button className={styles.btn} onClick={handleMudarSenha}>
+          <AiOutlineMail style={{ marginRight: 6 }} />
+          Mudar Senha
+        </button>
       )}
 
+      {/* Contatos */}
       <div className={styles.section}>
-        <h4>Contatos</h4>
-
+        <h4> Contatos</h4>
         {modoEdicao ? (
           <>
             <label>
@@ -208,6 +230,7 @@ const [loadingConvites, setLoadingConvites] = useState(true);
                 name="whatsapp"
                 value={contatos.whatsapp}
                 onChange={handleChangeContato}
+                placeholder="Número com DDD"
               />
             </label>
             <label>
@@ -217,6 +240,7 @@ const [loadingConvites, setLoadingConvites] = useState(true);
                 name="instagram"
                 value={contatos.instagram}
                 onChange={handleChangeContato}
+                placeholder="Ex: gamer123"
               />
             </label>
           </>
@@ -234,7 +258,6 @@ const [loadingConvites, setLoadingConvites] = useState(true);
             ) : (
               <p className={styles.naoInformado}>WhatsApp: Não informado</p>
             )}
-
             {jogador.instagram ? (
               <a
                 href={`https://instagram.com/${jogador.instagram}`}
@@ -251,10 +274,9 @@ const [loadingConvites, setLoadingConvites] = useState(true);
         )}
       </div>
 
-      {/* HISTÓRICO DE AMISTOSOS AGORA: */}
+      {/* Histórico */}
       <div className={styles.section}>
-        <h4>Histórico</h4>
-
+        <h4><GiCardDiscard style={{ color: '#00FFF7', marginRight: 6 }} /> Histórico</h4>
         {loadingAmistosos ? (
           <p>Carregando...</p>
         ) : amistosos.length === 0 ? (
@@ -270,66 +292,103 @@ const [loadingConvites, setLoadingConvites] = useState(true);
         )}
       </div>
 
+      {/* Convites */}
       <div className={styles.section}>
-  <h4>Central de Notificações</h4>
-  {loadingConvites ? (
-    <p>Carregando convites...</p>
-  ) : convites.length === 0 ? (
-    <p>Sem convites no momento.</p>
-  ) : (
-    <ul className={styles.convitesList}>
-      {convites.map((convite) => (
-        <li key={convite.id}>
-          <strong>{convite.nomeClube}</strong> —{' '}
-          <span
-            style={{
-              color:
-                convite.status === 'aceito'
-                  ? 'green'
-                  : convite.status === 'recusado'
-                  ? 'red'
-                  : 'orange',
-              fontWeight: 'bold',
-            }}
-          >
-            {convite.status}
-          </span>
-          {convite.status === 'pendente' && (
-            <div className={styles.acoesConvite}>
-              <button
-                onClick={() => handleAtualizarStatusConvite(convite.id, 'aceito', convite.nomeClube)}
-                className={styles.btnAceitar}
-              >
-                Aceitar
-              </button>
-              <button
-                onClick={() => handleAtualizarStatusConvite(convite.id, 'recusado')}
-                className={styles.btnRecusar}
-              >
-                Recusar
-              </button>
-            </div>
-          )}
-        </li>
-      ))}
-    </ul>
-  )}
-</div>
-
-
-      <div className={styles.section}>
-        <h4>Chat</h4>
-        <p>Abrir Chat entre jogadores</p>
+        <h4><GiConfirmed style={{ color: '#32FF7E', marginRight: 6 }} /> Central de Notificações</h4>
+        {loadingConvites ? (
+          <p>Carregando convites...</p>
+        ) : convites.length === 0 ? (
+          <p>Sem convites no momento.</p>
+        ) : (
+          <ul className={styles.convitesList}>
+            {convites.map((convite) => (
+              <li key={convite.id} className={styles.conviteItem}>
+                <strong>{convite.nomeClube}</strong> —{' '}
+                <span
+                  className={`${styles.statusBadge} ${
+                    convite.status === 'aceito'
+                      ? styles.statusAceito
+                      : convite.status === 'recusado'
+                      ? styles.statusRecusado
+                      : styles.statusPendente
+                  }`}
+                >
+                  {convite.status}
+                </span>
+                {convite.status === 'pendente' && (
+                  <div className={styles.acoesConvite}>
+                    <button
+                      onClick={() => handleAtualizarStatusConvite(convite.id, 'aceito', convite.nomeClube)}
+                      className={`${styles.btnAceitar} ${styles.btnIcon}`}
+                      title="Aceitar Convite"
+                    >
+                      <GiConfirmed />
+                    </button>
+                    <button
+                      onClick={() => handleAtualizarStatusConvite(convite.id, 'recusado')}
+                      className={`${styles.btnRecusar} ${styles.btnIcon}`}
+                      title="Recusar Convite"
+                    >
+                      <GiCancel />
+                    </button>
+                  </div>
+                )}
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
 
+      {/* Chat */}
+      {auth.currentUser.uid !== jogador.uid && (
+        <div className={styles.section}>
+          <h4>
+            <GiChatBubble style={{ color: '#00FFF7', marginRight: 6 }} />
+            Chat
+            {mensagensNaoLidas > 0 && (
+              <span className={styles.badge}>{mensagensNaoLidas}</span>
+            )}
+          </h4>
+
+          {!mostrarChat ? (
+            <button
+              className={styles.editBtn}
+              onClick={() => {
+                if (!chatId) {
+                  alert('Chat ainda está carregando, aguarde...');
+                  return;
+                }
+                setMostrarChat(true);
+                setMensagens([]);
+              }}
+            >
+              <GiChatBubble style={{ marginRight: 6 }} />
+              Abrir Chat com jogador
+            </button>
+          ) : (
+            <ChatBox chatId={chatId} />
+          )}
+        </div>
+      )}
+
+      {/* Botões de editar */}
       <div className={styles.btnGroup}>
         {modoEdicao ? (
           <>
-            <button className={styles.editBtn} onClick={handleSalvarContatos}>Salvar</button>
-            <button className={styles.cancelBtn} onClick={handleCancelarEdicao}>Cancelar</button>
+            <button className={styles.editBtn} onClick={handleSalvarContatos}>
+              <AiOutlineSave style={{ marginRight: 6 }} />
+              Salvar
+            </button>
+            <button className={styles.cancelBtn} onClick={handleCancelarEdicao}>
+              <AiOutlineClose style={{ marginRight: 6 }} />
+              Cancelar
+            </button>
           </>
         ) : (
-          <button className={styles.editBtn} onClick={handleEditar}>Editar</button>
+          <button className={styles.editBtn} onClick={handleEditar}>
+            <AiOutlineEdit style={{ marginRight: 6 }} />
+            Editar
+          </button>
         )}
       </div>
     </aside>

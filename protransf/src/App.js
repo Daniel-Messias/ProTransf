@@ -10,6 +10,7 @@ import {
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
 import { auth, db } from "./services/firebase";
+import { useParams } from 'react-router-dom';
 
 import "./style.css";
 import bola from "../src/assets/fotos/bola.png";
@@ -23,7 +24,12 @@ import PerfilClubePage from "./features/clube/pages/PerfilClubePage";
 import RankingPage from "../src/features/ranking/pages/Ranking";
 import PerfilPublicoJogador from "./features/jogador/pages/PerfilPublicoJogador";
 import PerfilPage from "./features/perfil/pages/PerfilPage";
+import ChatPage from './features/chat/pages/ChatPage';
 
+function ChatWrapper() {
+  const { id } = useParams();
+  return <ChatPage destinatarioId={id} />;
+}
 
 function Header({ user, tipo }) {
   console.log("Header renderizado — user:", user);
@@ -39,6 +45,8 @@ function Header({ user, tipo }) {
   const isJogador = tipo === "jogador";
   const isClubeJogador = tipo === "clube_jogador";
   const isVisitante = !user;
+
+
 
   return (
     <header>
@@ -142,7 +150,8 @@ function LayoutRoutes() {
   <Route path="/ranking" element={<RankingPage />} />
   <Route path="/perfil-jogador/:id" element={<PerfilPublicoJogador />} />
   <Route path="/perfil-clube/:id" element={<PerfilClubePage modoLeitura={true} />} />
-  <Route path="/perfil" element={<PerfilPage />} /> {/* ← nova rota aqui */}
+  <Route path="/perfil" element={<PerfilPage />} /> 
+  <Route path="/chat/:id" element={<ChatWrapper />} />
 </Routes>
 
     </div>

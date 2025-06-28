@@ -371,7 +371,7 @@ export default function BlocoClube({ jogador, clube, loading }) {
 
   return (
     <div className={styles.container}>
-      <h2 className={styles.title}>Informações do Clube</h2>
+      <h2 className={styles.title}>{form.nome || 'Clube sem nome'}</h2>
 
       {modoEdicao ? (
         <>
@@ -496,22 +496,36 @@ export default function BlocoClube({ jogador, clube, loading }) {
       ) : (
         <>
           {/* Modo visualização */}
-          <p><strong>Nome do Clube:</strong> {form.nome}</p>
-          <p><strong>Fundação:</strong> {form.fundacao}</p>
-          <p><strong>Descrição:</strong> {form.descricao || 'Sem descrição.'}</p>
-          <p><strong>Está buscando jogadores?</strong> {form.estaBuscando ? 'Sim' : 'Não'}</p>
-          <p><strong>Campeonatos:</strong> {form.campeonatos.length ? form.campeonatos.join(', ') : 'Nenhum informado'}</p>
+            <div className={styles.dadosClube}>
+    <strong>Fundação</strong>
+    <span>{form.fundacao}</span>
+  </div>
 
-          <h3>Jogadores do Elenco</h3>
-          {renderJogadores()}
+  <div className={styles.dadosClube}>
+    <strong>Descrição</strong>
+    <span>{form.descricao || 'Sem descrição.'}</span>
+  </div>
 
-          <button
-            className={styles.editButton}
-            onClick={() => setModoEdicao(true)}
-            disabled={salvando}
-          >
-            Editar Clube
-          </button>
+  <div className={styles.dadosClube}>
+    <strong>Está buscando jogadores?</strong>
+    <span>{form.estaBuscando ? 'Sim' : 'Não'}</span>
+  </div>
+
+  <div className={styles.dadosClube}>
+    <strong>Campeonatos</strong>
+    <span>{form.campeonatos.length ? form.campeonatos.join(', ') : 'Nenhum informado'}</span>
+  </div>
+
+  <h3 className={styles.subtitulo}>Jogadores do Elenco</h3>
+  {renderJogadores()}
+
+  <button
+    className={styles.editButton}
+    onClick={() => setModoEdicao(true)}
+    disabled={salvando}
+  >
+    Editar Clube
+  </button>
         </>
       )}
     </div>

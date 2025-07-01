@@ -5,6 +5,8 @@ import { doc, getDoc } from 'firebase/firestore';
 
 import SidebarPerfil from '../components/SidebarPerfil';
 import MainPerfil from '../components/MainPerfil';
+import AmistosoForm from "../components/AmistosoForm";
+
 
 import styles from '../styles/Perfil.module.css';
 

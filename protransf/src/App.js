@@ -6,11 +6,11 @@ import {
   Link,
   useLocation,
   useNavigate,
+  useParams,
 } from "react-router-dom";
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
 import { auth, db } from "./services/firebase";
-import { useParams } from 'react-router-dom';
 
 import "./style.css";
 import bola from "../src/assets/fotos/bola.png";
@@ -19,11 +19,8 @@ import Home from "./features/home/pages/Protransf";
 import Transferencia from "./features/transferencias/pages/Transferencia";
 import Cadastro from "./features/Cadastro/pages/Cadastro";
 import Login from "./features/auth/pages/Login";
-import PerfilJogadorPage from "./features/jogador/pages/PerfilJogadorPage";
-import PerfilClubePage from "./features/clube/pages/PerfilClubePage";
-import RankingPage from "../src/features/ranking/pages/Ranking";
-import PerfilPublicoJogador from "./features/jogador/pages/PerfilPublicoJogador";
 import PerfilPage from "./features/perfil/pages/PerfilPage";
+import RankingPage from "../src/features/ranking/pages/Ranking";
 import ChatPage from './features/chat/pages/ChatPage';
 
 function ChatWrapper() {
@@ -45,8 +42,6 @@ function Header({ user, tipo }) {
   const isJogador = tipo === "jogador";
   const isClubeJogador = tipo === "clube_jogador";
   const isVisitante = !user;
-
-
 
   return (
     <header>
@@ -71,7 +66,7 @@ function Header({ user, tipo }) {
         {user && isJogador && (
           <>
             <Link to="/transferencias">Transferências</Link>
-            <Link to="/jogador">Perfil</Link>
+            <Link to="/perfil">Perfil</Link>
             <Link to="/ranking">Ranking</Link>
           </>
         )}
@@ -79,9 +74,8 @@ function Header({ user, tipo }) {
         {/* Clube + Jogador */}
         {user && isClubeJogador && (
           <>
-            <Link to="/clube">Clube</Link>
             <Link to="/transferencias">Transferências</Link>
-            <Link to="/jogador">Perfil</Link>
+            <Link to="/perfil">Perfil</Link>
             <Link to="/ranking">Ranking</Link>
           </>
         )}
@@ -141,19 +135,15 @@ function LayoutRoutes() {
     <div className="imagem-fundo">
       {!hideHeader && <Header user={user} tipo={tipo} />}
       <Routes>
-  <Route path="/" element={<Home />} />
-  <Route path="/transferencias" element={<Transferencia />} />
-  <Route path="/cadastro" element={<Cadastro />} />
-  <Route path="/login" element={<Login />} />
-  <Route path="/jogador" element={<PerfilJogadorPage />} />
-  <Route path="/clube" element={<PerfilClubePage modoLeitura={false} />} />
-  <Route path="/ranking" element={<RankingPage />} />
-  <Route path="/perfil-jogador/:id" element={<PerfilPublicoJogador />} />
-  <Route path="/perfil-clube/:id" element={<PerfilClubePage modoLeitura={true} />} />
-  <Route path="/perfil" element={<PerfilPage />} /> 
-  <Route path="/chat/:id" element={<ChatWrapper />} />
-</Routes>
-
+        <Route path="/" element={<Home />} />
+        <Route path="/transferencias" element={<Transferencia />} />
+        <Route path="/cadastro" element={<Cadastro />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/perfil" element={<PerfilPage />} />
+       <Route path="/perfil/:id" element={<PerfilPage />} />
+        <Route path="/ranking" element={<RankingPage />} />
+        <Route path="/chat/:id" element={<ChatWrapper />} />
+      </Routes>
     </div>
   );
 }

@@ -1,5 +1,14 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { collection, query, where, onSnapshot, getDocs, doc, getDoc, setDoc } from 'firebase/firestore';
+import {
+  collection,
+  query,
+  where,
+  onSnapshot,
+  getDocs,
+  doc,
+  getDoc,
+  setDoc,
+} from 'firebase/firestore';
 import { db, auth } from '../../../services/firebase';
 import styles from '../transferencia.module.css';
 import CardTransferencia from '../components/CardTransferencia';
@@ -102,7 +111,6 @@ export default function Transferencia() {
           const usuarioData = { id: user.uid, ...userSnap.data() };
           setUsuarioAtual(usuarioData);
 
-          // Se usuário for clube ou clube_jogador, buscar clube na coleção 'clubes'
           if (usuarioData.tipo === 'clube' || usuarioData.tipo === 'clube_jogador') {
             const clubesRef = collection(db, 'clubes');
             const q = query(clubesRef, where('donoUid', '==', user.uid));
@@ -118,17 +126,19 @@ export default function Transferencia() {
     carregarUsuarioEClube();
   }, []);
 
+  // ✅ ATUALIZADO: Convite de clube para jogador
   const enviarConvite = async (clube, jogador) => {
     try {
       const conviteRef = doc(collection(db, 'convites'));
       await setDoc(conviteRef, {
+        tipo: 'clube_para_jogador',
         clubeId: clube.id,
         clubeNome: nomeClubeAtual || clube.nome || 'Clube',
         jogadorId: jogador.id,
         jogadorUsername: jogador.username || jogador.nome || 'Jogador',
         status: 'pendente',
         posicao: jogador.posicaoPrimaria || '',
-        data: new Date()
+        criadoEm: new Date()
       });
       alert('Convite enviado com sucesso!');
     } catch (error) {
@@ -137,17 +147,19 @@ export default function Transferencia() {
     }
   };
 
+  // ✅ ATUALIZADO: Pedido de jogador para clube
   const enviarPedido = async (jogador, clube) => {
     try {
       const conviteRef = doc(collection(db, 'convites'));
       await setDoc(conviteRef, {
+        tipo: 'jogador_para_clube',
         clubeId: clube.id,
-        clubeNome: nomeClubeAtual || clube.nome || 'Clube',
+        clubeNome: clube.nome || 'Clube',
         jogadorId: jogador.id,
         jogadorUsername: jogador.username || jogador.nome || 'Jogador',
         status: 'pendente',
         posicao: jogador.posicaoPrimaria || '',
-        data: new Date()
+        criadoEm: new Date()
       });
       alert('Pedido enviado com sucesso!');
     } catch (error) {

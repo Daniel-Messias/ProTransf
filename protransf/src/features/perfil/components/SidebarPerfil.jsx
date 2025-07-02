@@ -45,27 +45,56 @@ export default function SidebarPerfil({ jogador }) {
   const [chatId, setChatId] = useState(null);
   const [mensagens, setMensagens] = useState([]);
 
-  // Carregar convites do jogador
   useEffect(() => {
-    async function carregarConvites() {
-      if (!jogador.uid) return;
-      setLoadingConvites(true);
-      try {
-        const q = query(
-          collection(db, 'convites'),
-          where('jogadorId', '==', jogador.uid)
-        );
-        const snapshot = await getDocs(q);
-        const lista = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        setConvites(lista);
-      } catch (err) {
-        console.error('Erro ao carregar convites:', err);
-      } finally {
-        setLoadingConvites(false);
-      }
-    }
-    carregarConvites();
-  }, [jogador.uid]);
+  if (!jogador.uid) return;
+
+  setLoadingConvites(true);
+
+  // Query para convites recebidos pelo jogador
+  const qJogador = query(
+    collection(db, 'convites'),
+    where('jogadorId', '==', jogador.uid)
+  );
+
+  // Query para convites recebidos pelo clube atual do jogador (se houver)
+  const qClube = jogador.clubeAtualId
+    ? query(
+        collection(db, 'convites'),
+        where('clubeId', '==', jogador.clubeAtualId)
+      )
+    : null;
+
+  const unsubscribes = [];
+
+  // Listener convites jogador
+  const unsubscribeJogador = onSnapshot(qJogador, (snapshot) => {
+    const convitesJogador = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data(), tipo: 'jogador' }));
+    setConvites(prev => {
+      const outrosConvites = prev.filter(c => c.tipo !== 'jogador');
+      return [...convitesJogador, ...outrosConvites];
+    });
+    setLoadingConvites(false);
+  });
+  unsubscribes.push(unsubscribeJogador);
+
+  // Listener convites clube
+  if (qClube) {
+    const unsubscribeClube = onSnapshot(qClube, (snapshot) => {
+      const convitesClube = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data(), tipo: 'clube' }));
+      setConvites(prev => {
+        const outrosConvites = prev.filter(c => c.tipo !== 'clube');
+        return [...outrosConvites, ...convitesClube];
+      });
+      setLoadingConvites(false);
+    });
+    unsubscribes.push(unsubscribeClube);
+  }
+
+  return () => {
+    unsubscribes.forEach(unsub => unsub());
+  };
+}, [jogador.uid, jogador.clubeAtualId]);
+
 
   // Carregar amistosos para clube atual do jogador
   useEffect(() => {
@@ -173,26 +202,32 @@ export default function SidebarPerfil({ jogador }) {
   };
 
   // Atualizar status convites (aceitar/recusar)
-  const handleAtualizarStatusConvite = async (conviteId, novoStatus, nomeClube) => {
-    try {
-      const conviteRef = doc(db, 'convites', conviteId);
-      await updateDoc(conviteRef, { status: novoStatus });
-      setConvites(prev =>
-        prev.map(conv => conv.id === conviteId ? { ...conv, status: novoStatus } : conv)
-      );
-      if (novoStatus === 'aceito') {
-        const userRef = doc(db, 'usuarios', jogador.uid);
-        await updateDoc(userRef, {
-          status: 'Contratado',
-          nomeClube
-        });
-      }
-      alert(`Convite ${novoStatus === 'aceito' ? 'aceito' : 'recusado'} com sucesso!`);
-    } catch (error) {
-      console.error('Erro ao atualizar convite:', error);
-      alert('Erro ao atualizar convite. Tente novamente.');
+ const handleAtualizarStatusConvite = async (conviteId, novoStatus, nomeClube) => {
+  try {
+    const conviteRef = doc(db, 'convites', conviteId);
+    await updateDoc(conviteRef, { status: novoStatus });
+
+    setConvites(prev =>
+      prev.map(conv =>
+        conv.id === conviteId ? { ...conv, status: novoStatus } : conv
+      )
+    );
+
+    if (novoStatus === 'aceito') {
+      const userRef = doc(db, 'usuarios', jogador.uid);
+      await updateDoc(userRef, {
+        status: 'Contratado',
+        nomeClube
+      });
     }
-  };
+
+    alert(`Convite ${novoStatus === 'aceito' ? 'aceito' : 'recusado'} com sucesso!`);
+  } catch (error) {
+    console.error('Erro ao atualizar convite:', error);
+    alert('Erro ao atualizar convite. Tente novamente.');
+  }
+};
+
 
   // Amistosos: aceitar e recusar
   const handleDataAgendadaChange = (amistosoId, valorData) => {
@@ -370,41 +405,54 @@ export default function SidebarPerfil({ jogador }) {
           <p>Sem convites no momento.</p>
         ) : (
           <ul className={styles.convitesList}>
-            {convites.map((convite) => (
-              <li key={convite.id} className={styles.conviteItem}>
-                <strong>{convite.nomeClube}</strong> —{' '}
-                <span
-                  className={`${styles.statusBadge} ${
-                    convite.status === 'aceito'
-                      ? styles.statusAceito
-                      : convite.status === 'recusado'
-                      ? styles.statusRecusado
-                      : styles.statusPendente
-                  }`}
+      {convites.map((convite) => {
+        let nomeExibir = '';
+        let podeAceitarOuRecusar = false;
+
+        if (convite.tipo === 'clube_para_jogador') {
+          nomeExibir = convite.clubeNome || 'Clube desconhecido';
+          podeAceitarOuRecusar = isDonoPerfil; // Jogador vê e pode aceitar
+        } else if (convite.tipo === 'jogador_para_clube') {
+          nomeExibir = convite.jogadorUsername || 'Jogador desconhecido';
+          podeAceitarOuRecusar = currentUser?.uid === jogador.clubeAtualId; // Dono do clube atual
+        }
+
+        return (
+          <li key={convite.id} className={styles.conviteItem}>
+            <strong>{nomeExibir}</strong> —{' '}
+            <span
+              className={`${styles.statusBadge} ${
+                convite.status === 'aceito'
+                  ? styles.statusAceito
+                  : convite.status === 'recusado'
+                  ? styles.statusRecusado
+                  : styles.statusPendente
+              }`}
+            >
+              {convite.status}
+            </span>
+            {convite.status === 'pendente' && podeAceitarOuRecusar && (
+              <div className={styles.acoesConvite}>
+                <button
+                  onClick={() => handleAtualizarStatusConvite(convite.id, 'aceito', convite.clubeNome)}
+                  className={`${styles.btnAceitar} ${styles.btnIcon}`}
+                  title="Aceitar Convite"
                 >
-                  {convite.status}
-                </span>
-                {convite.status === 'pendente' && isDonoPerfil && (
-                  <div className={styles.acoesConvite}>
-                    <button
-                      onClick={() => handleAtualizarStatusConvite(convite.id, 'aceito', convite.nomeClube)}
-                      className={`${styles.btnAceitar} ${styles.btnIcon}`}
-                      title="Aceitar Convite"
-                    >
-                      <GiConfirmed />
-                    </button>
-                    <button
-                      onClick={() => handleAtualizarStatusConvite(convite.id, 'recusado')}
-                      className={`${styles.btnRecusar} ${styles.btnIcon}`}
-                      title="Recusar Convite"
-                    >
-                      <GiCancel />
-                    </button>
-                  </div>
-                )}
-              </li>
-            ))}
-          </ul>
+                  <GiConfirmed />
+                </button>
+                <button
+                  onClick={() => handleAtualizarStatusConvite(convite.id, 'recusado')}
+                  className={`${styles.btnRecusar} ${styles.btnIcon}`}
+                  title="Recusar Convite"
+                >
+                  <GiCancel />
+                </button>
+              </div>
+            )}
+          </li>
+        );
+      })}
+    </ul>
         )}
       </div>
 

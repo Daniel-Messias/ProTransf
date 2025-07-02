@@ -24,36 +24,36 @@ export default function CardTransferencia({ dados, tipo }) {
   };
 
   if (isTransferencia) {
-  return (
-    <div className={`${styles.cardTransferencia} ${styles[dados.status] || ''}`} role="region">
-      <div className={styles.transferBox}>
-        <div>
-          <strong className={styles.label}>Clube:</strong>
-          <p className={styles.value}>{dados.clubeNome}</p>
-        </div>
-        <div>
-          <strong className={styles.label}>Jogador:</strong>
-          <p className={styles.value}>{dados.jogadorNome}</p>
-        </div>
-        <div>
-          <strong className={styles.label}>Posição:</strong>
-          <p className={styles.value}>{dados.posicao}</p>
-          <span
-    className={`${styles.statusBadge} ${
-      dados.status === 'aceito'
-        ? styles['status-aceito']
-        : dados.status === 'recusado'
-        ? styles['status-recusado']
-        : styles['status-pendente']
-    }`}
-  >
-    {dados.status}
-  </span>
+    return (
+      <div className={`${styles.cardTransferencia} ${styles[dados.status] || ''}`} role="region">
+        <div className={styles.transferBox}>
+          <div>
+            <strong className={styles.label}>Clube:</strong>
+            <p className={styles.value}>{dados.clubeNome}</p>
+          </div>
+          <div>
+            <strong className={styles.label}>Jogador:</strong>
+            <p className={styles.value}>{dados.jogadorNome}</p>
+          </div>
+          <div>
+            <strong className={styles.label}>Posição:</strong>
+            <p className={styles.value}>{dados.posicao}</p>
+            <span
+              className={`${styles.statusBadge} ${
+                dados.status === 'aceito'
+                  ? styles['status-aceito']
+                  : dados.status === 'recusado'
+                  ? styles['status-recusado']
+                  : styles['status-pendente']
+              }`}
+            >
+              {dados.status}
+            </span>
+          </div>
         </div>
       </div>
-    </div>
-  );
-}
+    );
+  }
 
   // Layout padrão para jogadores e clubes na busca
   return (
@@ -62,15 +62,18 @@ export default function CardTransferencia({ dados, tipo }) {
         {tipo === 'jogador' ? (
           <>
             <h4>@{dados.username || 'jogador'}</h4>
-            <p>Posição:
-  <span className={styles.posicaoBadge}>
-    {dados.posicaoPrimaria || 'N/A'}
-  </span>
-</p>
+            <p>
+              Posição:
+              <span className={styles.posicaoBadge}>{dados.posicaoPrimaria || 'N/A'}</span>
+            </p>
 
             <p>Status: {dados.status}</p>
             <p>Plataforma: {dados.plataforma || 'N/A'}</p>
-            <Link to={`/perfil-jogador/${dados.username}`} className={styles.link} aria-label={`Ver perfil do jogador ${dados.username}`}>
+            <Link
+              to={`/perfil/${dados.id}`}
+              className={styles.link}
+              aria-label={`Ver perfil do jogador ${dados.username}`}
+            >
               Ver Perfil
             </Link>
           </>
@@ -79,7 +82,11 @@ export default function CardTransferencia({ dados, tipo }) {
             <h4>{dados.nome}</h4>
             <p>Procurando jogadores: {dados.procura === 'sim' ? 'Sim' : 'Não'}</p>
             <p>Campeonatos: {dados.campeonatos?.join(', ') || 'N/A'}</p>
-            <Link to={`/perfil-clube/${dados.id}`} className={styles.link} aria-label={`Ver perfil do clube ${dados.nome}`}>
+            <Link
+              to={`/perfil/${dados.id}`}
+              className={styles.link}
+              aria-label={`Ver perfil do clube ${dados.nome}`}
+            >
               Ver Perfil
             </Link>
           </>

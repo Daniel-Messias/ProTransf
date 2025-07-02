@@ -62,26 +62,25 @@ export default function BlocoClube({ jogador, clube, loading, modoLeitura, usuar
   }
 
   async function handleChamarAmistoso() {
-  if (!clube || !usuarioLogado) return;
+    if (!clube || !usuarioLogado) return;
 
-  try {
-    const amistososRef = collection(db, 'amistosos');
-    await addDoc(amistososRef, {
-      remetenteId: usuarioLogado.uid,
-      remetenteNome: usuarioLogado.username || usuarioLogado.email,
-      destinatarioClubeId: jogador.clubeAtualId,
-      destinatarioNome: clube.nome,
-      status: 'pendente',
-      criadoEm: serverTimestamp(),
-    });
+    try {
+      const amistososRef = collection(db, 'amistosos');
+      await addDoc(amistososRef, {
+        remetenteId: usuarioLogado.uid,
+        remetenteNome: usuarioLogado.username || usuarioLogado.email,
+        destinatarioClubeId: jogador.clubeAtualId,
+        destinatarioNome: clube.nome,
+        status: 'pendente',
+        criadoEm: serverTimestamp(),
+      });
 
-    alert('Convite para amistoso enviado com sucesso!');
-  } catch (error) {
-    console.error('Erro ao enviar convite de amistoso:', error);
-    alert('Erro ao enviar convite. Tente novamente.');
+      alert('Convite para amistoso enviado com sucesso!');
+    } catch (error) {
+      console.error('Erro ao enviar convite de amistoso:', error);
+      alert('Erro ao enviar convite. Tente novamente.');
+    }
   }
-}
-
 
   // Se usuário não for clube_jogador, mostrar bloqueio upgrade
   if (jogador.tipo !== 'clube_jogador') {
@@ -518,45 +517,47 @@ export default function BlocoClube({ jogador, clube, loading, modoLeitura, usuar
       ) : (
         <>
           {/* Modo visualização */}
-            <div className={styles.dadosClube}>
-    <strong>Fundação</strong>
-    <span>{form.fundacao}</span>
-  </div>
+          <div className={styles.dadosClube}>
+            <strong>Fundação</strong>
+            <span>{form.fundacao}</span>
+          </div>
 
-  <div className={styles.dadosClube}>
-    <strong>Descrição</strong>
-    <span>{form.descricao || 'Sem descrição.'}</span>
-  </div>
+          <div className={styles.dadosClube}>
+            <strong>Descrição</strong>
+            <span>{form.descricao || 'Sem descrição.'}</span>
+          </div>
 
-  <div className={styles.dadosClube}>
-    <strong>Está buscando jogadores?</strong>
-    <span>{form.estaBuscando ? 'Sim' : 'Não'}</span>
-  </div>
+          <div className={styles.dadosClube}>
+            <strong>Está buscando jogadores?</strong>
+            <span>{form.estaBuscando ? 'Sim' : 'Não'}</span>
+          </div>
 
-  <div className={styles.dadosClube}>
-    <strong>Campeonatos</strong>
-    <span>{form.campeonatos.length ? form.campeonatos.join(', ') : 'Nenhum informado'}</span>
-  </div>
+          <div className={styles.dadosClube}>
+            <strong>Campeonatos</strong>
+            <span>{form.campeonatos.length ? form.campeonatos.join(', ') : 'Nenhum informado'}</span>
+          </div>
 
-  <h3 className={styles.subtitulo}>Jogadores do Elenco</h3>
-  {renderJogadores()}
+          <h3 className={styles.subtitulo}>Jogadores do Elenco</h3>
+          {renderJogadores()}
 
-{modoLeitura && usuarioLogado && ['clube', 'clube_jogador'].includes(usuarioLogado.tipo) && (
-  <button
-    className={styles.btnAmistoso}
-    onClick={() => handleChamarAmistoso()}
-  >
-    Chamar para Amistoso
-  </button>
-)}
+          {modoLeitura && usuarioLogado && ['clube', 'clube_jogador'].includes(usuarioLogado.tipo) && (
+            <button
+              className={styles.btnAmistoso}
+              onClick={() => handleChamarAmistoso()}
+            >
+              Chamar para Amistoso
+            </button>
+          )}
 
-  <button
-    className={styles.editButton}
-    onClick={() => setModoEdicao(true)}
-    disabled={salvando}
-  >
-    Editar Clube
-  </button>
+          {!modoLeitura && (
+            <button
+              className={styles.editButton}
+              onClick={() => setModoEdicao(true)}
+              disabled={salvando}
+            >
+              Editar Clube
+            </button>
+          )}
         </>
       )}
     </div>

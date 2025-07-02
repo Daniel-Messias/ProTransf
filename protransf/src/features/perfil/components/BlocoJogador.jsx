@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styles from '../styles/BlocoJogador.module.css';
 import { doc, updateDoc } from 'firebase/firestore';
 import { auth, db } from '../../../services/firebase';
 
-export default function BlocoJogador({ jogador }) {
+export default function BlocoJogador({ jogador, modoLeitura }) {
   const [modoEdicao, setModoEdicao] = useState(false);
   const [formData, setFormData] = useState({
     bio: jogador.bio || '',
@@ -13,6 +13,12 @@ export default function BlocoJogador({ jogador }) {
   });
   const [novoVideo, setNovoVideo] = useState('');
   const [salvando, setSalvando] = useState(false);
+
+  useEffect(() => {
+    if (modoLeitura && modoEdicao) {
+      setModoEdicao(false);
+    }
+  }, [modoLeitura, modoEdicao]);
 
   if (!jogador) return null;
 
@@ -50,7 +56,7 @@ export default function BlocoJogador({ jogador }) {
       });
       alert('Perfil atualizado com sucesso!');
       setModoEdicao(false);
-      window.location.reload(); // Atualiza a interface com dados novos
+      window.location.reload();
     } catch (error) {
       console.error('Erro ao salvar perfil:', error);
       alert('Erro ao salvar. Tente novamente.');
@@ -208,9 +214,11 @@ export default function BlocoJogador({ jogador }) {
             )}
           </div>
 
-          <button className={styles.editButton} onClick={() => setModoEdicao(true)}>
-            Editar Perfil do Jogador
-          </button>
+          {!modoLeitura && (
+            <button className={styles.editButton} onClick={() => setModoEdicao(true)}>
+              Editar Perfil do Jogador
+            </button>
+          )}
         </>
       )}
     </div>

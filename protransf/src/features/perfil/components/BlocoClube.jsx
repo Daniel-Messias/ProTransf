@@ -11,7 +11,7 @@ const CapitainIcon = () => (
   <span title="Capitão" style={{color: 'gold', fontWeight: 'bold', marginLeft: 6}}>🧢</span>
 );
 
-export default function BlocoClube({ jogador, clube, loading }) {
+export default function BlocoClube({ jogador, clube, loading, modoLeitura, usuarioLogado }) {
   // Estados principais
   const [modoEdicao, setModoEdicao] = useState(false);
   const [salvando, setSalvando] = useState(false);
@@ -60,6 +60,28 @@ export default function BlocoClube({ jogador, clube, loading }) {
       </div>
     );
   }
+
+  async function handleChamarAmistoso() {
+  if (!clube || !usuarioLogado) return;
+
+  try {
+    const amistososRef = collection(db, 'amistosos');
+    await addDoc(amistososRef, {
+      remetenteId: usuarioLogado.uid,
+      remetenteNome: usuarioLogado.username || usuarioLogado.email,
+      destinatarioClubeId: jogador.clubeAtualId,
+      destinatarioNome: clube.nome,
+      status: 'pendente',
+      criadoEm: serverTimestamp(),
+    });
+
+    alert('Convite para amistoso enviado com sucesso!');
+  } catch (error) {
+    console.error('Erro ao enviar convite de amistoso:', error);
+    alert('Erro ao enviar convite. Tente novamente.');
+  }
+}
+
 
   // Se usuário não for clube_jogador, mostrar bloqueio upgrade
   if (jogador.tipo !== 'clube_jogador') {
@@ -518,6 +540,15 @@ export default function BlocoClube({ jogador, clube, loading }) {
 
   <h3 className={styles.subtitulo}>Jogadores do Elenco</h3>
   {renderJogadores()}
+
+{modoLeitura && usuarioLogado && ['clube', 'clube_jogador'].includes(usuarioLogado.tipo) && (
+  <button
+    className={styles.btnAmistoso}
+    onClick={() => handleChamarAmistoso()}
+  >
+    Chamar para Amistoso
+  </button>
+)}
 
   <button
     className={styles.editButton}

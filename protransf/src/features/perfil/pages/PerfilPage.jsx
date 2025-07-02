@@ -1,36 +1,41 @@
-// src/features/perfil/pages/PerfilPage.jsx
 import React, { useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
 import { auth, db } from '../../../services/firebase';
 import { doc, getDoc } from 'firebase/firestore';
 
 import SidebarPerfil from '../components/SidebarPerfil';
 import MainPerfil from '../components/MainPerfil';
-import AmistosoForm from "../components/AmistosoForm";
-
-
 import styles from '../styles/Perfil.module.css';
 
 export default function PerfilPage() {
-  const [jogador, setJogador] = useState(null);
+  const { id } = useParams(); // Pode ser undefined se for próprio perfil
+  const [perfil, setPerfil] = useState(null);
   const [clube, setClube] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [usuarioLogado, setUsuarioLogado] = useState(null);
+  const [modoLeitura, setModoLeitura] = useState(false);
 
   useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged(async (user) => {
-      if (!user) {
-        setJogador(null);
-        setClube(null);
-        setLoading(false);
-        return;
-      }
-
+    const fetchData = async () => {
       try {
-        const userRef = doc(db, 'usuarios', user.uid);
+        const authUser = auth.currentUser;
+        if (!authUser) {
+          setPerfil(null);
+          setModoLeitura(true); // visitante anônimo
+          setLoading(false);
+          return;
+        }
+
+        setUsuarioLogado(authUser);
+
+        const uidParaBuscar = id || authUser.uid; // se não houver id, usa uid logado
+
+        const userRef = doc(db, 'usuarios', uidParaBuscar);
         const userSnap = await getDoc(userRef);
 
         if (userSnap.exists()) {
           const data = userSnap.data();
-          setJogador(data);
+          setPerfil(data);
 
           if (data.tipo === 'clube_jogador' && data.clubeAtualId) {
             const clubeRef = doc(db, 'clubes', data.clubeAtualId);
@@ -39,24 +44,32 @@ export default function PerfilPage() {
               setClube(clubeSnap.data());
             }
           }
+
+          if (id && id !== authUser.uid) {
+            setModoLeitura(true); // está acessando perfil de outro usuário
+          }
+
+        } else {
+          setPerfil(null);
         }
+
       } catch (error) {
-        console.error('Erro ao buscar perfil:', error);
+        console.error('Erro ao carregar perfil:', error);
       } finally {
         setLoading(false);
       }
-    });
+    };
 
-    return () => unsubscribe();
-  }, []);
+    fetchData();
+  }, [id]);
 
   if (loading) return <p>Carregando...</p>;
-  if (!jogador) return <p>Usuário não encontrado ou não logado.</p>;
+  if (!perfil) return <p>Perfil não encontrado.</p>;
 
   return (
     <div className={styles.layout}>
-      <SidebarPerfil jogador={jogador} />
-      <MainPerfil jogador={jogador} clube={clube} />
+      <SidebarPerfil jogador={perfil} />
+      <MainPerfil jogador={perfil} clube={clube} modoLeitura={modoLeitura} usuarioLogado={usuarioLogado} />
     </div>
   );
 }

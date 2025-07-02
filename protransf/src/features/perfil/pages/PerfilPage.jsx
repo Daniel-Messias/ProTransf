@@ -3,11 +3,11 @@ import { useParams } from 'react-router-dom';
 import { auth, db } from '../../../services/firebase';
 import {
   doc,
-  getDoc,
-  collection,
   query,
   where,
+  collection,
   getDocs,
+  onSnapshot,
 } from 'firebase/firestore';
 
 import SidebarPerfil from '../components/SidebarPerfil';
@@ -15,7 +15,7 @@ import MainPerfil from '../components/MainPerfil';
 import styles from '../styles/Perfil.module.css';
 
 export default function PerfilPage() {
-  const { id } = useParams(); // Pode ser username
+  const { id } = useParams(); // Pode ser username ou UID
   const [perfil, setPerfil] = useState(null);
   const [clube, setClube] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -23,75 +23,96 @@ export default function PerfilPage() {
   const [modoLeitura, setModoLeitura] = useState(false);
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const authUser = auth.currentUser;
-        if (!authUser) {
+    let unsubscribeJogador = () => {};
+    let unsubscribeClube = () => {};
+
+    async function iniciar() {
+      setLoading(true);
+
+      const authUser = auth.currentUser;
+      setUsuarioLogado(authUser);
+
+      let uidParaBuscar = authUser?.uid;
+
+      // Se estiver acessando outro perfil via /perfil/:id (pode ser username ou UID)
+      if (id) {
+        if (!authUser || id !== authUser.uid) {
           setModoLeitura(true);
         }
 
-        setUsuarioLogado(authUser);
-        let uidParaBuscar = authUser?.uid;
+        // Tentar usar id direto como UID
+        const userDocRef = doc(db, 'usuarios', id);
+        const userDocSnap = await getDocs(query(collection(db, 'usuarios'), where('username', '==', id)));
 
-        // Se estiver acessando outro perfil via /perfil/:id (possivelmente username)
-        if (id) {
-          if (!authUser || id !== authUser.uid) {
-            setModoLeitura(true); // já ativa modo leitura por segurança
-          }
-
-          // Tenta buscar direto por UID
-          const userDocDirect = await getDoc(doc(db, 'usuarios', id));
-          if (userDocDirect.exists()) {
+        // Verifica se existe documento com UID == id
+        try {
+          const docSnap = await new Promise((resolve, reject) => {
+            onSnapshot(userDocRef, (doc) => resolve(doc), (error) => reject(error));
+          });
+          if (docSnap.exists()) {
             uidParaBuscar = id;
+          } else if (!userDocSnap.empty) {
+            // Se não achou UID, tenta por username
+            uidParaBuscar = userDocSnap.docs[0].id;
           } else {
-            // Se não existe com esse id, talvez seja username → buscar com query
-            const q = query(collection(db, 'usuarios'), where('username', '==', id));
-            const snap = await getDocs(q);
-            if (!snap.empty) {
-              uidParaBuscar = snap.docs[0].id;
-            } else {
-              setPerfil(null);
-              setLoading(false);
-              return;
-            }
+            setPerfil(null);
+            setLoading(false);
+            return;
           }
+        } catch {
+          // fallback se erro
+          setPerfil(null);
+          setLoading(false);
+          return;
         }
+      }
 
-        // Buscar dados do usuário (com UID correto)
-        const userRef = doc(db, 'usuarios', uidParaBuscar);
-        const userSnap = await getDoc(userRef);
+      // Ouvir dados do jogador em tempo real
+      const jogadorRef = doc(db, 'usuarios', uidParaBuscar);
+      unsubscribeJogador = onSnapshot(jogadorRef, (docSnap) => {
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          setPerfil({ id: docSnap.id, ...data });
 
-        if (userSnap.exists()) {
-          const data = userSnap.data();
-          setPerfil(data);
-
-          // Se for clube_jogador e tiver clube vinculado
-          if (data.tipo === 'clube_jogador' && data.clubeAtualId) {
+          // Ouvir clube em tempo real se houver clubeAtualId
+          if (data.clubeAtualId) {
             const clubeRef = doc(db, 'clubes', data.clubeAtualId);
-            const clubeSnap = await getDoc(clubeRef);
-            if (clubeSnap.exists()) {
-              setClube(clubeSnap.data());
-            }
-          }
-
-          // Confirma se é dono do perfil
-          if (authUser && uidParaBuscar === authUser.uid) {
-            setModoLeitura(false); // edição permitida
+            if (unsubscribeClube) unsubscribeClube();
+            unsubscribeClube = onSnapshot(clubeRef, (clubeSnap) => {
+              if (clubeSnap.exists()) {
+                setClube({ id: clubeSnap.id, ...clubeSnap.data() });
+              } else {
+                setClube(null);
+              }
+            });
           } else {
-            setModoLeitura(true); // visitante
+            setClube(null);
+            if (unsubscribeClube) unsubscribeClube();
           }
 
+          // Controla modo leitura
+          if (authUser && uidParaBuscar === authUser.uid) {
+            setModoLeitura(false);
+          } else {
+            setModoLeitura(true);
+          }
         } else {
           setPerfil(null);
+          setClube(null);
         }
-      } catch (error) {
-        console.error('Erro ao carregar perfil:', error);
-      } finally {
         setLoading(false);
-      }
-    };
+      }, (error) => {
+        console.error('Erro onSnapshot jogador:', error);
+        setLoading(false);
+      });
+    }
 
-    fetchData();
+    iniciar();
+
+    return () => {
+      unsubscribeJogador();
+      unsubscribeClube();
+    };
   }, [id]);
 
   if (loading) return <p>Carregando...</p>;

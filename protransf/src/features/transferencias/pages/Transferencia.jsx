@@ -23,6 +23,13 @@ export default function Transferencia() {
   const [usuarioAtual, setUsuarioAtual] = useState(null);
   const [nomeClubeAtual, setNomeClubeAtual] = useState('');
 
+  // Índices para controle do carrossel
+  const [indexAceitas, setIndexAceitas] = useState(0);
+  const [indexRecusadas, setIndexRecusadas] = useState(0);
+  const [indexPendentes, setIndexPendentes] = useState(0);
+
+  const itensPorPagina = 5;
+
   function enriquecerTransferencia(item) {
     return {
       ...item,
@@ -75,19 +82,22 @@ export default function Transferencia() {
     async function carregarTransferencias(snap, setFunc) {
       const docs = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       const docsEnriquecidos = docs.map(enriquecerTransferencia);
-      setFunc(docsEnriquecidos.slice(-3).reverse());
+      setFunc(docsEnriquecidos.slice(-100).reverse()); // Pega até 100 para dar mais "material" pro carrossel
     }
 
     const unsubAceitas = onSnapshot(qAceitas, snap => {
       carregarTransferencias(snap, setTransferenciasAceitas);
+      setIndexAceitas(0); // resetar índice ao atualizar dados
     });
 
     const unsubRecusadas = onSnapshot(qRecusadas, snap => {
       carregarTransferencias(snap, setTransferenciasRecusadas);
+      setIndexRecusadas(0);
     });
 
     const unsubPendentes = onSnapshot(qPendentes, snap => {
       carregarTransferencias(snap, setTransferenciasPendentes);
+      setIndexPendentes(0);
     });
 
     return () => {
@@ -126,7 +136,7 @@ export default function Transferencia() {
     carregarUsuarioEClube();
   }, []);
 
-  // ✅ ATUALIZADO: Convite de clube para jogador
+  // Funções para envio de convite/pedido (igual ao seu código)
   const enviarConvite = async (clube, jogador) => {
     try {
       const conviteRef = doc(collection(db, 'convites'));
@@ -147,7 +157,6 @@ export default function Transferencia() {
     }
   };
 
-  // ✅ ATUALIZADO: Pedido de jogador para clube
   const enviarPedido = async (jogador, clube) => {
     try {
       const conviteRef = doc(collection(db, 'convites'));
@@ -167,6 +176,42 @@ export default function Transferencia() {
       alert('Erro ao enviar pedido');
     }
   };
+
+  // Função para pegar fatia do carrossel, com limite de itensPorPagina
+  function getSlice(arr, index) {
+    return arr.slice(index, index + itensPorPagina);
+  }
+
+  // Efeitos para avançar o índice do carrossel automaticamente
+  useEffect(() => {
+    if (transferenciasAceitas.length <= itensPorPagina) return;
+
+    const timer = setInterval(() => {
+      setIndexAceitas(prev => (prev + 1) % (transferenciasAceitas.length - itensPorPagina + 1));
+    }, 4000);
+
+    return () => clearInterval(timer);
+  }, [transferenciasAceitas]);
+
+  useEffect(() => {
+    if (transferenciasRecusadas.length <= itensPorPagina) return;
+
+    const timer = setInterval(() => {
+      setIndexRecusadas(prev => (prev + 1) % (transferenciasRecusadas.length - itensPorPagina + 1));
+    }, 4000);
+
+    return () => clearInterval(timer);
+  }, [transferenciasRecusadas]);
+
+  useEffect(() => {
+    if (transferenciasPendentes.length <= itensPorPagina) return;
+
+    const timer = setInterval(() => {
+      setIndexPendentes(prev => (prev + 1) % (transferenciasPendentes.length - itensPorPagina + 1));
+    }, 4000);
+
+    return () => clearInterval(timer);
+  }, [transferenciasPendentes]);
 
   return (
     <section className={styles.container}>
@@ -228,7 +273,7 @@ export default function Transferencia() {
           <p className={styles.msgVazio}>Nenhuma transferência aceita.</p>
         ) : (
           <div className={styles.carrossel}>
-            {transferenciasAceitas.map(item => (
+            {getSlice(transferenciasAceitas, indexAceitas).map(item => (
               <CardTransferencia key={item.id} dados={item} tipo="transferencia" />
             ))}
           </div>
@@ -241,7 +286,7 @@ export default function Transferencia() {
           <p className={styles.msgVazio}>Nenhuma transferência recusada.</p>
         ) : (
           <div className={styles.carrossel}>
-            {transferenciasRecusadas.map(item => (
+            {getSlice(transferenciasRecusadas, indexRecusadas).map(item => (
               <CardTransferencia key={item.id} dados={item} tipo="transferencia" />
             ))}
           </div>
@@ -254,7 +299,7 @@ export default function Transferencia() {
           <p className={styles.msgVazio}>Nenhuma transferência pendente.</p>
         ) : (
           <div className={styles.carrossel}>
-            {transferenciasPendentes.map(item => (
+            {getSlice(transferenciasPendentes, indexPendentes).map(item => (
               <CardTransferencia key={item.id} dados={item} tipo="transferencia" />
             ))}
           </div>

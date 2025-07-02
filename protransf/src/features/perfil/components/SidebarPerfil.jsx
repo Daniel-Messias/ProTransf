@@ -13,12 +13,15 @@ import { AiOutlineEdit, AiOutlineSave, AiOutlineClose, AiOutlineMail } from 'rea
 import ChatBox from '../../chat/components/ChatBox';
 
 export default function SidebarPerfil({ jogador }) {
+  
   const inputRef = useRef();
 
   const currentUser = auth.currentUser;
 
   // Detecta se o usuário logado é o dono do perfil
-  const isDonoPerfil = currentUser && currentUser.uid === jogador.uid;
+  const isDonoPerfil = currentUser && currentUser.uid === jogador.id;
+  console.log('jogador completo:', jogador);
+
 
   // Estado modo edição, habilitado só para dono do perfil
   const [modoEdicao, setModoEdicao] = useState(false);
@@ -533,6 +536,7 @@ export default function SidebarPerfil({ jogador }) {
 
       {/* Botões editar (aparece só para dono) */}
       {isDonoPerfil && (
+        
         <div className={styles.btnGroup}>
           {modoEdicao ? (
             <>

@@ -54,9 +54,7 @@ function Header({ user, tipo }) {
         {/* Visitante (não logado) */}
         {isVisitante && (
           <>
-            <Link to="/clube">Clube</Link>
             <Link to="/transferencias">Transferências</Link>
-            <Link to="/jogador">Jogador</Link>
             <Link to="/ranking">Ranking</Link>
             <Link to="/cadastro">Cadastrar-se</Link>
           </>

@@ -56,7 +56,6 @@ export default function BlocoJogador({ jogador, modoLeitura }) {
       });
       alert('Perfil atualizado com sucesso!');
       setModoEdicao(false);
-      window.location.reload();
     } catch (error) {
       console.error('Erro ao salvar perfil:', error);
       alert('Erro ao salvar. Tente novamente.');

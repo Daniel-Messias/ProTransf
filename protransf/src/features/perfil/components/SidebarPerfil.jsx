@@ -164,7 +164,6 @@ export default function SidebarPerfil({ jogador }) {
       const downloadURL = await getDownloadURL(storageRef);
       const userRef = doc(db, 'usuarios', uid);
       await updateDoc(userRef, { fotoURL: downloadURL });
-      window.location.reload();
     } catch (error) {
       console.error('Erro ao enviar imagem:', error);
       alert('Erro ao atualizar foto.');
@@ -189,7 +188,6 @@ export default function SidebarPerfil({ jogador }) {
       });
       alert('Contatos atualizados com sucesso!');
       setModoEdicao(false);
-      window.location.reload();
     } catch (error) {
       console.error('Erro ao salvar contatos:', error);
       alert('Erro ao salvar contatos. Tente novamente.');

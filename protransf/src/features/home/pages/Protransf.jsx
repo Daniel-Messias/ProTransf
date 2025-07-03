@@ -1,16 +1,24 @@
 import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import bola from "../../../assets/fotos/bola.png";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth, db } from "../../../services/firebase";
 import { buscarJogadores } from "../../../services/firestoreService";
-import { doc, getDoc } from "firebase/firestore";
+import { doc, getDoc, collection, limit, query, orderBy, getDocs } from "firebase/firestore";
+import { addDoc, serverTimestamp } from "firebase/firestore";
+import { FaUser } from "react-icons/fa";
+import UltimasTransferencias from "../components/UltimasTransferencias";
+
 
 export default function Home() {
   const [user, setUser] = useState(null);
   const [tipo, setTipo] = useState(null);
   const [jogadores, setJogadores] = useState([]);
+  const [clubes, setClubes] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [formEnviado, setFormEnviado] = useState(false);
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
@@ -19,11 +27,7 @@ export default function Home() {
         try {
           const docRef = doc(db, "usuarios", firebaseUser.uid);
           const docSnap = await getDoc(docRef);
-          if (docSnap.exists()) {
-            setTipo(docSnap.data().tipo || null);
-          } else {
-            setTipo(null);
-          }
+          setTipo(docSnap.exists() ? docSnap.data().tipo : null);
         } catch (error) {
           console.error("Erro ao buscar tipo do usuário:", error);
           setTipo(null);
@@ -34,6 +38,24 @@ export default function Home() {
     });
     return () => unsubscribe();
   }, []);
+  useEffect(() => {
+  async function carregarClubes() {
+    try {
+      const q = query(collection(db, "clubes"), limit(4));
+      const snapshot = await getDocs(q);
+      const lista = snapshot.docs.map((doc, i) => ({
+        id: doc.id,
+        ...doc.data(),
+        pontos: 70 - i * 4 // pontos fictícios decrescentes
+      }));
+      setClubes(lista);
+    } catch (error) {
+      console.error("Erro ao buscar clubes:", error);
+    }
+  }
+
+  carregarClubes();
+}, []);
 
   useEffect(() => {
     async function carregarJogadores() {
@@ -50,40 +72,53 @@ export default function Home() {
     carregarJogadores();
   }, []);
 
-  if (loading) {
-    return <p style={{ textAlign: "center" }}>Carregando jogadores...</p>;
+ const handleSubmit = async (e) => {
+  e.preventDefault();
+  const nome = e.target.nome.value;
+  const email = e.target.email.value;
+  const mensagem = e.target.mensagem.value;
+
+  try {
+    await addDoc(collection(db, "mensagensContato"), {
+      nome,
+      email,
+      mensagem,
+      enviadoEm: serverTimestamp(),
+    });
+
+    setFormEnviado(true);
+    e.target.reset(); // limpa o formulário após envio
+  } catch (error) {
+    console.error("Erro ao enviar mensagem:", error);
+    alert("Erro ao enviar. Tente novamente.");
   }
+};
+  if (loading) return <p style={{ textAlign: "center" }}>Carregando jogadores...</p>;
 
   return (
     <>
       <div className="hero">
         <h1 className="centro">
-          PR
-          <img src={bola} alt="bola de futebol" className="soccer-ball" />
+          PR<img src={bola} alt="bola de futebol" className="soccer-ball" />
           <span>TRANSFER</span>
         </h1>
         <h2>MERCADO DE TRANSFERÊNCIAS</h2>
         <p>
-          Buscando um novo clube ou reforços? No PROTRANSF você encontra as
-          melhores oportunidades.
+          Buscando um novo clube ou reforços? No PROTRANSFER você encontra as melhores oportunidades.
         </p>
         <div className="buttons">
-          {!user ? (
-            <Link to="/cadastro" className="btn-cadastrar">
-              CADASTRAR-SE
-            </Link>
-          ) : tipo === "clube" || tipo === "clube_jogador" ? (
-            <Link to="/clube" className="btn-ver-perfil">
-              PERFIL
-            </Link>
-          ) : (
-            <Link to="/jogador" className="btn-ver-perfil">
-              PERFIL
-            </Link>
-          )}
-        </div>
+  {!user ? (
+    <Link to="/cadastro" className="btn-cadastrar">
+      CADASTRAR-SE
+    </Link>
+  ) : (
+    <Link to="/perfil" className="btn-ver-perfil">
+      <FaUser style={{ marginRight: 6 }} />
+      PERFIL
+    </Link>
+  )}
+</div>
       </div>
-
       <section>
         <h3>JOGADORES EM DESTAQUE</h3>
         <table>
@@ -101,9 +136,7 @@ export default function Home() {
               <tr
                 key={jogador.id}
                 style={{ cursor: "pointer" }}
-                onClick={() =>
-                  (window.location.href = `/perfil-jogador/${jogador.id}`)
-                }
+                onClick={() => navigate(`/perfil/${jogador.id}`)}
               >
                 <td>
                   <img
@@ -144,76 +177,48 @@ export default function Home() {
           <div className="column">
             <h3>RANKING DE CLUBES</h3>
             <ul className="ranking-list">
-              {[
-                { nome: "FC Virtual", pontos: 72 },
-                { nome: "Eleven United", pontos: 68 },
-                { nome: "VPG Stars", pontos: 65 },
-                { nome: "E-Squad", pontos: 60 },
-              ].map((clube, i) => (
-                <li key={i}>
+              {clubes.map((clube, i) => (
+                <li
+                key={clube.id}
+                style={{ cursor: "pointer" }}
+                onClick={() => navigate(`/perfil/${clube.id}`)}>
                   <span className="pos">{i + 1}</span>
                   <span className="team-name">{clube.nome}</span>
                   <span className="pontos">{clube.pontos} pts</span>
-                </li>
-              ))}
+                  </li>
+                ))}
             </ul>
+
           </div>
 
           <div className="column">
-            <h3>ÚLTIMAS TRANSFERÊNCIAS</h3>
-            <ul className="transfer-list">
-              {[
-                { de: "RapidShot55", para: "Cyber FC" },
-                { de: "Playmaker08", para: "Final Josoada" },
-                { de: "SolidDefender", para: "Dreamerz" },
-              ].map((t, i) => (
-                <li key={i} className="transfer-item">
-                  <span className="from">{t.de}</span>
-                  <span className="arrow">→</span>
-                  <span className="to">{t.para}</span>
-                </li>
-              ))}
-            </ul>
+            <div className="column">
+              <h3>ÚLTIMAS TRANSFERÊNCIAS</h3>
+              <UltimasTransferencias />
+              </div>
           </div>
         </div>
       </div>
 
       <section className="contact">
         <h3>Entre em contato conosco</h3>
-        <form>
+        <form onSubmit={handleSubmit}>
           <div className="form-group">
             <label htmlFor="nome">Nome</label>
-            <input
-              type="text"
-              id="nome"
-              name="nome"
-              placeholder="Seu nome completo"
-              required
-            />
+            <input type="text" id="nome" name="nome" placeholder="Seu nome completo" required />
           </div>
           <div className="form-group">
             <label htmlFor="email">E-mail</label>
-            <input
-              type="email"
-              id="email"
-              name="email"
-              placeholder="Seu e-mail"
-              required
-            />
+            <input type="email" id="email" name="email" placeholder="Seu e-mail" required />
           </div>
           <div className="form-group full-width">
             <label htmlFor="mensagem">Mensagem</label>
-            <textarea
-              id="mensagem"
-              name="mensagem"
-              rows="3"
-              placeholder="Escreva sua mensagem..."
-              required
-            ></textarea>
+            <textarea id="mensagem" name="mensagem" rows="3" placeholder="Escreva sua mensagem..." required></textarea>
           </div>
           <button type="submit" className="btn-primary">
             Enviar
           </button>
+          {formEnviado && <p className="msg-sucesso">Mensagem enviada com sucesso!</p>}
         </form>
       </section>
     </>

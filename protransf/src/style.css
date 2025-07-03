@@ -116,10 +116,13 @@
     }
 
     .hero h2 {
-      color: var(--primary);
-      font-size: 24px;
-      margin-bottom: 16px;
-    }
+  width: 100%;
+  text-align: center !important;
+  margin: 0 auto;
+  display: block; /* garante bloco */
+  border-bottom: none !important;
+}
+
 
     .hero p {
       color: var(--text-muted);
@@ -243,6 +246,7 @@ tbody td:first-child img {
     .column {
       flex: 1;
       min-width: 100px;
+      text-decoration: none;
     }
 
     
@@ -457,11 +461,13 @@ td.defense {
 .transfer-list .from {
   color: #5fbdf2;
   font-weight: 1000;
+  text-decoration: none;
 }
 
 .transfer-list .to {
   color: #ffffff;
   font-weight: 600;
+  text-decoration: none;
 }
 .table-container {
   max-width: 900px; 
@@ -495,3 +501,20 @@ td.defense {
   color: #000; /* texto preto no hover */
 }
 
+.arrow-aceito {
+  color: #28a745; /* verde */
+}
+
+.arrow-recusado {
+  color: #dc3545; /* vermelho */
+}
+
+.arrow-pendente {
+  color: #fd7e14; /* laranja */
+}
+.msg-sucesso {
+  margin-top: 12px;
+  color: #00ff88;
+  font-weight: 600;
+  text-align: center;
+}

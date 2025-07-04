@@ -5,6 +5,9 @@ import {
 } from 'firebase/firestore';
 import { db } from '../../../services/firebase';
 import { Link } from 'react-router-dom';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { storage } from '../../../services/firebase';
+
 
 // Ícone simples para capitão (pode substituir por SVG/fonte depois)
 const CapitainIcon = () => (
@@ -12,7 +15,6 @@ const CapitainIcon = () => (
 );
 
 export default function BlocoClube({ jogador, clube, loading, modoLeitura, usuarioLogado }) {
-  // Estados principais
   const [modoEdicao, setModoEdicao] = useState(false);
   const [salvando, setSalvando] = useState(false);
   const [form, setForm] = useState({
@@ -20,11 +22,16 @@ export default function BlocoClube({ jogador, clube, loading, modoLeitura, usuar
     fundacao: '',
     descricao: '',
     estaBuscando: false,
-    campeonatos: [], // Array
-    jogadores: [],   // Array com objetos { username, posicao, plataforma, status, numeroCamisa, capitão }
+    campeonatos: [],
+    jogadores: [],
+    logoUrl: '',
+    status: 'ativo',
+    numeroDeJogadores: 0,
+    ultimaAtualizacao: null,
+    criadoPorUsuarioId: '',
+    criadoEm: null,
   });
 
-  // Novo jogador que está sendo adicionado
   const [novoJogadorEmail, setNovoJogadorEmail] = useState('');
   const [novoJogadorDados, setNovoJogadorDados] = useState({
     username: '',
@@ -34,8 +41,18 @@ export default function BlocoClube({ jogador, clube, loading, modoLeitura, usuar
     numeroCamisa: '',
   });
 
-  // Capitão username (único capitão)
-  const capitãoUsername = form.jogadores.find(j => j.capitao)?.username || null;
+  const [novoCampeonato, setNovoCampeonato] = useState('');
+
+  // Se o usuário não tem clube cadastrado, já entra no modo criação
+  useEffect(() => {
+    if (!clube && usuarioLogado) {
+      setModoEdicao(true);
+      setForm(prev => ({
+        ...prev,
+        criadoPorUsuarioId: usuarioLogado.uid,
+      }));
+    }
+  }, [clube, usuarioLogado]);
 
   // Sincroniza dados ao receber clube atualizado
   useEffect(() => {
@@ -47,53 +64,37 @@ export default function BlocoClube({ jogador, clube, loading, modoLeitura, usuar
         estaBuscando: !!clube.estaBuscando,
         campeonatos: clube.campeonatos || [],
         jogadores: clube.jogadores || [],
+        logoUrl: clube.logoUrl || '',
+        status: clube.status || 'ativo',
+        numeroDeJogadores: clube.numeroDeJogadores || (clube.jogadores?.length || 0),
+        ultimaAtualizacao: clube.ultimaAtualizacao || null,
+        criadoPorUsuarioId: clube.criadoPorUsuarioId || '',
+        criadoEm: clube.criadoEm || null,
       });
     }
   }, [clube]);
+async function handleLogoUpload(event) {
+  const file = event.target.files[0];
+  if (!file) return;
 
-  // Enquanto carrega
+  const storageRef = ref(storage, `logosClubes/${usuarioLogado.uid}_${file.name}`);
+
+  try {
+    await uploadBytes(storageRef, file);
+    const url = await getDownloadURL(storageRef);
+    setForm(prev => ({ ...prev, logoUrl: url }));
+    alert('Logo enviado com sucesso!');
+  } catch (error) {
+    console.error('Erro ao fazer upload do logo:', error);
+    alert('Erro ao enviar logo. Tente novamente.');
+  }
+}
+
   if (loading) {
     return (
       <div className={styles.container}>
         <h2 className={styles.title}>Informações do Clube</h2>
         <p>Carregando dados do clube...</p>
-      </div>
-    );
-  }
-
-  async function handleChamarAmistoso() {
-    if (!clube || !usuarioLogado) return;
-
-    try {
-      const amistososRef = collection(db, 'amistosos');
-      await addDoc(amistososRef, {
-        remetenteId: usuarioLogado.uid,
-        remetenteNome: usuarioLogado.username || usuarioLogado.email,
-        destinatarioClubeId: jogador.clubeAtualId,
-        destinatarioNome: clube.nome,
-        status: 'pendente',
-        criadoEm: serverTimestamp(),
-      });
-
-      alert('Convite para amistoso enviado com sucesso!');
-    } catch (error) {
-      console.error('Erro ao enviar convite de amistoso:', error);
-      alert('Erro ao enviar convite. Tente novamente.');
-    }
-  }
-
-  // Se usuário não for clube_jogador, mostrar bloqueio upgrade
-  if (jogador.tipo !== 'clube_jogador') {
-    return (
-      <div className={`${styles.container} ${styles.bloqueado}`}>
-        <h2 className={styles.title}>Informações do Clube</h2>
-        <p>Para acessar as informações do clube, faça o upgrade para Clube + Jogador.</p>
-        <button
-          className={styles.btnUpgrade}
-          onClick={() => alert('Implementar fluxo de upgrade aqui!')}
-        >
-          Fazer Upgrade
-        </button>
       </div>
     );
   }
@@ -119,7 +120,7 @@ export default function BlocoClube({ jogador, clube, loading, modoLeitura, usuar
       const data = snapshot.docs[0].data();
       setNovoJogadorDados({
         username: data.username || '',
-        posicao: data.posicao || '',
+        posicao: data.posicaoPrimaria || '',
         plataforma: data.plataforma || '',
         status: data.status || '',
         numeroCamisa: '',
@@ -135,7 +136,6 @@ export default function BlocoClube({ jogador, clube, loading, modoLeitura, usuar
     }
   }
 
-  // Ao mudar o email do novo jogador, buscar dados dele
   useEffect(() => {
     if (novoJogadorEmail.trim()) {
       buscarDadosJogadorPorEmail(novoJogadorEmail);
@@ -151,13 +151,12 @@ export default function BlocoClube({ jogador, clube, loading, modoLeitura, usuar
   }, [novoJogadorEmail]);
 
   // Adicionar jogador ao elenco
-  async function adicionarJogador() {
-    // Validações básicas
+  function adicionarJogador() {
     if (
-      !novoJogadorEmail.trim() || 
-      !novoJogadorDados.username || 
-      !novoJogadorDados.posicao || 
-      !novoJogadorDados.plataforma || 
+      !novoJogadorEmail.trim() ||
+      !novoJogadorDados.username ||
+      !novoJogadorDados.posicao ||
+      !novoJogadorDados.plataforma ||
       !novoJogadorDados.status ||
       !novoJogadorDados.numeroCamisa.trim()
     ) {
@@ -165,14 +164,12 @@ export default function BlocoClube({ jogador, clube, loading, modoLeitura, usuar
       return;
     }
 
-    // Verificar se jogador já está no elenco
     const jaTem = form.jogadores.some(j => j.username === novoJogadorDados.username);
     if (jaTem) {
       alert('Este jogador já está no elenco.');
       return;
     }
 
-    // Adiciona jogador no estado
     const novoJogador = {
       username: novoJogadorDados.username,
       posicao: novoJogadorDados.posicao,
@@ -181,11 +178,14 @@ export default function BlocoClube({ jogador, clube, loading, modoLeitura, usuar
       numeroCamisa: novoJogadorDados.numeroCamisa.trim(),
       capitao: false,
     };
+
     const novosJogadores = [...form.jogadores, novoJogador];
+    setForm(prev => ({
+      ...prev,
+      jogadores: novosJogadores,
+      numeroDeJogadores: novosJogadores.length,
+    }));
 
-    setForm(prev => ({ ...prev, jogadores: novosJogadores }));
-
-    // Limpar inputs
     setNovoJogadorEmail('');
     setNovoJogadorDados({
       username: '',
@@ -198,15 +198,19 @@ export default function BlocoClube({ jogador, clube, loading, modoLeitura, usuar
     alert(`Jogador ${novoJogador.username} adicionado ao elenco!`);
   }
 
-  // Remover jogador pelo índice
-  async function removerJogador(index) {
+  // Remover jogador
+  function removerJogador(index) {
     if (!window.confirm(`Remover jogador ${form.jogadores[index].username}?`)) return;
 
     const novosJogadores = form.jogadores.filter((_, i) => i !== index);
-    setForm(prev => ({ ...prev, jogadores: novosJogadores }));
+    setForm(prev => ({
+      ...prev,
+      jogadores: novosJogadores,
+      numeroDeJogadores: novosJogadores.length,
+    }));
   }
 
-  // Definir capitão do elenco (único)
+  // Definir capitão (único)
   function definirCapitao(username) {
     setForm(prev => ({
       ...prev,
@@ -217,7 +221,7 @@ export default function BlocoClube({ jogador, clube, loading, modoLeitura, usuar
     }));
   }
 
-  // Atualizar número da camisa do jogador (editável inline)
+  // Atualizar número da camisa
   function atualizarNumeroCamisa(index, numero) {
     setForm(prev => {
       const copia = [...prev.jogadores];
@@ -226,16 +230,7 @@ export default function BlocoClube({ jogador, clube, loading, modoLeitura, usuar
     });
   }
 
-  // Atualizar lista de campeonatos - remover
-  function removerCampeonato(index) {
-    setForm(prev => ({
-      ...prev,
-      campeonatos: prev.campeonatos.filter((_, i) => i !== index),
-    }));
-  }
-
-  // Adicionar campeonato novo
-  const [novoCampeonato, setNovoCampeonato] = useState('');
+  // Campeonatos
   function adicionarCampeonato() {
     if (novoCampeonato.trim() === '') return;
     if (form.campeonatos.includes(novoCampeonato.trim())) {
@@ -249,7 +244,14 @@ export default function BlocoClube({ jogador, clube, loading, modoLeitura, usuar
     setNovoCampeonato('');
   }
 
-  // Salvar alterações no Firebase
+  function removerCampeonato(index) {
+    setForm(prev => ({
+      ...prev,
+      campeonatos: prev.campeonatos.filter((_, i) => i !== index),
+    }));
+  }
+
+  // Salvar ou criar clube
   async function handleSalvar() {
     if (!form.nome.trim() || !form.fundacao.trim()) {
       alert('Nome do clube e fundação são obrigatórios.');
@@ -257,46 +259,55 @@ export default function BlocoClube({ jogador, clube, loading, modoLeitura, usuar
     }
     setSalvando(true);
     try {
-      const clubeRef = doc(db, 'clubes', jogador.clubeAtualId);
-      await updateDoc(clubeRef, {
-        nome: form.nome.trim(),
-        fundacao: form.fundacao.trim(),
-        descricao: form.descricao.trim(),
-        estaBuscando: form.estaBuscando,
-        campeonatos: form.campeonatos,
-        jogadores: form.jogadores,
-      });
+      if (clube) {
+        // Atualizar clube existente
+        const clubeRef = doc(db, 'clubes', jogador.clubeAtualId);
+        await updateDoc(clubeRef, {
+          nome: form.nome.trim(),
+          fundacao: form.fundacao.trim(),
+          descricao: form.descricao.trim(),
+          estaBuscando: form.estaBuscando,
+          campeonatos: form.campeonatos,
+          jogadores: form.jogadores,
+          logoUrl: form.logoUrl,
+          status: form.status,
+          numeroDeJogadores: form.numeroDeJogadores,
+          ultimaAtualizacao: serverTimestamp(),
+        });
+      } else {
+        // Criar novo clube
+        const clubesRef = collection(db, 'clubes');
+        const novoClubeDoc = await addDoc(clubesRef, {
+          nome: form.nome.trim(),
+          fundacao: form.fundacao.trim(),
+          descricao: form.descricao.trim(),
+          estaBuscando: form.estaBuscando,
+          campeonatos: form.campeonatos,
+          jogadores: form.jogadores,
+          logoUrl: form.logoUrl,
+          status: 'ativo',
+          numeroDeJogadores: form.jogadores.length,
+          ultimaAtualizacao: serverTimestamp(),
+          criadoPorUsuarioId: usuarioLogado.uid,
+          criadoEm: serverTimestamp(),
+        });
 
-      // Atualizar status e clubeAtual dos jogadores no Firestore (sincronizar)
-      for (const jogadorElenco of form.jogadores) {
-        try {
-          // Buscar usuário pelo username
-          const usuariosRef = collection(db, 'usuarios');
-          const q = query(usuariosRef, where('username', '==', jogadorElenco.username));
-          const snapshot = await getDocs(q);
-          if (!snapshot.empty) {
-            const jogadorDoc = snapshot.docs[0];
-            await updateDoc(jogadorDoc.ref, {
-              status: 'Contratado',
-              clubeAtual: form.nome.trim(),
-              numeroCamisa: jogadorElenco.numeroCamisa,
-            });
-          }
-        } catch (err) {
-          console.error(`Erro ao atualizar jogador ${jogadorElenco.username}:`, err);
-        }
+        // Atualiza o clubeAtualId do usuário logado
+        const userRef = doc(db, 'usuarios', usuarioLogado.uid);
+        await updateDoc(userRef, {
+          clubeAtualId: novoClubeDoc.id,
+        });
       }
-
       setModoEdicao(false);
-      alert('Informações do clube salvas com sucesso!');
+      alert('Clube salvo com sucesso!');
     } catch (error) {
-      console.error('Erro ao salvar dados do clube:', error);
-      alert('Erro ao salvar dados. Tente novamente.');
+      console.error('Erro ao salvar clube:', error);
+      alert('Erro ao salvar clube. Tente novamente.');
     }
     setSalvando(false);
   }
 
-  // Cancelar edição e resetar formulário para dados atuais do clube
+  // Cancelar edição
   function cancelarEdicao() {
     setModoEdicao(false);
     if (clube) {
@@ -307,8 +318,31 @@ export default function BlocoClube({ jogador, clube, loading, modoLeitura, usuar
         estaBuscando: !!clube.estaBuscando,
         campeonatos: clube.campeonatos || [],
         jogadores: clube.jogadores || [],
+        logoUrl: clube.logoUrl || '',
+        status: clube.status || 'ativo',
+        numeroDeJogadores: clube.numeroDeJogadores || (clube.jogadores?.length || 0),
+        ultimaAtualizacao: clube.ultimaAtualizacao || null,
+        criadoPorUsuarioId: clube.criadoPorUsuarioId || '',
+        criadoEm: clube.criadoEm || null,
       });
+    } else {
+      setForm(prev => ({
+        ...prev,
+        nome: '',
+        fundacao: '',
+        descricao: '',
+        estaBuscando: false,
+        campeonatos: [],
+        jogadores: [],
+        logoUrl: '',
+        status: 'ativo',
+        numeroDeJogadores: 0,
+        ultimaAtualizacao: null,
+        criadoPorUsuarioId: usuarioLogado.uid,
+        criadoEm: null,
+      }));
     }
+
     setNovoJogadorEmail('');
     setNovoJogadorDados({
       username: '',
@@ -319,7 +353,7 @@ export default function BlocoClube({ jogador, clube, loading, modoLeitura, usuar
     });
   }
 
-  // Renderiza lista dos jogadores (modo leitura ou edição)
+  // Renderizar jogadores em tabela
   function renderJogadores() {
     if (!form.jogadores.length) return <p>Elenco vazio.</p>;
 
@@ -396,7 +430,6 @@ export default function BlocoClube({ jogador, clube, loading, modoLeitura, usuar
 
       {modoEdicao ? (
         <>
-          {/* Campos edição */}
           <label>
             Nome do Clube*:
             <input
@@ -437,7 +470,21 @@ export default function BlocoClube({ jogador, clube, loading, modoLeitura, usuar
             </select>
           </label>
 
-          {/* Campeonatos */}
+          <label>
+  Logo do Clube:
+  <input
+    type="file"
+    accept="image/*"
+    onChange={handleLogoUpload}
+  />
+  {form.logoUrl && (
+    <div className={styles.previewLogo}>
+      <img src={form.logoUrl} alt="Prévia do Logo" className={styles.logoClube} />
+    </div>
+  )}
+</label>
+
+
           <div className={styles.campeonatosContainer}>
             <strong>Campeonatos:</strong>
             <ul>
@@ -469,11 +516,9 @@ export default function BlocoClube({ jogador, clube, loading, modoLeitura, usuar
             </div>
           </div>
 
-          {/* Lista de jogadores */}
           <h3>Jogadores do Elenco</h3>
           {renderJogadores()}
 
-          {/* Adicionar jogador */}
           <div className={styles.adicionarJogador}>
             <h4>Adicionar Jogador por Email</h4>
             <input
@@ -504,7 +549,6 @@ export default function BlocoClube({ jogador, clube, loading, modoLeitura, usuar
             </button>
           </div>
 
-          {/* Botões ação */}
           <div className={styles.buttonGroup}>
             <button type="button" onClick={handleSalvar} disabled={salvando}>
               {salvando ? 'Salvando...' : 'Salvar Alterações'}
@@ -516,7 +560,6 @@ export default function BlocoClube({ jogador, clube, loading, modoLeitura, usuar
         </>
       ) : (
         <>
-          {/* Modo visualização */}
           <div className={styles.dadosClube}>
             <strong>Fundação</strong>
             <span>{form.fundacao}</span>
@@ -537,17 +580,21 @@ export default function BlocoClube({ jogador, clube, loading, modoLeitura, usuar
             <span>{form.campeonatos.length ? form.campeonatos.join(', ') : 'Nenhum informado'}</span>
           </div>
 
+          <div className={styles.dadosClube}>
+            <strong>Número de Jogadores</strong>
+            <span>{form.jogadores.length}</span>
+          </div>
+
+          {form.logoUrl && (
+            <div className={styles.dadosClube}>
+              <strong>Logo:</strong>
+              <br />
+              <img src={form.logoUrl} alt="Logo do Clube" className={styles.logoClube} />
+            </div>
+          )}
+
           <h3 className={styles.subtitulo}>Jogadores do Elenco</h3>
           {renderJogadores()}
-
-          {modoLeitura && usuarioLogado && ['clube', 'clube_jogador'].includes(usuarioLogado.tipo) && (
-            <button
-              className={styles.btnAmistoso}
-              onClick={() => handleChamarAmistoso()}
-            >
-              Chamar para Amistoso
-            </button>
-          )}
 
           {!modoLeitura && (
             <button

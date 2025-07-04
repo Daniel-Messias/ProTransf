@@ -377,7 +377,6 @@ export default function FormCadastro() {
             className={styles.formInput}
           >
             <option value="jogador">Jogador</option>
-            <option value="clube">Clube</option>
             <option value="clube_jogador">Clube + Jogador</option>
           </select>
         </div>

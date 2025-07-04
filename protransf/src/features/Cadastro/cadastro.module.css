@@ -239,3 +239,24 @@ select:focus {
   border-color: #ff6b6b !important;
   box-shadow: 0 0 6px #ff6b6b !important;
 }
+/* Estilização adicional para selects */
+select {
+  background-color: #0d1b2a; /* Fundo escuro no dropdown */
+  color: #ffffff;            /* Texto branco */
+  border: 2px solid #5fbdf2;
+  padding: 0.5rem 0.75rem;
+  font-size: 1rem;
+  border-radius: 6px;
+  appearance: none;
+}
+
+select option {
+  background-color: #0d1b2a; /* Fundo escuro das opções */
+  color: #ffffff;            /* Texto branco */
+}
+
+select:focus {
+  outline: none;
+  border-color: #74c0fc;
+  box-shadow: 0 0 5px #74c0fc66;
+}

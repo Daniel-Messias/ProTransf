@@ -6,7 +6,6 @@ import {
   Link,
   useLocation,
   useNavigate,
-  useParams,
 } from "react-router-dom";
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
@@ -21,12 +20,6 @@ import Cadastro from "./features/Cadastro/pages/Cadastro";
 import Login from "./features/auth/pages/Login";
 import PerfilPage from "./features/perfil/pages/PerfilPage";
 import RankingPage from "../src/features/ranking/pages/Ranking";
-import ChatPage from './features/chat/pages/ChatPage';
-
-function ChatWrapper() {
-  const { id } = useParams();
-  return <ChatPage destinatarioId={id} />;
-}
 
 function Header({ user, tipo }) {
   console.log("Header renderizado — user:", user);
@@ -138,9 +131,8 @@ function LayoutRoutes() {
         <Route path="/cadastro" element={<Cadastro />} />
         <Route path="/login" element={<Login />} />
         <Route path="/perfil" element={<PerfilPage />} />
-       <Route path="/perfil/:id" element={<PerfilPage />} />
+        <Route path="/perfil/:id" element={<PerfilPage />} />
         <Route path="/ranking" element={<RankingPage />} />
-        <Route path="/chat/:id" element={<ChatWrapper />} />
       </Routes>
     </div>
   );

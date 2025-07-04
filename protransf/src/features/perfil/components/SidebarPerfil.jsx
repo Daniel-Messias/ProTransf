@@ -214,13 +214,17 @@ export default function SidebarPerfil({ jogador }) {
       )
     );
 
-    if (novoStatus === 'aceito') {
-      const userRef = doc(db, 'usuarios', jogador.uid);
-      await updateDoc(userRef, {
-        status: 'Contratado',
-        nomeClube
-      });
-    }
+   if (novoStatus === 'aceito') {
+  const userRef = doc(db, 'usuarios', jogador.uid);
+
+  await updateDoc(userRef, {
+    status: 'Contratado',
+    clubeAtual: nomeClube || '',
+    clubeAtualId: currentUser.uid || '', // ID do clube que aceitou
+    numeroCamisa: '', // deixa em branco para ser preenchido manualmente se quiser
+  });
+}
+
 
     alert(`Convite ${novoStatus === 'aceito' ? 'aceito' : 'recusado'} com sucesso!`);
   } catch (error) {

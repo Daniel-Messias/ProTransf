@@ -150,65 +150,110 @@ async function handleLogoUpload(event) {
     }
   }, [novoJogadorEmail]);
 
-  // Adicionar jogador ao elenco
-  function adicionarJogador() {
-    if (
-      !novoJogadorEmail.trim() ||
-      !novoJogadorDados.username ||
-      !novoJogadorDados.posicao ||
-      !novoJogadorDados.plataforma ||
-      !novoJogadorDados.status ||
-      !novoJogadorDados.numeroCamisa.trim()
-    ) {
-      alert('Preencha todos os campos do jogador, inclusive o número da camisa.');
-      return;
-    }
-
-    const jaTem = form.jogadores.some(j => j.username === novoJogadorDados.username);
-    if (jaTem) {
-      alert('Este jogador já está no elenco.');
-      return;
-    }
-
-    const novoJogador = {
-      username: novoJogadorDados.username,
-      posicao: novoJogadorDados.posicao,
-      plataforma: novoJogadorDados.plataforma,
-      status: novoJogadorDados.status,
-      numeroCamisa: novoJogadorDados.numeroCamisa.trim(),
-      capitao: false,
-    };
-
-    const novosJogadores = [...form.jogadores, novoJogador];
-    setForm(prev => ({
-      ...prev,
-      jogadores: novosJogadores,
-      numeroDeJogadores: novosJogadores.length,
-    }));
-
-    setNovoJogadorEmail('');
-    setNovoJogadorDados({
-      username: '',
-      posicao: '',
-      plataforma: '',
-      status: '',
-      numeroCamisa: '',
-    });
-
-    alert(`Jogador ${novoJogador.username} adicionado ao elenco!`);
+  async function adicionarJogador() {
+  if (
+    !novoJogadorEmail.trim() ||
+    !novoJogadorDados.username ||
+    !novoJogadorDados.posicao ||
+    !novoJogadorDados.plataforma ||
+    !novoJogadorDados.status ||
+    !novoJogadorDados.numeroCamisa.trim()
+  ) {
+    alert('Preencha todos os campos do jogador, inclusive o número da camisa.');
+    return;
   }
+
+  const jaTem = form.jogadores.some(j => j.username === novoJogadorDados.username);
+  if (jaTem) {
+    alert('Este jogador já está no elenco.');
+    return;
+  }
+
+  const novoJogador = {
+    username: novoJogadorDados.username,
+    posicao: novoJogadorDados.posicao,
+    plataforma: novoJogadorDados.plataforma,
+    status: novoJogadorDados.status,
+    numeroCamisa: novoJogadorDados.numeroCamisa.trim(),
+    capitao: false,
+  };
+
+  // Atualiza localmente
+  const novosJogadores = [...form.jogadores, novoJogador];
+  setForm(prev => ({
+    ...prev,
+    jogadores: novosJogadores,
+    numeroDeJogadores: novosJogadores.length,
+  }));
+
+  try {
+    // Atualiza Firestore do jogador
+    const usuariosRef = collection(db, 'usuarios');
+    const q = query(usuariosRef, where('username', '==', novoJogador.username));
+    const snapshot = await getDocs(q);
+    if (!snapshot.empty) {
+      const jogadorDocId = snapshot.docs[0].id;
+      const jogadorRef = doc(db, 'usuarios', jogadorDocId);
+      await updateDoc(jogadorRef, {
+        status: 'contratado',
+        clubeAtualId: clube ? clube.id : '', // adapta conforme seu dado do clube
+        podeEditarNumeroCamisa: false,
+      });
+    }
+  } catch (error) {
+    console.error('Erro ao atualizar jogador no Firestore:', error);
+    alert('Erro ao atualizar dados do jogador no Firestore. Tente novamente.');
+  }
+
+  // Limpa campos
+  setNovoJogadorEmail('');
+  setNovoJogadorDados({
+    username: '',
+    posicao: '',
+    plataforma: '',
+    status: '',
+    numeroCamisa: '',
+  });
+
+  alert(`Jogador ${novoJogador.username} adicionado ao elenco!`);
+}
+
 
   // Remover jogador
-  function removerJogador(index) {
-    if (!window.confirm(`Remover jogador ${form.jogadores[index].username}?`)) return;
+  async function removerJogador(index) {
+  if (!window.confirm(`Remover jogador ${form.jogadores[index].username}?`)) return;
 
-    const novosJogadores = form.jogadores.filter((_, i) => i !== index);
-    setForm(prev => ({
-      ...prev,
-      jogadores: novosJogadores,
-      numeroDeJogadores: novosJogadores.length,
-    }));
+  const jogadorRemovido = form.jogadores[index];
+
+  try {
+    // Busca o documento do jogador pelo username
+    const usuariosRef = collection(db, 'usuarios');
+    const q = query(usuariosRef, where('username', '==', jogadorRemovido.username));
+    const snapshot = await getDocs(q);
+    if (!snapshot.empty) {
+      const jogadorDocId = snapshot.docs[0].id;
+      const jogadorRef = doc(db, 'usuarios', jogadorDocId);
+      await updateDoc(jogadorRef, {
+        status: 'livre',
+        clubeAtualId: '',
+        podeEditarNumeroCamisa: true, // se usar esse campo
+      });
+    }
+  } catch (error) {
+    console.error('Erro ao atualizar jogador no Firestore:', error);
+    alert('Erro ao atualizar dados do jogador. Tente novamente.');
+    return; // Para não continuar removendo localmente em caso de erro grave
   }
+
+  // Atualiza estado local removendo jogador
+  const novosJogadores = form.jogadores.filter((_, i) => i !== index);
+  setForm(prev => ({
+    ...prev,
+    jogadores: novosJogadores,
+    numeroDeJogadores: novosJogadores.length,
+  }));
+}
+
 
   // Definir capitão (único)
   function definirCapitao(username) {

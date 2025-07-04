@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import styles from '../styles/BlocoJogador.module.css';
 import { doc, updateDoc } from 'firebase/firestore';
 import { auth, db } from '../../../services/firebase';
@@ -9,7 +10,8 @@ export default function BlocoJogador({ jogador, modoLeitura }) {
     bio: jogador.bio || '',
     posicaoPrimaria: jogador.posicaoPrimaria || '',
     posicaoSecundaria: jogador.posicaoSecundaria || '',
-    videos: jogador.videos || []
+    videos: jogador.videos || [],
+    numeroCamisa: jogador.numeroCamisa || '',
   });
   const [novoVideo, setNovoVideo] = useState('');
   const [salvando, setSalvando] = useState(false);
@@ -20,7 +22,19 @@ export default function BlocoJogador({ jogador, modoLeitura }) {
     }
   }, [modoLeitura, modoEdicao]);
 
+  useEffect(() => {
+    setFormData({
+      bio: jogador.bio || '',
+      posicaoPrimaria: jogador.posicaoPrimaria || '',
+      posicaoSecundaria: jogador.posicaoSecundaria || '',
+      videos: jogador.videos || [],
+      numeroCamisa: jogador.numeroCamisa || '',
+    });
+  }, [jogador]);
+
   if (!jogador) return null;
+
+  const isContratado = jogador.status === 'Contratado';
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -31,7 +45,7 @@ export default function BlocoJogador({ jogador, modoLeitura }) {
     if (novoVideo.trim()) {
       setFormData((prev) => ({
         ...prev,
-        videos: [...prev.videos, novoVideo.trim()]
+        videos: [...prev.videos, novoVideo.trim()],
       }));
       setNovoVideo('');
     }
@@ -53,6 +67,7 @@ export default function BlocoJogador({ jogador, modoLeitura }) {
         posicaoPrimaria: formData.posicaoPrimaria,
         posicaoSecundaria: formData.posicaoSecundaria,
         videos: formData.videos,
+        numeroCamisa: formData.numeroCamisa,
       });
       alert('Perfil atualizado com sucesso!');
       setModoEdicao(false);
@@ -80,7 +95,19 @@ export default function BlocoJogador({ jogador, modoLeitura }) {
           </div>
           <div className={styles.infoItem}>
             <strong>Clube atual</strong>
-            <span>{jogador.nomeClube || 'Nenhum'}</span>
+            <span>
+              {jogador.clubeAtualId ? (
+                <Link to={`/perfil/${jogador.clubeAtualId}`}>
+                  {jogador.clubeAtual}
+                </Link>
+              ) : (
+                'Nenhum'
+              )}
+            </span>
+          </div>
+          <div className={styles.infoItem}>
+            <strong>Número da Camisa</strong>
+            <span>{jogador.numeroCamisa || '-'}</span>
           </div>
           <div className={styles.infoItem}>
             <strong>Posição Primária</strong>
@@ -93,9 +120,9 @@ export default function BlocoJogador({ jogador, modoLeitura }) {
           <div className={styles.infoItem}>
             <strong>Bio</strong>
             <span>
-              {jogador.bio?.trim()
-                ? jogador.bio
-                : <span className={styles.vazio}>Sem bio</span>}
+              {jogador.bio?.trim() ? jogador.bio : (
+                <span className={styles.vazio}>Sem bio</span>
+              )}
             </span>
           </div>
         </div>
@@ -148,6 +175,19 @@ export default function BlocoJogador({ jogador, modoLeitura }) {
                 <option value="Ponta Direita">Ponta Direita</option>
                 <option value="Atacante">Atacante</option>
               </select>
+            </label>
+
+            <label>
+              Número da Camisa:
+              <input
+                type="text"
+                name="numeroCamisa"
+                value={formData.numeroCamisa}
+                onChange={handleChange}
+                maxLength={2}
+                placeholder="Ex: 10"
+                disabled={isContratado}
+              />
             </label>
           </div>
 
@@ -214,7 +254,10 @@ export default function BlocoJogador({ jogador, modoLeitura }) {
           </div>
 
           {!modoLeitura && (
-            <button className={styles.editButton} onClick={() => setModoEdicao(true)}>
+            <button
+              className={styles.editButton}
+              onClick={() => setModoEdicao(true)}
+            >
               Editar Perfil do Jogador
             </button>
           )}

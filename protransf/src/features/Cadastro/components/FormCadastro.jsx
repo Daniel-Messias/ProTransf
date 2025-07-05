@@ -147,6 +147,7 @@ export default function FormCadastro() {
         fotoURL: photoURL,
         criadoEm: serverTimestamp(),
         tipo: formData.tipoUsuario,
+        status: "Livre no Mercado",
       });
 
       setShowModal(true);
@@ -175,9 +176,9 @@ export default function FormCadastro() {
   };
 
   const fecharModal = () => {
-    setShowModal(false);
-    navigate('/');  // Redireciona para a página principal ao fechar modal
-  };
+  setShowModal(false);
+  window.location.href = "/"; // ✅ Força reload da aplicação e já mostra o menu corretamente
+};
 
   return (
     <div className={styles.container}>

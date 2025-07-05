@@ -1,0 +1,59 @@
+.tabelaJogadores {
+  width: 100%;
+  border-collapse: collapse;
+  background: #f9fbff;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+  margin-bottom: 30px;
+}
+
+.tabelaJogadores th {
+  background: #007bff;
+  color: #fff;
+  padding: 10px;
+  text-align: left;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.tabelaJogadores td {
+  padding: 12px;
+  font-size: 14px;
+  border-top: 1px solid #e0e0e0;
+}
+
+.inputNumeroCamisa {
+  width: 60px;
+  text-align: center;
+}
+
+.linkPerfil {
+  color: #007bff;
+  font-weight: bold;
+  text-decoration: none;
+}
+
+.linkPerfil:hover {
+  text-decoration: underline;
+}
+
+.btnRemoverJogador,
+.btnCapitao {
+  background: none;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+  color: #e63946;
+  transition: transform 0.2s ease;
+}
+
+.btnRemoverJogador:hover,
+.btnCapitao:hover {
+  transform: scale(1.2);
+}
+
+.btnCapitao {
+  color: #007bff;
+  margin-left: 6px;
+}

@@ -1,17 +1,26 @@
-/* Container geral do form */
+/* Container principal */
 .formClube {
-  max-width: 600px;
-  margin: 2rem auto;
-  padding: 2rem;
-  background: #1e1e2f; /* Fundo escuro */
-  border-radius: 12px;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-  color: #e0e0e0;
+  max-width: 680px;
+  margin: 3rem auto;
+  padding: 2.5rem;
+  background: transparent;
+  border-radius: 16px;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.4);
+  color: #f0f0f0;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  display: flex;
+  flex-direction: column;
+  gap: 1.8rem;
+}
+
+/* Títulos e seções */
+h3, h4 {
+  color: #4a90e2;
+  margin-bottom: 0.5rem;
 }
 
 /* Labels e inputs */
-.formClube label {
+label {
   display: block;
   margin-bottom: 0.5rem;
   font-weight: 600;
@@ -19,161 +28,154 @@
   color: #cfd8dc;
 }
 
-.formClube input[type="text"],
-.formClube input[type="email"],
-.formClube input[type="file"],
-.formClube select,
-.formClube textarea {
+input[type="text"],
+input[type="email"],
+input[type="file"],
+select,
+textarea {
   width: 100%;
-  padding: 0.6rem 0.8rem;
-  margin-bottom: 1.2rem;
-  border-radius: 8px;
-  border: 1.5px solid #444a5a;
+  padding: 0.75rem 1rem;
+  border-radius: 10px;
+  border: 1.5px solid #4a90e2;
   background: #2a2f45;
   color: #fff;
   font-size: 1rem;
-  transition: border-color 0.3s ease;
+  transition: all 0.3s ease;
 }
 
-.formClube input[type="text"]:focus,
-.formClube input[type="email"]:focus,
-.formClube select:focus,
-.formClube textarea:focus {
-  border-color: #4a90e2;
+input:focus,
+textarea:focus,
+select:focus {
+  border-color: #5baaff;
   outline: none;
+  box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.3);
 }
 
 /* Textarea */
-.formClube textarea {
+textarea {
   resize: vertical;
-  min-height: 70px;
-  font-family: inherit;
-}
-
-/* Botões principais */
-.formClube button {
-  background-color: #4a90e2;
-  color: white;
-  border: none;
-  padding: 0.65rem 1.5rem;
-  border-radius: 10px;
-  font-weight: 700;
-  cursor: pointer;
-  font-size: 1rem;
-  transition: background-color 0.25s ease;
-  margin-right: 1rem;
-}
-
-.formClube button:hover:not(:disabled) {
-  background-color: #3a74c4;
-}
-
-.formClube button:disabled {
-  background-color: #677a9b;
-  cursor: not-allowed;
-}
-
-/* Grupo dos botões salvar/cancelar */
-.buttonGroup {
-  margin-top: 1.8rem;
-  display: flex;
-  justify-content: flex-end;
+  min-height: 80px;
 }
 
 /* Preview da logo */
 .previewLogo {
-  margin-top: -0.6rem;
-  margin-bottom: 1rem;
+  margin-top: 1rem;
   text-align: center;
 }
 
 .logoClube {
-  max-width: 150px;
-  max-height: 150px;
-  border-radius: 8px;
-  box-shadow: 0 0 8px rgba(74,144,226,0.7);
+  max-width: 180px;
+  max-height: 180px;
+  border-radius: 12px;
+  box-shadow: 0 0 15px rgba(74,144,226,0.7);
   object-fit: contain;
 }
 
-/* Campeonatos lista */
-.campeonatosContainer strong {
-  display: block;
-  margin-bottom: 0.8rem;
-  font-size: 1.1rem;
-  color: #a0a9b8;
+/* Botões */
+button {
+  background: linear-gradient(135deg, #4a90e2, #357ABD);
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: 0.25s ease all;
 }
 
-.campeonatosContainer ul {
-  list-style-type: none;
-  padding-left: 0;
-  margin-bottom: 1rem;
+button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  background: linear-gradient(135deg, #3a74c4, #2e5ba0);
 }
 
-.campeonatosContainer li {
-  background-color: #2a2f45;
-  padding: 0.45rem 0.8rem;
-  margin-bottom: 0.4rem;
-  border-radius: 6px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  color: #dde1e6;
-  font-size: 0.95rem;
+button:disabled {
+  background: #5a6a80;
+  cursor: not-allowed;
 }
 
-/* Botão remover campeonato */
-.btnRemoverCampeonato {
+/* Botões de ação (remover, capitão) */
+.btnRemoverCampeonato,
+.btnCapitao,
+.btnRemoverJogador {
   background: transparent;
   border: none;
   cursor: pointer;
-  color: #ff6b6b;
   font-size: 1.2rem;
+  color: #c0c7d6;
   transition: color 0.2s ease;
 }
 
-.btnRemoverCampeonato:hover {
-  color: #ff3b3b;
+.btnRemoverCampeonato:hover,
+.btnRemoverJogador:hover {
+  color: #ff4d4d;
 }
 
-/* Input novo campeonato e botão */
+.btnCapitao:hover {
+  color: #ffd93d;
+}
+
+/* Grupo dos botões principais */
+.buttonGroup {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+/* Campeonatos */
+.campeonatosContainer strong {
+  font-size: 1.05rem;
+  color: #a8b4c9;
+  margin-bottom: 0.5rem;
+  display: block;
+}
+
+.campeonatosContainer ul {
+  list-style: none;
+  padding-left: 0;
+  margin: 0;
+}
+
+.campeonatosContainer li {
+  background-color: #2d324b;
+  padding: 0.6rem 1rem;
+  margin-bottom: 0.5rem;
+  border-radius: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: #dce3f1;
+}
+
+/* Input + botão adicionar campeonato */
 .adicionarCampeonato {
   display: flex;
-  gap: 0.8rem;
-  margin-bottom: 1.5rem;
+  gap: 1rem;
+  margin-top: 1rem;
 }
 
 .adicionarCampeonato input[type="text"] {
-  flex-grow: 1;
-  border-radius: 8px;
-  padding: 0.5rem 0.8rem;
-  border: 1.5px solid #444a5a;
-  background: #2a2f45;
-  color: #fff;
+  flex: 1;
 }
 
 .adicionarCampeonato button {
-  width: 3rem;
-  font-size: 1.5rem;
-  font-weight: 700;
-  padding: 0;
+  padding: 0.6rem 1.2rem;
+  font-size: 1.2rem;
   border-radius: 50%;
-  background-color: #4a90e2;
-  color: #fff;
-  border: none;
-  cursor: pointer;
-  transition: background-color 0.25s ease;
+  width: 42px;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.adicionarCampeonato button:hover {
-  background-color: #3a74c4;
-}
-
-/* Tabela jogadores */
+/* Tabela de jogadores */
 .tabelaJogadores {
   width: 100%;
   border-collapse: collapse;
-  margin-bottom: 1.8rem;
   font-size: 0.95rem;
+  margin-top: 1rem;
   color: #e0e0e0;
 }
 
@@ -183,89 +185,64 @@
 
 .tabelaJogadores th,
 .tabelaJogadores td {
-  padding: 0.7rem 1rem;
-  text-align: left;
+  padding: 0.75rem 1rem;
   border-bottom: 1px solid #444a5a;
+  text-align: left;
 }
 
 .tabelaJogadores tbody tr:hover {
   background-color: #3b4270;
 }
 
+/* Número da camisa input */
 .inputNumeroCamisa {
-  width: 50px;
-  padding: 0.3rem 0.5rem;
-  border-radius: 6px;
-  border: 1.5px solid #444a5a;
+  width: 60px;
+  padding: 0.4rem 0.6rem;
+  border-radius: 8px;
+  border: 1.5px solid #4a90e2;
   background: #2a2f45;
   color: #fff;
   text-align: center;
   font-weight: 600;
-  transition: border-color 0.3s ease;
 }
 
-.inputNumeroCamisa:focus {
-  border-color: #4a90e2;
-  outline: none;
-}
-
-/* Botões dentro da tabela */
-.btnCapitao,
-.btnRemoverJogador {
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  font-size: 1.2rem;
-  margin-left: 0.4rem;
-  transition: color 0.2s ease;
-  color: #a0a9b8;
-}
-
-.btnCapitao:hover {
-  color: #f5d75a; /* amarelo dourado */
-}
-
-.btnRemoverJogador:hover {
-  color: #ff6b6b; /* vermelho */
-}
-
-/* Adicionar jogador - área do input email + dados */
+/* Adicionar jogador */
 .adicionarJogador {
   background-color: #222738;
-  padding: 1rem;
-  border-radius: 12px;
-  margin-bottom: 2rem;
-  color: #cfd8dc;
-}
-
-.adicionarJogador h4 {
-  margin-bottom: 0.8rem;
-  font-weight: 700;
-  font-size: 1.2rem;
+  padding: 1.5rem;
+  border-radius: 14px;
+  margin-top: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
 }
 
 .inputEmail {
   width: 100%;
-  padding: 0.6rem 0.8rem;
-  border-radius: 8px;
-  border: 1.5px solid #444a5a;
+  padding: 0.7rem 1rem;
+  border-radius: 10px;
+  border: 1.5px solid #4a90e2;
   background: #2a2f45;
   color: #fff;
   font-size: 1rem;
-  margin-bottom: 1rem;
 }
 
 .dadosJogador p {
-  margin: 0.15rem 0;
+  margin: 0.2rem 0;
   font-size: 0.9rem;
+  color: #cfd8dc;
 }
 
-/* Pequeno ajuste geral */
+.dadosJogador strong {
+  color: #4a90e2;
+}
+
+/* Acessibilidade foco */
 button:focus,
 input:focus,
 select:focus,
 textarea:focus {
+  outline: none;
   outline-offset: 2px;
-  outline-color: #4a90e2;
+  box-shadow: 0 0 0 2px rgba(74,144,226,0.4);
 }
-

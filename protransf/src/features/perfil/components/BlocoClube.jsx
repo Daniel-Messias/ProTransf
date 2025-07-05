@@ -45,14 +45,22 @@ export default function BlocoClube({ jogador, clube, loading, modoLeitura, usuar
 
   // Se o usuário não tem clube cadastrado, já entra no modo criação
   useEffect(() => {
-    if (!clube && usuarioLogado) {
-      setModoEdicao(true);
-      setForm(prev => ({
-        ...prev,
-        criadoPorUsuarioId: usuarioLogado.uid,
-      }));
-    }
-  }, [clube, usuarioLogado]);
+  if (!loading && !clube && usuarioLogado && !modoLeitura) {
+    // Só entra em modo de criação se:
+    // - dados carregaram
+    // - não existe clube
+    // - está logado
+    // - é o dono da conta (não está em modo leitura)
+    setModoEdicao(true);
+    setForm(prev => ({
+      ...prev,
+      criadoPorUsuarioId: usuarioLogado.uid,
+    }));
+  } else {
+    // Se existe clube ou é visitante, entra em visualização
+    setModoEdicao(false);
+  }
+}, [clube, usuarioLogado, loading, modoLeitura]);
 
   // Sincroniza dados ao receber clube atualizado
   useEffect(() => {

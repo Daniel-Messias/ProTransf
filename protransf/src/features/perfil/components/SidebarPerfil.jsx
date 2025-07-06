@@ -42,14 +42,14 @@ export default function SidebarPerfil({ jogador }) {
   const [loadingAmistosos, setLoadingAmistosos] = useState(true);
 
   useEffect(() => {
-    if (!jogador.uid) return;
+    if (!jogador.id) return;
 
     setLoadingConvites(true);
 
     // Query para convites recebidos pelo jogador
     const qJogador = query(
       collection(db, 'convites'),
-      where('jogadorId', '==', jogador.uid)
+      where('jogadorId', '==', jogador.id)
     );
 
     // Query para convites recebidos pelo clube atual do jogador (se houver)
@@ -89,7 +89,7 @@ export default function SidebarPerfil({ jogador }) {
     return () => {
       unsubscribes.forEach(unsub => unsub());
     };
-  }, [jogador.uid, jogador.clubeAtualId]);
+  }, [jogador.id, jogador.clubeAtualId]);
 
 
   // Carregar amistosos para clube atual do jogador
@@ -186,7 +186,7 @@ export default function SidebarPerfil({ jogador }) {
       );
 
       if (novoStatus === 'aceito') {
-        const userRef = doc(db, 'usuarios', jogador.uid);
+        const userRef = doc(db, 'usuarios', jogador.id);
 
         await updateDoc(userRef, {
           status: 'Contratado',
@@ -382,7 +382,9 @@ export default function SidebarPerfil({ jogador }) {
         ) : (
           <ul className={styles.convitesList}>
             {convites
-  .filter(convite => convite.tipo === 'clube_para_jogador')
+            .filter(convite => convite.tipo === 'clube_para_jogador')
+
+
   .map((convite) => {
     const nomeClube = convite.clubeNome || 'Clube desconhecido';
     const podeResponder = isDonoPerfil && convite.status === 'pendente';

@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import styles from '../styles/BlocoJogador.module.css';
-import { doc, onSnapshot, updateDoc } from 'firebase/firestore';
+import { doc, onSnapshot, updateDoc, getDoc } from 'firebase/firestore';
 import { auth, db } from '../../../services/firebase';
 
 export default function BlocoJogador({ jogadorId, modoLeitura }) {
   const [jogador, setJogador] = useState(null);
+  const [clubeAtualNome, setClubeAtualNome] = useState('');
   const [modoEdicao, setModoEdicao] = useState(false);
   const [formData, setFormData] = useState({
     bio: '',
@@ -23,10 +24,28 @@ export default function BlocoJogador({ jogadorId, modoLeitura }) {
     const jogadorRef = doc(db, 'usuarios', jogadorId);
     const unsubscribe = onSnapshot(
       jogadorRef,
-      (docSnap) => {
+      async (docSnap) => {
         if (docSnap.exists()) {
           const data = docSnap.data();
           setJogador({ id: docSnap.id, ...data });
+
+          // Busca nome do clube atual, se existir clubeAtualId
+          if (data.clubeAtualId) {
+            try {
+              const clubeRef = doc(db, 'clubes', data.clubeAtualId);
+              const clubeSnap = await getDoc(clubeRef);
+              if (clubeSnap.exists()) {
+                setClubeAtualNome(clubeSnap.data().nome || 'Clube');
+              } else {
+                setClubeAtualNome('Clube não encontrado');
+              }
+            } catch (error) {
+              console.error('Erro ao buscar nome do clube:', error);
+              setClubeAtualNome('Erro ao carregar clube');
+            }
+          } else {
+            setClubeAtualNome('');
+          }
 
           // Atualiza o form só se não estiver editando para não sobrescrever o que o usuário está digitando
           if (!modoEdicao) {
@@ -120,7 +139,7 @@ export default function BlocoJogador({ jogadorId, modoLeitura }) {
             <span>
               {jogador.clubeAtualId ? (
                 <Link to={`/perfil/${jogador.clubeAtualId}`}>
-                  {jogador.clubeAtual || 'Ver clube'}
+                  {clubeAtualNome || 'Ver clube'}
                 </Link>
               ) : (
                 'Nenhum'
@@ -141,7 +160,13 @@ export default function BlocoJogador({ jogadorId, modoLeitura }) {
           </div>
           <div className={styles.infoItem}>
             <strong>Bio</strong>
-            <span>{jogador.bio?.trim() ? jogador.bio : <span className={styles.vazio}>Sem bio</span>}</span>
+            <span>
+              {jogador.bio?.trim() ? (
+                jogador.bio
+              ) : (
+                <span className={styles.vazio}>Sem bio</span>
+              )}
+            </span>
           </div>
         </div>
       ) : (
@@ -149,12 +174,21 @@ export default function BlocoJogador({ jogadorId, modoLeitura }) {
           <div className={styles.formGrid}>
             <label>
               Bio:
-              <textarea name="bio" value={formData.bio} onChange={handleChange} rows={4} />
+              <textarea
+                name="bio"
+                value={formData.bio}
+                onChange={handleChange}
+                rows={4}
+              />
             </label>
 
             <label>
               Posição Primária:
-              <select name="posicaoPrimaria" value={formData.posicaoPrimaria} onChange={handleChange}>
+              <select
+                name="posicaoPrimaria"
+                value={formData.posicaoPrimaria}
+                onChange={handleChange}
+              >
                 <option value="">Nenhuma</option>
                 <option value="Goleiro">Goleiro</option>
                 <option value="Zagueiro">Zagueiro</option>
@@ -169,7 +203,11 @@ export default function BlocoJogador({ jogadorId, modoLeitura }) {
 
             <label>
               Posição Secundária:
-              <select name="posicaoSecundaria" value={formData.posicaoSecundaria} onChange={handleChange}>
+              <select
+                name="posicaoSecundaria"
+                value={formData.posicaoSecundaria}
+                onChange={handleChange}
+              >
                 <option value="">Nenhuma</option>
                 <option value="Goleiro">Goleiro</option>
                 <option value="Zagueiro">Zagueiro</option>
@@ -199,7 +237,11 @@ export default function BlocoJogador({ jogadorId, modoLeitura }) {
           <div className={styles.videosSection}>
             <label>
               Adicionar link de jogada:
-              <input type="text" value={novoVideo} onChange={(e) => setNovoVideo(e.target.value)} />
+              <input
+                type="text"
+                value={novoVideo}
+                onChange={(e) => setNovoVideo(e.target.value)}
+              />
               <button onClick={handleAddVideo} type="button">
                 Adicionar
               </button>
@@ -225,7 +267,11 @@ export default function BlocoJogador({ jogadorId, modoLeitura }) {
           </div>
 
           <div className={styles.buttonGroup}>
-            <button onClick={handleSalvar} disabled={salvando} type="button">
+            <button
+              onClick={handleSalvar}
+              disabled={salvando}
+              type="button"
+            >
               {salvando ? 'Salvando...' : 'Salvar alterações'}
             </button>
             <button onClick={() => setModoEdicao(false)} type="button">
@@ -260,7 +306,11 @@ export default function BlocoJogador({ jogadorId, modoLeitura }) {
             )}
           </div>
 
-          <button className={styles.editButton} onClick={() => setModoEdicao(true)} type="button">
+          <button
+            className={styles.editButton}
+            onClick={() => setModoEdicao(true)}
+            type="button"
+          >
             Editar Perfil do Jogador
           </button>
         </>

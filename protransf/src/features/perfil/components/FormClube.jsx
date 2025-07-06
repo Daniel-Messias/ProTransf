@@ -120,59 +120,47 @@ export default function FormClube({ clube, usuarioLogado, modoLeitura, setModoEd
     }
   }, [novoJogadorEmail]);
 
-  async function adicionarJogador() {
-    if (
-      !novoJogadorEmail.trim() ||
-      !novoJogadorDados.username ||
-      !novoJogadorDados.posicao ||
-      !novoJogadorDados.plataforma ||
-      !novoJogadorDados.status ||
-      !novoJogadorDados.numeroCamisa.trim()
-    ) {
-      alert('Preencha todos os campos do jogador, inclusive o número da camisa.');
+  async function convidarJogador() {
+  if (
+    !novoJogadorEmail.trim() ||
+    !novoJogadorDados.username ||
+    !novoJogadorDados.posicao ||
+    !novoJogadorDados.plataforma ||
+    !novoJogadorDados.status ||
+    !novoJogadorDados.numeroCamisa.trim()
+  ) {
+    alert('Preencha todos os campos do jogador, inclusive o número da camisa.');
+    return;
+  }
+
+  try {
+    const usuariosRef = collection(db, 'usuarios');
+    const q = query(usuariosRef, where('email', '==', novoJogadorEmail.trim().toLowerCase()));
+    const snapshot = await getDocs(q);
+
+    if (snapshot.empty) {
+      alert('Jogador não encontrado.');
       return;
     }
 
-    const jaTem = form.jogadores.some(j => j.username === novoJogadorDados.username);
-    if (jaTem) {
-      alert('Este jogador já está no elenco.');
-      return;
-    }
-
-    const novoJogador = {
-      username: novoJogadorDados.username,
+    const jogadorDoc = snapshot.docs[0];
+    const convite = {
+      tipo: 'clube_para_jogador',
+      status: 'pendente',
+      dataEnvio: serverTimestamp(),
+      jogadorId: jogadorDoc.id,
+      jogadorEmail: novoJogadorEmail.trim(),
+      jogadorUsername: novoJogadorDados.username,
+      clubeId: clube.id,
+      clubeNome: form.nome,
+      numeroCamisa: novoJogadorDados.numeroCamisa.trim(),
       posicao: novoJogadorDados.posicao,
       plataforma: novoJogadorDados.plataforma,
-      status: novoJogadorDados.status,
-      numeroCamisa: novoJogadorDados.numeroCamisa.trim(),
-      capitao: false,
     };
 
-    const novosJogadores = [...form.jogadores, novoJogador];
-    setForm(prev => ({
-      ...prev,
-      jogadores: novosJogadores,
-      numeroDeJogadores: novosJogadores.length,
-    }));
+    await addDoc(collection(db, 'convites'), convite);
 
-    try {
-      const usuariosRef = collection(db, 'usuarios');
-      const q = query(usuariosRef, where('username', '==', novoJogador.username));
-      const snapshot = await getDocs(q);
-      if (!snapshot.empty) {
-        const jogadorDocId = snapshot.docs[0].id;
-        const jogadorRef = doc(db, 'usuarios', jogadorDocId);
-        await updateDoc(jogadorRef, {
-          status: 'contratado',
-          clubeAtualId: clube ? clube.id : '',
-          podeEditarNumeroCamisa: false,
-        });
-      }
-    } catch (error) {
-      console.error('Erro ao atualizar jogador no Firestore:', error);
-      alert('Erro ao atualizar dados do jogador no Firestore. Tente novamente.');
-    }
-
+    alert(`Convite enviado para ${novoJogadorDados.username}.`);
     setNovoJogadorEmail('');
     setNovoJogadorDados({
       username: '',
@@ -182,8 +170,12 @@ export default function FormClube({ clube, usuarioLogado, modoLeitura, setModoEd
       numeroCamisa: '',
     });
 
-    alert(`Jogador ${novoJogador.username} adicionado ao elenco!`);
+  } catch (error) {
+    console.error('Erro ao enviar convite:', error);
+    alert('Erro ao enviar convite. Tente novamente.');
   }
+}
+
 
   async function removerJogador(index) {
     if (!window.confirm(`Remover jogador ${form.jogadores[index].username}?`)) return;
@@ -498,9 +490,10 @@ export default function FormClube({ clube, usuarioLogado, modoLeitura, setModoEd
               required
             />
           </label>
-          <button type="button" onClick={adicionarJogador}>
-            Adicionar Jogador
-          </button>
+          <button type="button" onClick={convidarJogador}>
+  Enviar Convite
+</button>
+
         </div>
       )}
 

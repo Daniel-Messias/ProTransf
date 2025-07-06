@@ -4,16 +4,15 @@ import BlocoJogador from './BlocoJogador';
 import BlocoClube from './BlocoClube';
 import styles from '../styles/MainPerfil.module.css';
 
-export default function MainPerfil({ jogador, clube, modoLeitura, usuarioLogado }) {
+export default function MainPerfil({ jogador, clube, modoLeitura, usuarioLogado, carregandoClube }) {
   return (
     <main className={styles.main}>
-      <BlocoJogador jogador={jogador} modoLeitura={modoLeitura} />
+      <BlocoJogador jogadorId={jogador?.id} modoLeitura={modoLeitura} />
       <BlocoClube
-        jogador={jogador}
         clube={clube}
         modoLeitura={modoLeitura}
-        loading={false}
         usuarioLogado={usuarioLogado}
+        carregando={carregandoClube}
       />
     </main>
   );

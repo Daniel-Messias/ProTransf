@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import styles from '../styles/FormClube.module.css'; // Ajuste caminho conforme estrutura
+import styles from '../styles/FormClube.module.css';
 import { 
   doc, updateDoc, addDoc, collection, serverTimestamp, getDocs, query, where 
 } from 'firebase/firestore';
@@ -7,9 +7,7 @@ import { db } from '../../../services/firebase';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { storage } from '../../../services/firebase';
 
-// Formulário para criar/editar dados do clube, incluindo logo, campeonatos e jogadores
 export default function FormClube({ clube, usuarioLogado, modoLeitura, setModoEdicao, atualizarClubeLocal }) {
-  // Estado do formulário, inicializado vazio ou com dados recebidos
   const [form, setForm] = useState({
     nome: '',
     fundacao: '',
@@ -36,7 +34,6 @@ export default function FormClube({ clube, usuarioLogado, modoLeitura, setModoEd
   });
   const [salvando, setSalvando] = useState(false);
 
-  // Sincroniza form com dados do clube recebidos (quando editando)
   useEffect(() => {
     if (clube) {
       setForm({
@@ -56,7 +53,6 @@ export default function FormClube({ clube, usuarioLogado, modoLeitura, setModoEd
     }
   }, [clube]);
 
-  // Upload da logo para Firebase Storage
   async function handleLogoUpload(event) {
     const file = event.target.files[0];
     if (!file) return;
@@ -74,7 +70,6 @@ export default function FormClube({ clube, usuarioLogado, modoLeitura, setModoEd
     }
   }
 
-  // Busca dados do jogador no Firestore pelo email para preencher automaticamente os campos do novo jogador
   async function buscarDadosJogadorPorEmail(email) {
     if (!email.trim()) {
       setNovoJogadorDados({
@@ -111,7 +106,6 @@ export default function FormClube({ clube, usuarioLogado, modoLeitura, setModoEd
     }
   }
 
-  // Atualiza dados do jogador ao alterar email
   useEffect(() => {
     if (novoJogadorEmail.trim()) {
       buscarDadosJogadorPorEmail(novoJogadorEmail);
@@ -126,7 +120,6 @@ export default function FormClube({ clube, usuarioLogado, modoLeitura, setModoEd
     }
   }, [novoJogadorEmail]);
 
-  // Adiciona jogador ao elenco localmente e atualiza Firestore do jogador para status "contratado"
   async function adicionarJogador() {
     if (
       !novoJogadorEmail.trim() ||
@@ -140,7 +133,6 @@ export default function FormClube({ clube, usuarioLogado, modoLeitura, setModoEd
       return;
     }
 
-    // Verifica se jogador já está no elenco
     const jaTem = form.jogadores.some(j => j.username === novoJogadorDados.username);
     if (jaTem) {
       alert('Este jogador já está no elenco.');
@@ -156,7 +148,6 @@ export default function FormClube({ clube, usuarioLogado, modoLeitura, setModoEd
       capitao: false,
     };
 
-    // Atualiza elenco local
     const novosJogadores = [...form.jogadores, novoJogador];
     setForm(prev => ({
       ...prev,
@@ -165,7 +156,6 @@ export default function FormClube({ clube, usuarioLogado, modoLeitura, setModoEd
     }));
 
     try {
-      // Atualiza status do jogador no Firestore para contratado
       const usuariosRef = collection(db, 'usuarios');
       const q = query(usuariosRef, where('username', '==', novoJogador.username));
       const snapshot = await getDocs(q);
@@ -183,7 +173,6 @@ export default function FormClube({ clube, usuarioLogado, modoLeitura, setModoEd
       alert('Erro ao atualizar dados do jogador no Firestore. Tente novamente.');
     }
 
-    // Limpa campos do novo jogador
     setNovoJogadorEmail('');
     setNovoJogadorDados({
       username: '',
@@ -196,7 +185,6 @@ export default function FormClube({ clube, usuarioLogado, modoLeitura, setModoEd
     alert(`Jogador ${novoJogador.username} adicionado ao elenco!`);
   }
 
-  // Remove jogador do elenco local e atualiza Firestore para status "livre"
   async function removerJogador(index) {
     if (!window.confirm(`Remover jogador ${form.jogadores[index].username}?`)) return;
 
@@ -221,7 +209,6 @@ export default function FormClube({ clube, usuarioLogado, modoLeitura, setModoEd
       return;
     }
 
-    // Atualiza elenco local removendo jogador
     const novosJogadores = form.jogadores.filter((_, i) => i !== index);
     setForm(prev => ({
       ...prev,
@@ -230,7 +217,6 @@ export default function FormClube({ clube, usuarioLogado, modoLeitura, setModoEd
     }));
   }
 
-  // Define único capitão do time no elenco
   function definirCapitao(username) {
     setForm(prev => ({
       ...prev,
@@ -241,7 +227,6 @@ export default function FormClube({ clube, usuarioLogado, modoLeitura, setModoEd
     }));
   }
 
-  // Atualiza número da camisa de jogador específico
   function atualizarNumeroCamisa(index, numero) {
     setForm(prev => {
       const copia = [...prev.jogadores];
@@ -250,7 +235,6 @@ export default function FormClube({ clube, usuarioLogado, modoLeitura, setModoEd
     });
   }
 
-  // Adiciona novo campeonato à lista, evitando duplicados
   function adicionarCampeonato() {
     if (novoCampeonato.trim() === '') return;
     if (form.campeonatos.includes(novoCampeonato.trim())) {
@@ -264,7 +248,6 @@ export default function FormClube({ clube, usuarioLogado, modoLeitura, setModoEd
     setNovoCampeonato('');
   }
 
-  // Remove campeonato da lista pelo índice
   function removerCampeonato(index) {
     setForm(prev => ({
       ...prev,
@@ -272,7 +255,6 @@ export default function FormClube({ clube, usuarioLogado, modoLeitura, setModoEd
     }));
   }
 
-  // Salva ou cria clube no Firestore, atualizando estado local via callback
   async function handleSalvar() {
     if (!form.nome.trim() || !form.fundacao.trim()) {
       alert('Nome do clube e fundação são obrigatórios.');
@@ -281,7 +263,6 @@ export default function FormClube({ clube, usuarioLogado, modoLeitura, setModoEd
     setSalvando(true);
     try {
       if (clube) {
-        // Atualizar clube existente
         const clubeRef = doc(db, 'clubes', clube.id);
         await updateDoc(clubeRef, {
           nome: form.nome.trim(),
@@ -296,7 +277,6 @@ export default function FormClube({ clube, usuarioLogado, modoLeitura, setModoEd
           ultimaAtualizacao: serverTimestamp(),
         });
       } else {
-        // Criar novo clube
         const clubesRef = collection(db, 'clubes');
         const novoClubeDoc = await addDoc(clubesRef, {
           nome: form.nome.trim(),
@@ -313,7 +293,6 @@ export default function FormClube({ clube, usuarioLogado, modoLeitura, setModoEd
           criadoEm: serverTimestamp(),
         });
 
-        // Atualiza o clubeAtualId do usuário logado
         const userRef = doc(db, 'usuarios', usuarioLogado.uid);
         await updateDoc(userRef, {
           clubeAtualId: novoClubeDoc.id,
@@ -323,7 +302,6 @@ export default function FormClube({ clube, usuarioLogado, modoLeitura, setModoEd
       alert('Clube salvo com sucesso!');
       setModoEdicao(false);
 
-      // Atualiza dados locais no pai para manter sincronização
       if (atualizarClubeLocal) atualizarClubeLocal({ ...form });
 
     } catch (error) {
@@ -333,7 +311,6 @@ export default function FormClube({ clube, usuarioLogado, modoLeitura, setModoEd
     setSalvando(false);
   }
 
-  // Renderização do formulário
   return (
     <form className={styles.formClube} onSubmit={e => e.preventDefault()}>
       <label>

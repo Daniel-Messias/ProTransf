@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import styles from '../styles/BlocoClube.module.css';
 import FormClube from './FormClube';
-import { doc, getDoc } from 'firebase/firestore';
+import { doc, onSnapshot } from 'firebase/firestore';
 import { db } from '../../../services/firebase';
 
 export default function BlocoClube({ usuarioLogado }) {
@@ -10,14 +10,17 @@ export default function BlocoClube({ usuarioLogado }) {
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState(null);
 
-  async function buscarClube() {
+  useEffect(() => {
+    if (!usuarioLogado?.uid) return;
+
     setCarregando(true);
     setErro(null);
 
-    try {
-      const usuarioRef = doc(db, 'usuarios', usuarioLogado.uid);
-      const usuarioSnap = await getDoc(usuarioRef);
+    // Listener no documento do usuário
+    const usuarioRef = doc(db, 'usuarios', usuarioLogado.uid);
+    let unsubscribeClube = () => {};
 
+    const unsubscribeUsuario = onSnapshot(usuarioRef, usuarioSnap => {
       if (!usuarioSnap.exists()) {
         setErro('Usuário não encontrado no banco.');
         setClube(null);
@@ -31,31 +34,37 @@ export default function BlocoClube({ usuarioLogado }) {
       if (!clubeId) {
         setClube(null);
         setCarregando(false);
-        return; // usuário ainda não tem clube
+        unsubscribeClube();
+        return;
       }
 
+      // Listener no documento do clube
       const clubeRef = doc(db, 'clubes', clubeId);
-      const clubeSnap = await getDoc(clubeRef);
-
-      if (!clubeSnap.exists()) {
-        setErro('Clube não encontrado.');
+      unsubscribeClube = onSnapshot(clubeRef, clubeSnap => {
+        if (!clubeSnap.exists()) {
+          setErro('Clube não encontrado.');
+          setClube(null);
+        } else {
+          setClube({ id: clubeSnap.id, ...clubeSnap.data() });
+          setErro(null);
+        }
+        setCarregando(false);
+      }, error => {
+        setErro('Erro ao ouvir dados do clube.');
         setClube(null);
-      } else {
-        setClube({ id: clubeSnap.id, ...clubeSnap.data() });
-      }
-    } catch (e) {
-      console.error('Erro ao buscar clube:', e);
-      setErro('Erro ao buscar clube. Tente novamente.');
+        setCarregando(false);
+      });
+    }, error => {
+      setErro('Erro ao ouvir dados do usuário.');
       setClube(null);
-    }
+      setCarregando(false);
+    });
 
-    setCarregando(false);
-  }
-
-  useEffect(() => {
-    if (usuarioLogado?.uid) {
-      buscarClube();
-    }
+    // Cleanup geral
+    return () => {
+      unsubscribeUsuario();
+      unsubscribeClube();
+    };
   }, [usuarioLogado]);
 
   function atualizarClubeLocal(novosDados) {
@@ -86,7 +95,7 @@ export default function BlocoClube({ usuarioLogado }) {
 
           {!modoEdicao && (
             <button
-              className={styles.btnEditar} // botão estilizado como no css exemplo
+              className={styles.btnEditar}
               onClick={() => setModoEdicao(true)}
             >
               Cadastrar Clube
@@ -110,7 +119,6 @@ export default function BlocoClube({ usuarioLogado }) {
               <h2 className={styles.tituloClube}>{clube.nome}</h2>
 
               <div className={styles.infoGrid}>
-                {/* Cada info do clube dentro de um box infoItem */}
                 <div className={styles.infoItem}>
                   <strong>Fundação</strong>
                   <span>{clube.fundacao || <em className={styles.vazio}>Não informado</em>}</span>
@@ -153,7 +161,7 @@ export default function BlocoClube({ usuarioLogado }) {
               </div>
 
               <button
-                className={styles.btnEditar} // botão azul estilizado
+                className={styles.btnEditar}
                 onClick={() => setModoEdicao(true)}
               >
                 Editar Clube

@@ -175,6 +175,33 @@ export default function FormClube({ clube, usuarioLogado, modoLeitura, setModoEd
     alert('Erro ao enviar convite. Tente novamente.');
   }
 }
+async function pedirDemissao() {
+  if (!window.confirm('Você tem certeza que deseja pedir demissão do clube?')) return;
+
+  try {
+    // Buscar o documento do usuário logado
+    const userRef = doc(db, 'usuarios', usuarioLogado.uid);
+
+    // Atualizar o status ou sinalizar o pedido de demissão
+    await updateDoc(userRef, {
+      pedidoDemissao: true,  // flag que indica pedido de saída
+      status: 'pedido_demissao', // opcional, para controle
+      clubeAtualId: '', // opcional, remover clube atual até aprovação
+    });
+
+    alert('Pedido de demissão enviado com sucesso!');
+    
+    // Se quiser, atualizar localmente o estado do clube
+    if (atualizarClubeLocal) atualizarClubeLocal(prev => ({
+      ...prev,
+      jogadores: prev.jogadores.filter(j => j.username !== usuarioLogado.username),
+    }));
+
+  } catch (error) {
+    console.error('Erro ao pedir demissão:', error);
+    alert('Erro ao enviar pedido. Tente novamente.');
+  }
+}
 
 
   async function removerJogador(index) {
@@ -496,6 +523,12 @@ export default function FormClube({ clube, usuarioLogado, modoLeitura, setModoEd
 
         </div>
       )}
+      {!modoLeitura && form.jogadores.some(j => j.username === usuarioLogado.username) && (
+  <button type="button" onClick={pedirDemissao} className={styles.btnDemissao}>
+    Pedir Demissão
+  </button>
+)}
+
 
       {!modoLeitura && (
         <div className={styles.buttonGroup}>

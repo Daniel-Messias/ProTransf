@@ -246,3 +246,17 @@ textarea:focus {
   outline-offset: 2px;
   box-shadow: 0 0 0 2px rgba(74,144,226,0.4);
 }
+.btnDemissao {
+  background-color: #ff4d4f;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  cursor: pointer;
+  margin-top: 20px;
+  border-radius: 4px;
+  font-weight: bold;
+}
+
+.btnDemissao:hover {
+  background-color: #d9363e;
+}

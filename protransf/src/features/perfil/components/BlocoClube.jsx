@@ -3,7 +3,7 @@ import styles from '../styles/BlocoClube.module.css';
 import FormClube from './FormClube';
 import { doc, onSnapshot } from 'firebase/firestore';
 import { db } from '../../../services/firebase';
-
+import ElencoClube from './ElencoClube';
 export default function BlocoClube({ usuarioLogado }) {
   const [clube, setClube] = useState(null);
   const [modoEdicao, setModoEdicao] = useState(false);
@@ -164,9 +164,18 @@ export default function BlocoClube({ usuarioLogado }) {
                 className={styles.btnEditar}
                 onClick={() => setModoEdicao(true)}
               >
-                Editar Clube
-              </button>
-            </>
+               Editar Clube
+    </button>
+
+    <h3>Jogadores do Elenco</h3>
+    <ElencoClube
+      jogadores={clube.jogadores || []}
+      modoEdicao={false}
+      definirCapitao={() => {}}
+      removerJogador={() => {}}
+      atualizarNumeroCamisa={() => {}}
+    />
+    </>
           ) : (
             <FormClube
               clube={clube}

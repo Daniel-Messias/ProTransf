@@ -23,12 +23,10 @@ export default function ElencoClube({ jogadores, modoEdicao, definirCapitao, rem
       </thead>
       <tbody>
         {jogadores.map((j, i) => (
-          <tr key={j.username}>
+          <tr key={j.id}>
             <td>
               <Link
-                to={`/perfil-jogador/${j.username}`}
-                target="_blank"
-                rel="noreferrer"
+                to={`/perfil/${j.id}`}
                 className={styles.linkPerfil}
               >
                 {j.username}

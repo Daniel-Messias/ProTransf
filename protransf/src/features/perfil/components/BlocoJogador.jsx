@@ -29,35 +29,27 @@ export default function BlocoJogador({ jogadorId, modoLeitura }) {
           const data = docSnap.data();
           setJogador({ id: docSnap.id, ...data });
 
-          // Busca nome do clube atual, se existir clubeAtualId
           if (data.clubeAtualId) {
             try {
               const clubeRef = doc(db, 'clubes', data.clubeAtualId);
               const clubeSnap = await getDoc(clubeRef);
-             if (clubeSnap.exists()) {
-  const clubeData = clubeSnap.data();
-  console.log('✅ Dados do clube encontrados:', clubeData);
-
-  if (clubeData.nome) {
-    setClubeAtualNome(clubeData.nome);
-  } else {
-    console.warn('⚠️ Campo "nome" não encontrado no clube:', clubeData);
-    setClubeAtualNome('Nome do clube ausente');
-  }
-} else {
-  console.warn('❌ Clube não encontrado com ID:', data.clubeAtualId);
-  setClubeAtualNome('Clube não encontrado');
-}
-
-            } catch (error) {
-              console.error('Erro ao buscar nome do clube:', error);
+              if (clubeSnap.exists()) {
+                const clubeData = clubeSnap.data();
+                if (clubeData.nome) {
+                  setClubeAtualNome(clubeData.nome);
+                } else {
+                  setClubeAtualNome('Nome do clube ausente');
+                }
+              } else {
+                setClubeAtualNome('Clube não encontrado');
+              }
+            } catch {
               setClubeAtualNome('Erro ao carregar clube');
             }
           } else {
             setClubeAtualNome('');
           }
 
-          // Atualiza o form só se não estiver editando para não sobrescrever o que o usuário está digitando
           if (!modoEdicao) {
             setFormData({
               bio: data.bio || '',
@@ -129,6 +121,23 @@ export default function BlocoJogador({ jogadorId, modoLeitura }) {
       setSalvando(false);
     }
   };
+
+  async function pedirDemissao() {
+    if (!window.confirm('Tem certeza que deseja pedir demissão do clube?')) return;
+
+    try {
+      const jogadorRef = doc(db, 'usuarios', jogadorId);
+      await updateDoc(jogadorRef, {
+        pedidoDemissao: true,
+        status: 'pedido_demissao',
+        clubeAtualId: '',
+      });
+      alert('Pedido de demissão enviado com sucesso!');
+    } catch (error) {
+      console.error('Erro ao pedir demissão:', error);
+      alert('Erro ao enviar pedido. Tente novamente.');
+    }
+  }
 
   return (
     <div className={styles.container}>
@@ -277,11 +286,7 @@ export default function BlocoJogador({ jogadorId, modoLeitura }) {
           </div>
 
           <div className={styles.buttonGroup}>
-            <button
-              onClick={handleSalvar}
-              disabled={salvando}
-              type="button"
-            >
+            <button onClick={handleSalvar} disabled={salvando} type="button">
               {salvando ? 'Salvando...' : 'Salvar alterações'}
             </button>
             <button onClick={() => setModoEdicao(false)} type="button">
@@ -315,14 +320,25 @@ export default function BlocoJogador({ jogadorId, modoLeitura }) {
               <p className={styles.vazio}>Sem jogadas registradas.</p>
             )}
           </div>
+<div className={styles.actionButtons}>
+      <button
+        className={styles.editButton}
+        onClick={() => setModoEdicao(true)}
+        type="button"
+      >
+        Editar Perfil do Jogador
+      </button>
 
-          <button
-            className={styles.editButton}
-            onClick={() => setModoEdicao(true)}
-            type="button"
-          >
-            Editar Perfil do Jogador
-          </button>
+      {isContratado && (
+        <button
+          onClick={pedirDemissao}
+          type="button"
+          className={styles.btnDemissao}
+        >
+          Pedir Demissão
+        </button>
+      )}
+    </div>
         </>
       )}
     </div>

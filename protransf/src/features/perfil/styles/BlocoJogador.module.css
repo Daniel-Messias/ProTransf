@@ -129,11 +129,11 @@
 }
 
 .editButton {
-  display: block;
-  margin: 28px auto 0;
   background-color: #007bff;
   color: white;
-  padding: 14px 36px;
+  height: 48px;
+  line-height: 48px;
+  padding: 0 36px;
   border: none;
   border-radius: 14px;
   font-size: 17px;
@@ -144,6 +144,7 @@
   transition: background-color 0.35s, box-shadow 0.35s;
   user-select: none;
 }
+
 
 .editButton:hover {
   background-color: #0056b3;
@@ -214,4 +215,37 @@ label {
 .buttonGroup button:hover {
   background-color: #0056b3;
   box-shadow: 0 6px 14px rgba(0, 86, 179, 0.6);
+}
+.actionButtons {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
+  margin-top: 28px;
+  flex-wrap: wrap;
+}
+
+
+.btnDemissao {
+  height: 48px; /* garante que fique igual ao editButton */
+  padding: 0 24px;
+  background-color: #ff4d4f;
+  color: white;
+  border: none;
+  border-radius: 14px;
+  cursor: pointer;
+  font-weight: 900;
+  font-size: 17px;
+  letter-spacing: 0.05em;
+  box-shadow: 0 5px 15px rgba(255, 77, 79, 0.5);
+  transition: background-color 0.35s, box-shadow 0.35s;
+}
+
+.btnDemissao:hover {
+  background-color: #d9363e;
+  box-shadow: 0 8px 24px rgba(217, 54, 62, 0.8);
+}
+.editButton,
+.btnDemissao {
+  min-width: 220px;
 }

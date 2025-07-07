@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import styles from '../styles/FormClube.module.css';
 import { 
-  doc, updateDoc, addDoc, collection, serverTimestamp, getDocs, query, where 
+  doc, updateDoc, addDoc, collection, serverTimestamp, getDocs, query, where, onSnapshot 
 } from 'firebase/firestore';
 import { db } from '../../../services/firebase';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
@@ -33,6 +33,7 @@ export default function FormClube({ clube, usuarioLogado, modoLeitura, setModoEd
     numeroCamisa: '',
   });
   const [salvando, setSalvando] = useState(false);
+  const [jogadoresTempoReal, setJogadoresTempoReal] = useState([]);
 
   useEffect(() => {
     if (clube) {
@@ -52,6 +53,25 @@ export default function FormClube({ clube, usuarioLogado, modoLeitura, setModoEd
       });
     }
   }, [clube]);
+
+useEffect(() => {
+  if (!clube?.id) {
+    setJogadoresTempoReal([]);
+    return;
+  }
+
+  const q = query(collection(db, 'usuarios'), where('clubeAtualId', '==', clube.id));
+
+  const unsubscribe = onSnapshot(q, snapshot => {
+    const jogadores = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    setJogadoresTempoReal(jogadores);
+  }, error => {
+    console.error('Erro ao escutar jogadores em tempo real:', error);
+    setJogadoresTempoReal([]);
+  });
+
+  return () => unsubscribe();
+}, [clube?.id]);
 
   async function handleLogoUpload(event) {
     const file = event.target.files[0];
@@ -204,10 +224,10 @@ async function pedirDemissao() {
 }
 
 
-  async function removerJogador(index) {
-    if (!window.confirm(`Remover jogador ${form.jogadores[index].username}?`)) return;
+  async function removerJogador(jogador) {
+  if (!window.confirm(`Remover jogador ${jogador.username}?`)) return;
 
-    const jogadorRemovido = form.jogadores[index];
+  const jogadorRemovido = jogador;
 
     try {
       const usuariosRef = collection(db, 'usuarios');
@@ -236,23 +256,40 @@ async function pedirDemissao() {
     }));
   }
 
-  function definirCapitao(username) {
-    setForm(prev => ({
-      ...prev,
-      jogadores: prev.jogadores.map(j => ({
-        ...j,
-        capitao: j.username === username,
-      })),
-    }));
-  }
+  async function definirCapitao(username) {
+  try {
+    const usuariosRef = collection(db, 'usuarios');
+    const q = query(usuariosRef, where('clubeAtualId', '==', clube.id));
+    const snapshot = await getDocs(q);
 
-  function atualizarNumeroCamisa(index, numero) {
-    setForm(prev => {
-      const copia = [...prev.jogadores];
-      copia[index].numeroCamisa = numero;
-      return { ...prev, jogadores: copia };
+    const updates = snapshot.docs.map(docSnap => {
+      const isCapitao = docSnap.data().username === username;
+      return updateDoc(doc(db, 'usuarios', docSnap.id), {
+        capitao: isCapitao,
+      });
     });
+
+    await Promise.all(updates);
+    alert(`Novo capitão definido: ${username}`);
+  } catch (error) {
+    console.error('Erro ao definir capitão:', error);
+    alert('Erro ao definir capitão.');
   }
+}
+
+
+  async function atualizarNumeroCamisa(jogadorId, numero) {
+  try {
+    const jogadorRef = doc(db, 'usuarios', jogadorId);
+    await updateDoc(jogadorRef, {
+      numeroCamisa: numero,
+    });
+  } catch (error) {
+    console.error('Erro ao atualizar número da camisa:', error);
+    alert('Erro ao atualizar número.');
+  }
+}
+
 
   function adicionarCampeonato() {
     if (novoCampeonato.trim() === '') return;
@@ -289,7 +326,8 @@ async function pedirDemissao() {
           descricao: form.descricao.trim(),
           estaBuscando: form.estaBuscando,
           campeonatos: form.campeonatos,
-          jogadores: form.jogadores,
+          jogadores: [], // mantido por compatibilidade, mas agora não é mais usado
+           numeroDeJogadores: jogadoresTempoReal.length,
           logoUrl: form.logoUrl,
           status: form.status,
           numeroDeJogadores: form.numeroDeJogadores,
@@ -441,10 +479,10 @@ async function pedirDemissao() {
           </tr>
         </thead>
         <tbody>
-          {form.jogadores.length === 0 ? (
-            <tr><td colSpan={modoLeitura ? 5 : 6}>Elenco vazio.</td></tr>
-          ) : (
-            form.jogadores.map((j, i) => (
+          {jogadoresTempoReal.length === 0 ? (
+  <tr><td colSpan={modoLeitura ? 5 : 6}>Elenco vazio.</td></tr>
+) : (
+  jogadoresTempoReal.map((j, i) => (
               <tr key={j.username}>
                 <td>{j.username}</td>
                 <td>{j.posicao}</td>
@@ -454,7 +492,7 @@ async function pedirDemissao() {
                     <input
                       type="text"
                       value={j.numeroCamisa}
-                      onChange={e => atualizarNumeroCamisa(i, e.target.value)}
+                      onChange={e => atualizarNumeroCamisa(j.id, e.target.value)}
                       className={styles.inputNumeroCamisa}
                       maxLength={3}
                     />
@@ -476,7 +514,7 @@ async function pedirDemissao() {
                       </button>
                     )}
                     <button
-                      onClick={() => removerJogador(i)}
+                      onClick={() => removerJogador(j)}
                       className={styles.btnRemoverJogador}
                       type="button"
                       title="Remover jogador"
@@ -523,7 +561,7 @@ async function pedirDemissao() {
 
         </div>
       )}
-      {!modoLeitura && form.jogadores.some(j => j.username === usuarioLogado.username) && (
+     {!modoLeitura && jogadoresTempoReal.some(j => j.username === usuarioLogado.username) && (
   <button type="button" onClick={pedirDemissao} className={styles.btnDemissao}>
     Pedir Demissão
   </button>

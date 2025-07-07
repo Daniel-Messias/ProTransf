@@ -1,14 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import styles from '../styles/BlocoClube.module.css';
 import FormClube from './FormClube';
-import { doc, onSnapshot } from 'firebase/firestore';
+import { doc, onSnapshot, collection, query, where } from 'firebase/firestore';
 import { db } from '../../../services/firebase';
 import ElencoClube from './ElencoClube';
+
 export default function BlocoClube({ usuarioLogado }) {
   const [clube, setClube] = useState(null);
   const [modoEdicao, setModoEdicao] = useState(false);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState(null);
+
+  // NOVO: estado para jogadores do clube
+  const [jogadores, setJogadores] = useState([]);
 
   useEffect(() => {
     if (!usuarioLogado?.uid) return;
@@ -66,6 +70,26 @@ export default function BlocoClube({ usuarioLogado }) {
       unsubscribeClube();
     };
   }, [usuarioLogado]);
+
+  // NOVO: useEffect para buscar jogadores do clube
+  useEffect(() => {
+    if (!clube?.id) {
+      setJogadores([]);
+      return;
+    }
+
+    const q = query(collection(db, 'usuarios'), where('clubeAtualId', '==', clube.id));
+
+    const unsubscribe = onSnapshot(q, snapshot => {
+      const jogadoresData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      setJogadores(jogadoresData);
+    }, error => {
+      console.error('Erro ao carregar jogadores do clube:', error);
+      setJogadores([]);
+    });
+
+    return () => unsubscribe();
+  }, [clube?.id]);
 
   function atualizarClubeLocal(novosDados) {
     setClube(prev => ({ ...prev, ...novosDados }));
@@ -145,7 +169,7 @@ export default function BlocoClube({ usuarioLogado }) {
 
                 <div className={styles.infoItem}>
                   <strong>Número de Jogadores</strong>
-                  <span>{clube.numeroDeJogadores ?? 0}</span>
+                  <span>{jogadores.length}</span> {/* Mostrando a quantidade do estado jogadores */}
                 </div>
 
                 {clube.logoUrl && (
@@ -164,18 +188,18 @@ export default function BlocoClube({ usuarioLogado }) {
                 className={styles.btnEditar}
                 onClick={() => setModoEdicao(true)}
               >
-               Editar Clube
-    </button>
+                Editar Clube
+              </button>
 
-    <h3>Jogadores do Elenco</h3>
-    <ElencoClube
-      jogadores={clube.jogadores || []}
-      modoEdicao={false}
-      definirCapitao={() => {}}
-      removerJogador={() => {}}
-      atualizarNumeroCamisa={() => {}}
-    />
-    </>
+              <h3>Jogadores do Elenco</h3>
+              <ElencoClube
+                jogadores={jogadores}  
+                modoEdicao={false}
+                definirCapitao={() => {}}
+                removerJogador={() => {}}
+                atualizarNumeroCamisa={() => {}}
+              />
+            </>
           ) : (
             <FormClube
               clube={clube}

@@ -34,11 +34,21 @@ export default function BlocoJogador({ jogadorId, modoLeitura }) {
             try {
               const clubeRef = doc(db, 'clubes', data.clubeAtualId);
               const clubeSnap = await getDoc(clubeRef);
-              if (clubeSnap.exists()) {
-                setClubeAtualNome(clubeSnap.data().nome || 'Clube');
-              } else {
-                setClubeAtualNome('Clube não encontrado');
-              }
+             if (clubeSnap.exists()) {
+  const clubeData = clubeSnap.data();
+  console.log('✅ Dados do clube encontrados:', clubeData);
+
+  if (clubeData.nome) {
+    setClubeAtualNome(clubeData.nome);
+  } else {
+    console.warn('⚠️ Campo "nome" não encontrado no clube:', clubeData);
+    setClubeAtualNome('Nome do clube ausente');
+  }
+} else {
+  console.warn('❌ Clube não encontrado com ID:', data.clubeAtualId);
+  setClubeAtualNome('Clube não encontrado');
+}
+
             } catch (error) {
               console.error('Erro ao buscar nome do clube:', error);
               setClubeAtualNome('Erro ao carregar clube');

@@ -42,54 +42,56 @@ export default function SidebarPerfil({ jogador }) {
   const [loadingAmistosos, setLoadingAmistosos] = useState(true);
 
   useEffect(() => {
-    if (!jogador.id) return;
+  if (!jogador.id) return;
 
-    setLoadingConvites(true);
+  setLoadingConvites(true);
 
-    // Query para convites recebidos pelo jogador
-    const qJogador = query(
-      collection(db, 'convites'),
-      where('jogadorId', '==', jogador.id)
-    );
+  const qJogador = query(
+    collection(db, 'convites'),
+    where('jogadorId', '==', jogador.id)
+  );
 
-    // Query para convites recebidos pelo clube atual do jogador (se houver)
-    const qClube = jogador.clubeAtualId
-      ? query(
-          collection(db, 'convites'),
-          where('clubeId', '==', jogador.clubeAtualId)
-        )
-      : null;
+  const qClube = jogador.clubeAtualId
+    ? query(
+        collection(db, 'convites'),
+        where('clubeId', '==', jogador.clubeAtualId)
+      )
+    : null;
 
-    const unsubscribes = [];
+  const unsubscribes = [];
 
-    // Listener convites jogador
-    const unsubscribeJogador = onSnapshot(qJogador, (snapshot) => {
-      const convitesJogador = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data(), tipo: 'jogador' }));
+  // Listener convites jogador
+  const unsubscribeJogador = onSnapshot(qJogador, (snapshot) => {
+    // NÃO sobrescrever o tipo aqui!
+    const convitesJogador = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    setConvites(prev => {
+      // filtra os convites anteriores que não são desse jogador
+      const outrosConvites = prev.filter(c => c.jogadorId !== jogador.id);
+      return [...convitesJogador, ...outrosConvites];
+    });
+    setLoadingConvites(false);
+  });
+  unsubscribes.push(unsubscribeJogador);
+
+  // Listener convites clube
+  if (qClube) {
+    const unsubscribeClube = onSnapshot(qClube, (snapshot) => {
+      // NÃO sobrescrever o tipo aqui!
+      const convitesClube = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       setConvites(prev => {
-        const outrosConvites = prev.filter(c => c.tipo !== 'jogador');
-        return [...convitesJogador, ...outrosConvites];
+        // filtra os convites anteriores que não são desse clube
+        const outrosConvites = prev.filter(c => c.clubeId !== jogador.clubeAtualId);
+        return [...outrosConvites, ...convitesClube];
       });
       setLoadingConvites(false);
     });
-    unsubscribes.push(unsubscribeJogador);
+    unsubscribes.push(unsubscribeClube);
+  }
 
-    // Listener convites clube
-    if (qClube) {
-      const unsubscribeClube = onSnapshot(qClube, (snapshot) => {
-        const convitesClube = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data(), tipo: 'clube' }));
-        setConvites(prev => {
-          const outrosConvites = prev.filter(c => c.tipo !== 'clube');
-          return [...outrosConvites, ...convitesClube];
-        });
-        setLoadingConvites(false);
-      });
-      unsubscribes.push(unsubscribeClube);
-    }
-
-    return () => {
-      unsubscribes.forEach(unsub => unsub());
-    };
-  }, [jogador.id, jogador.clubeAtualId]);
+  return () => {
+    unsubscribes.forEach(unsub => unsub());
+  };
+}, [jogador.id, jogador.clubeAtualId]);
 
 
   // Carregar amistosos para clube atual do jogador
@@ -174,34 +176,36 @@ export default function SidebarPerfil({ jogador }) {
   };
 
   // Atualizar status convites (aceitar/recusar)
-  const handleAtualizarStatusConvite = async (conviteId, novoStatus, nomeClube) => {
-    try {
-      const conviteRef = doc(db, 'convites', conviteId);
-      await updateDoc(conviteRef, { status: novoStatus });
+  const handleAtualizarStatusConvite = async (conviteId, novoStatus, nomeClube, clubeId, numeroCamisa) => {
+  try {
+    const conviteRef = doc(db, 'convites', conviteId);
+    await updateDoc(conviteRef, { status: novoStatus });
 
-      setConvites(prev =>
-        prev.map(conv =>
-          conv.id === conviteId ? { ...conv, status: novoStatus } : conv
-        )
-      );
+    setConvites(prev =>
+      prev.map(conv =>
+        conv.id === conviteId ? { ...conv, status: novoStatus } : conv
+      )
+    );
 
-      if (novoStatus === 'aceito') {
-        const userRef = doc(db, 'usuarios', jogador.id);
+    if (novoStatus === 'aceito') {
+      const userRef = doc(db, 'usuarios', jogador.id);
 
-        await updateDoc(userRef, {
-          status: 'Contratado',
-          clubeAtual: nomeClube || '',
-          clubeAtualId: currentUser.uid || '', // ID do clube que aceitou
-          numeroCamisa: '', // deixa em branco para ser preenchido manualmente se quiser
-        });
-      }
-
-      alert(`Convite ${novoStatus === 'aceito' ? 'aceito' : 'recusado'} com sucesso!`);
-    } catch (error) {
-      console.error('Erro ao atualizar convite:', error);
-      alert('Erro ao atualizar convite. Tente novamente.');
+      // Atualiza o perfil do jogador com o clube correto
+      await updateDoc(userRef, {
+        status: 'Contratado',
+        clubeAtual: nomeClube || '',
+        clubeAtualId: clubeId || '',
+        numeroCamisa: numeroCamisa || '',
+      });
     }
-  };
+
+    alert(`Convite ${novoStatus === 'aceito' ? 'aceito' : 'recusado'} com sucesso!`);
+  } catch (error) {
+    console.error('Erro ao atualizar convite:', error);
+    alert('Erro ao atualizar convite. Tente novamente.');
+  }
+};
+;
 
   // Amistosos: aceitar e recusar
   const handleDataAgendadaChange = (amistosoId, valorData) => {
@@ -407,14 +411,22 @@ export default function SidebarPerfil({ jogador }) {
         {podeResponder && (
           <div className={styles.acoesConvite}>
             <button
-              onClick={() =>
-                handleAtualizarStatusConvite(convite.id, 'aceito', nomeClube)
-              }
-              className={`${styles.btnAceitar} ${styles.btnIcon}`}
-              title="Aceitar Convite"
-            >
-              <GiConfirmed />
-            </button>
+  onClick={() =>
+    handleAtualizarStatusConvite(
+      convite.id,
+      'aceito',
+      convite.clubeNome,
+      convite.clubeId,
+      convite.numeroCamisa // <-- importante!
+    )
+  }
+
+  className={`${styles.btnAceitar} ${styles.btnIcon}`}
+  title="Aceitar Convite"
+>
+  <GiConfirmed />
+</button>
+
             <button
               onClick={() =>
                 handleAtualizarStatusConvite(convite.id, 'recusado')

@@ -11,6 +11,7 @@ import { GiGamepad, GiCardDiscard, GiConfirmed, GiCancel } from 'react-icons/gi'
 import { AiOutlineEdit, AiOutlineSave, AiOutlineClose, AiOutlineMail } from 'react-icons/ai';
 import CentralNotificacoes from './CentralNotificacoes.jsx';
 import Historico from './Historico.jsx';
+import AmistososRecebidos from './AmistososRecebidos';
 
 export default function SidebarPerfil({ jogador }) {
   
@@ -107,10 +108,9 @@ export default function SidebarPerfil({ jogador }) {
       setLoadingAmistosos(true);
       try {
         const q = query(
-          collection(db, 'amistosos'),
-          where('destinatarioClubeId', '==', jogador.clubeAtualId),
-          where('status', '==', 'pendente')
-        );
+  collection(db, 'amistosos'),
+  where('destinatarioClubeId', '==', jogador.clubeAtualId)
+);
         const querySnapshot = await getDocs(q);
         const dados = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         setAmistosos(dados);
@@ -122,6 +122,26 @@ export default function SidebarPerfil({ jogador }) {
     }
     carregarAmistosos();
   }, [jogador.clubeAtualId]);
+
+  const atualizarResultadoAmistoso = async (amistosoId, resultado) => {
+  try {
+    const amistosoRef = doc(db, 'amistosos', amistosoId);
+    await updateDoc(amistosoRef, { resultado });
+    
+    // Atualiza o estado local para mostrar o resultado na UI sem recarregar
+    setAmistosos(prev =>
+      prev.map(a =>
+        a.id === amistosoId ? { ...a, resultado } : a
+      )
+    );
+
+    alert('Resultado do amistoso atualizado com sucesso!');
+  } catch (error) {
+    console.error('Erro ao atualizar resultado do amistoso:', error);
+    alert('Erro ao atualizar resultado. Tente novamente.');
+  }
+};
+
 
   // Upload foto/avatar
   const handleImageClick = () => {
@@ -256,8 +276,51 @@ export default function SidebarPerfil({ jogador }) {
   const podeChamarAmistoso = currentUser &&
     ['clube', 'clube_jogador'].includes(currentUser.tipo) &&
     !isDonoPerfil;
+// Estado para mostrar/ocultar modal de convite amistoso
+const [mostrarModalChamarAmistoso, setMostrarModalChamarAmistoso] = useState(false);
 
-  // Você pode implementar o handleChamarAmistoso, se quiser, ou remover o botão do JSX
+// Estado para guardar data e hora escolhida no convite
+const [dataHoraAmistoso, setDataHoraAmistoso] = useState('');
+
+// Função para abrir o modal
+const abrirModalChamarAmistoso = () => {
+  setDataHoraAmistoso('');
+  setMostrarModalChamarAmistoso(true);
+};
+
+// Função para fechar o modal
+const fecharModalChamarAmistoso = () => {
+  setMostrarModalChamarAmistoso(false);
+};
+
+// Função para chamar amistoso - cria documento no Firestore
+const handleChamarAmistoso = async () => {
+  if (!dataHoraAmistoso) {
+    alert('Por favor, selecione data e hora para o amistoso.');
+    return;
+  }
+
+  try {
+    await addDoc(collection(db, 'amistosos'), {
+      remetenteClubeId: currentUser.clubeAtualId || null,
+      remetenteNome: currentUser.nome || 'Clube desconhecido',
+      destinatarioClubeId: jogador.clubeAtualId || null,
+      destinatarioNome: jogador.clubeAtual || 'Clube desconhecido',
+      status: 'pendente',
+      dataCriacao: new Date(),
+      dataAgendada: {
+        seconds: Math.floor(new Date(dataHoraAmistoso).getTime() / 1000)
+      }
+    });
+
+    alert('Convite para amistoso enviado com sucesso!');
+    fecharModalChamarAmistoso();
+
+  } catch (error) {
+    console.error('Erro ao enviar convite de amistoso:', error);
+    alert('Erro ao enviar convite. Tente novamente.');
+  }
+};
 
   return (
     <aside className={styles.sidebar}>
@@ -353,12 +416,36 @@ export default function SidebarPerfil({ jogador }) {
         )}
       </div>
 
-      {/* Botão Chamar para Amistoso */}
       {podeChamarAmistoso && (
-        <button className={styles.btnAmistoso} onClick={() => alert('Funcionalidade em desenvolvimento')}>
-          Chamar para Amistoso
-        </button>
-      )}
+  <>
+    <button className={styles.btnAmistoso} onClick={abrirModalChamarAmistoso}>
+      Chamar para Amistoso
+    </button>
+
+    {mostrarModalChamarAmistoso && (
+      <div className={styles.modalAmistoso}>
+        <h3>Chamar para Amistoso</h3>
+        <label>
+          Data e Hora:
+          <input
+            type="datetime-local"
+            value={dataHoraAmistoso}
+            onChange={e => setDataHoraAmistoso(e.target.value)}
+          />
+        </label>
+        <div className={styles.modalBotoes}>
+          <button onClick={handleChamarAmistoso} className={styles.btnConfirmar}>
+            Enviar Convite
+          </button>
+          <button onClick={fecharModalChamarAmistoso} className={styles.btnCancelar}>
+            Cancelar
+          </button>
+        </div>
+      </div>
+    )}
+  </>
+)}
+
 
       {/* Histórico */}
       <Historico
@@ -377,49 +464,15 @@ export default function SidebarPerfil({ jogador }) {
 />
 
       {/* Amistosos Recebidos */}
-      {amistosos.length > 0 && (
-        <div className={styles.section}>
-          <h4><GiGamepad style={{ color: '#ffcc00', marginRight: 6 }} /> Amistosos Recebidos</h4>
-          <ul className={styles.convitesList}>
-            {amistosos.map((amistoso) => (
-              <li key={amistoso.id} className={styles.conviteItem}>
-                <strong>{amistoso.remetenteNome || 'Clube desconhecido'}</strong> chamou seu time para um amistoso.
-                <span className={styles.statusPendente}>{amistoso.status}</span>
+      <AmistososRecebidos
+  amistosos={amistosos}
+  isDonoPerfil={isDonoPerfil}
+  handleDataAgendadaChange={handleDataAgendadaChange}
+  aceitarAmistoso={aceitarAmistoso}
+  recusarAmistoso={recusarAmistoso}
+  atualizarResultadoAmistoso={atualizarResultadoAmistoso}  // <- aqui
+/>
 
-                {amistoso.status === 'pendente' && isDonoPerfil && (
-                  <div className={styles.acoesConvite}>
-                    <input
-                      type="datetime-local"
-                      onChange={e => handleDataAgendadaChange(amistoso.id, e.target.value)}
-                      value={
-                        amistoso.dataAgendada
-                          ? new Date(amistoso.dataAgendada.seconds * 1000).toISOString().slice(0, 16)
-                          : ''
-                      }
-                      className={styles.inputDataAgendada}
-                    />
-                    <button
-                      onClick={() => aceitarAmistoso(amistoso.id, amistoso.dataAgendada)}
-                      className={styles.btnAceitar}
-                      disabled={!amistoso.dataAgendada}
-                      title="Aceitar Amistoso"
-                    >
-                      Aceitar
-                    </button>
-                    <button
-                      onClick={() => recusarAmistoso(amistoso.id)}
-                      className={styles.btnRecusar}
-                      title="Recusar Amistoso"
-                    >
-                      Recusar
-                    </button>
-                  </div>
-                )}
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
 
       {/* Botões editar (aparece só para dono) */}
       {isDonoPerfil && (

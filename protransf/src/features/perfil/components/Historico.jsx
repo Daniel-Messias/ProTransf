@@ -65,10 +65,28 @@ export default function Historico({ amistosos, convites, loadingAmistosos, loadi
             <ul className={styles.lista}>
               {amistososHistorico.map((jogo) => (
                 <li key={jogo.id} className={styles.item}>
-                  <span>{jogo.remetenteNome || 'Clube desconhecido'}</span>
-                  <span className={styles.data}>
-                    {new Date(jogo.dataAgendada?.seconds * 1000).toLocaleDateString('pt-BR')}
-                  </span>
+                  <div className={styles.amistosoHeader}>
+                    <strong>{jogo.remetenteNome || 'Clube desconhecido'}</strong> vs <strong>{jogo.destinatarioNome || 'Clube desconhecido'}</strong>
+                  </div>
+                  <div className={styles.amistosoInfo}>
+                    <span className={styles.data}>
+                      {jogo.dataAgendada
+                        ? new Date(jogo.dataAgendada.seconds * 1000).toLocaleDateString('pt-BR')
+                        : 'Data não agendada'}
+                    </span>
+                    <span
+                      className={
+                        jogo.status === 'aceito'
+                          ? styles.statusAceito
+                          : styles.statusRecusado
+                      }
+                    >
+                      {jogo.status}
+                    </span>
+                    {jogo.resultado && (
+                      <span className={styles.resultado}>Resultado: {jogo.resultado}</span>
+                    )}
+                  </div>
                 </li>
               ))}
             </ul>

@@ -195,65 +195,38 @@ useEffect(() => {
     alert('Erro ao enviar convite. Tente novamente.');
   }
 }
-async function pedirDemissao() {
-  if (!window.confirm('Você tem certeza que deseja pedir demissão do clube?')) return;
-
-  try {
-    // Buscar o documento do usuário logado
-    const userRef = doc(db, 'usuarios', usuarioLogado.uid);
-
-    // Atualizar o status ou sinalizar o pedido de demissão
-    await updateDoc(userRef, {
-      pedidoDemissao: true,  // flag que indica pedido de saída
-      status: 'pedido_demissao', // opcional, para controle
-      clubeAtualId: '', // opcional, remover clube atual até aprovação
-    });
-
-    alert('Pedido de demissão enviado com sucesso!');
-    
-    // Se quiser, atualizar localmente o estado do clube
-    if (atualizarClubeLocal) atualizarClubeLocal(prev => ({
-      ...prev,
-      jogadores: prev.jogadores.filter(j => j.username !== usuarioLogado.username),
-    }));
-
-  } catch (error) {
-    console.error('Erro ao pedir demissão:', error);
-    alert('Erro ao enviar pedido. Tente novamente.');
-  }
-}
-
 
   async function removerJogador(jogador) {
   if (!window.confirm(`Remover jogador ${jogador.username}?`)) return;
 
-  const jogadorRemovido = jogador;
-
-    try {
-      const usuariosRef = collection(db, 'usuarios');
-      const q = query(usuariosRef, where('username', '==', jogadorRemovido.username));
-      const snapshot = await getDocs(q);
-      if (!snapshot.empty) {
-        const jogadorDocId = snapshot.docs[0].id;
-        const jogadorRef = doc(db, 'usuarios', jogadorDocId);
-        await updateDoc(jogadorRef, {
-          status: 'livre',
-          clubeAtualId: '',
-          podeEditarNumeroCamisa: true,
-        });
-      }
-    } catch (error) {
-      console.error('Erro ao atualizar jogador no Firestore:', error);
-      alert('Erro ao atualizar dados do jogador. Tente novamente.');
-      return;
+  try {
+    const usuariosRef = collection(db, 'usuarios');
+    const q = query(usuariosRef, where('username', '==', jogador.username));
+    const snapshot = await getDocs(q);
+    if (!snapshot.empty) {
+      const jogadorDocId = snapshot.docs[0].id;
+      const jogadorRef = doc(db, 'usuarios', jogadorDocId);
+      await updateDoc(jogadorRef, {
+        status: 'livre',
+        clubeAtualId: '',
+        podeEditarNumeroCamisa: true,
+      });
     }
+  } catch (error) {
+    console.error('Erro ao atualizar jogador no Firestore:', error);
+    alert('Erro ao atualizar dados do jogador. Tente novamente.');
+    return;
+  }
 
-    const novosJogadores = form.jogadores.filter((_, i) => i !== index);
-    setForm(prev => ({
-      ...prev,
-      jogadores: novosJogadores,
-      numeroDeJogadores: novosJogadores.length,
-    }));
+  // Atualiza localmente a lista de jogadores removendo o jogador que saiu
+  setJogadoresTempoReal(prevJogadores => prevJogadores.filter(j => j.username !== jogador.username));
+
+  // Também atualize o número de jogadores se quiser
+  setForm(prev => ({
+    ...prev,
+    numeroDeJogadores: form.numeroDeJogadores > 0 ? form.numeroDeJogadores - 1 : 0,
+  }));
+
   }
 
   async function definirCapitao(username) {
@@ -326,7 +299,7 @@ async function pedirDemissao() {
           descricao: form.descricao.trim(),
           estaBuscando: form.estaBuscando,
           campeonatos: form.campeonatos,
-          jogadores: [], // mantido por compatibilidade, mas agora não é mais usado
+          jogadores: [], 
            numeroDeJogadores: jogadoresTempoReal.length,
           logoUrl: form.logoUrl,
           status: form.status,
@@ -341,7 +314,6 @@ async function pedirDemissao() {
           descricao: form.descricao.trim(),
           estaBuscando: form.estaBuscando,
           campeonatos: form.campeonatos,
-          jogadores: form.jogadores,
           logoUrl: form.logoUrl,
           status: 'ativo',
           numeroDeJogadores: form.jogadores.length,
@@ -561,13 +533,6 @@ async function pedirDemissao() {
 
         </div>
       )}
-     {!modoLeitura && jogadoresTempoReal.some(j => j.username === usuarioLogado.username) && (
-  <button type="button" onClick={pedirDemissao} className={styles.btnDemissao}>
-    Pedir Demissão
-  </button>
-)}
-
-
       {!modoLeitura && (
         <div className={styles.buttonGroup}>
           <button type="button" onClick={handleSalvar} disabled={salvando}>

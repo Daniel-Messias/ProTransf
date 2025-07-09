@@ -2,9 +2,7 @@ import React, { useEffect, useState } from 'react';
 import styles from '../styles/Elenco.module.css';
 import { Link } from 'react-router-dom';
 import { db } from '../../../services/firebase';
-import {
-  collection, query, where, onSnapshot, updateDoc, doc, getDocs, addDoc, serverTimestamp
-} from 'firebase/firestore';
+import { collection, query, where, onSnapshot, updateDoc, doc, getDocs, addDoc, serverTimestamp, getDoc } from 'firebase/firestore';
 
 const CapitainIcon = () => (
   <span title="Capitão" className={styles.capitaoIcon}>🧢</span>
@@ -75,47 +73,56 @@ export default function ElencoClube({ clubeId, usuarioLogado }) {
   }
 
   async function enviarConvite() {
-    if (!emailConvite.trim()) {
-      alert('Informe o e-mail do jogador.');
+  if (!emailConvite.trim()) {
+    alert('Informe o e-mail do jogador.');
+    return;
+  }
+
+  setEnviandoConvite(true);
+
+  try {
+    // Busca o usuário pelo email
+    const q = query(collection(db, 'usuarios'), where('email', '==', emailConvite.trim()));
+    const snapshot = await getDocs(q);
+
+    if (snapshot.empty) {
+      alert('Nenhum jogador encontrado com esse e-mail.');
+      setEnviandoConvite(false);
       return;
     }
 
-    setEnviandoConvite(true);
+    const jogadorDoc = snapshot.docs[0];
+    const jogadorData = jogadorDoc.data();
 
-    try {
-      const q = query(collection(db, 'usuarios'), where('email', '==', emailConvite.trim()));
-      const snapshot = await getDocs(q);
+    // Busca dados do clube para pegar o nome
+    const clubeDoc = await getDoc(doc(db, 'clubes', clubeId));
+    const clubeData = clubeDoc.exists() ? clubeDoc.data() : {};
 
-      if (snapshot.empty) {
-        alert('Nenhum jogador encontrado com esse e-mail.');
-        setEnviandoConvite(false);
-        return;
-      }
+    // Cria o convite com os campos extras
+    await addDoc(collection(db, 'convites'), {
+      tipo: 'clube_para_jogador',
+      jogadorId: jogadorDoc.id,
+      jogadorEmail: jogadorData.email || '',
+      jogadorUsername: jogadorData.username || '',
+      numeroCamisa: '', // pode ajustar se quiser preencher aqui
+      plataforma: jogadorData.plataforma || '',
+      posicao: jogadorData.posicao || '',
+      clubeId: clubeId,
+      clubeNome: clubeData.nome || '',
+      status: 'pendente',
+      criadoEm: serverTimestamp(),
+    });
 
-      const jogadorDoc = snapshot.docs[0];
-      const jogadorData = jogadorDoc.data();
-
-      await addDoc(collection(db, 'convites'), {
-        tipo: 'clube_para_jogador',
-        jogadorId: jogadorDoc.id,
-        clubeId: clubeId,
-        status: 'pendente',
-        criadoEm: serverTimestamp(),
-        numeroCamisa: '',
-        plataforma: jogadorData.plataforma || '',
-      });
-
-      alert('Convite enviado com sucesso!');
-      setEmailConvite('');
-      setMostrarInputConvite(false);
-    } catch (error) {
-      console.error('Erro ao enviar convite:', error);
-      alert('Erro ao enviar convite.');
-    }
-
-    setEnviandoConvite(false);
+    alert('Convite enviado com sucesso!');
+    setEmailConvite('');
+    setMostrarInputConvite(false);
+  } catch (error) {
+    console.error('Erro ao enviar convite:', error);
+    alert('Erro ao enviar convite.');
   }
 
+  setEnviandoConvite(false);
+}
   if (!jogadores.length) return <p>Elenco vazio.</p>;
 
   return (

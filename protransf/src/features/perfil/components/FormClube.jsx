@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import styles from '../styles/FormClube.module.css';
-import { 
-  doc, updateDoc, addDoc, collection, serverTimestamp, getDocs, query, where, onSnapshot 
+import {
+  doc, updateDoc, addDoc, collection, serverTimestamp
 } from 'firebase/firestore';
 import { db } from '../../../services/firebase';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
@@ -14,7 +14,6 @@ export default function FormClube({ clube, usuarioLogado, modoLeitura, setModoEd
     descricao: '',
     estaBuscando: false,
     campeonatos: [],
-    jogadores: [],
     logoUrl: '',
     status: 'ativo',
     numeroDeJogadores: 0,
@@ -24,16 +23,7 @@ export default function FormClube({ clube, usuarioLogado, modoLeitura, setModoEd
   });
 
   const [novoCampeonato, setNovoCampeonato] = useState('');
-  const [novoJogadorEmail, setNovoJogadorEmail] = useState('');
-  const [novoJogadorDados, setNovoJogadorDados] = useState({
-    username: '',
-    posicao: '',
-    plataforma: '',
-    status: '',
-    numeroCamisa: '',
-  });
   const [salvando, setSalvando] = useState(false);
-  const [jogadoresTempoReal, setJogadoresTempoReal] = useState([]);
 
   useEffect(() => {
     if (clube) {
@@ -43,35 +33,15 @@ export default function FormClube({ clube, usuarioLogado, modoLeitura, setModoEd
         descricao: clube.descricao || '',
         estaBuscando: !!clube.estaBuscando,
         campeonatos: clube.campeonatos || [],
-        jogadores: clube.jogadores || [],
         logoUrl: clube.logoUrl || '',
         status: clube.status || 'ativo',
-        numeroDeJogadores: clube.numeroDeJogadores || (clube.jogadores?.length || 0),
+        numeroDeJogadores: clube.numeroDeJogadores || 0,
         ultimaAtualizacao: clube.ultimaAtualizacao || null,
         criadoPorUsuarioId: clube.criadoPorUsuarioId || '',
         criadoEm: clube.criadoEm || null,
       });
     }
   }, [clube]);
-
-useEffect(() => {
-  if (!clube?.id) {
-    setJogadoresTempoReal([]);
-    return;
-  }
-
-  const q = query(collection(db, 'usuarios'), where('clubeAtualId', '==', clube.id));
-
-  const unsubscribe = onSnapshot(q, snapshot => {
-    const jogadores = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    setJogadoresTempoReal(jogadores);
-  }, error => {
-    console.error('Erro ao escutar jogadores em tempo real:', error);
-    setJogadoresTempoReal([]);
-  });
-
-  return () => unsubscribe();
-}, [clube?.id]);
 
   async function handleLogoUpload(event) {
     const file = event.target.files[0];
@@ -89,180 +59,6 @@ useEffect(() => {
       alert('Erro ao enviar logo. Tente novamente.');
     }
   }
-
-  async function buscarDadosJogadorPorEmail(email) {
-    if (!email.trim()) {
-      setNovoJogadorDados({
-        username: '',
-        posicao: '',
-        plataforma: '',
-        status: '',
-        numeroCamisa: '',
-      });
-      return;
-    }
-
-    const usuariosRef = collection(db, 'usuarios');
-    const q = query(usuariosRef, where('email', '==', email.trim().toLowerCase()));
-    const snapshot = await getDocs(q);
-
-    if (!snapshot.empty) {
-      const data = snapshot.docs[0].data();
-      setNovoJogadorDados({
-        username: data.username || '',
-        posicao: data.posicaoPrimaria || '',
-        plataforma: data.plataforma || '',
-        status: data.status || '',
-        numeroCamisa: '',
-      });
-    } else {
-      setNovoJogadorDados({
-        username: '',
-        posicao: '',
-        plataforma: '',
-        status: '',
-        numeroCamisa: '',
-      });
-    }
-  }
-
-  useEffect(() => {
-    if (novoJogadorEmail.trim()) {
-      buscarDadosJogadorPorEmail(novoJogadorEmail);
-    } else {
-      setNovoJogadorDados({
-        username: '',
-        posicao: '',
-        plataforma: '',
-        status: '',
-        numeroCamisa: '',
-      });
-    }
-  }, [novoJogadorEmail]);
-
-  async function convidarJogador() {
-  if (
-    !novoJogadorEmail.trim() ||
-    !novoJogadorDados.username ||
-    !novoJogadorDados.posicao ||
-    !novoJogadorDados.plataforma ||
-    !novoJogadorDados.status ||
-    !novoJogadorDados.numeroCamisa.trim()
-  ) {
-    alert('Preencha todos os campos do jogador, inclusive o número da camisa.');
-    return;
-  }
-
-  try {
-    const usuariosRef = collection(db, 'usuarios');
-    const q = query(usuariosRef, where('email', '==', novoJogadorEmail.trim().toLowerCase()));
-    const snapshot = await getDocs(q);
-
-    if (snapshot.empty) {
-      alert('Jogador não encontrado.');
-      return;
-    }
-
-    const jogadorDoc = snapshot.docs[0];
-    const convite = {
-      tipo: 'clube_para_jogador',
-      status: 'pendente',
-      dataEnvio: serverTimestamp(),
-      jogadorId: jogadorDoc.id,
-      jogadorEmail: novoJogadorEmail.trim(),
-      jogadorUsername: novoJogadorDados.username,
-      clubeId: clube.id,
-      clubeNome: form.nome,
-      numeroCamisa: novoJogadorDados.numeroCamisa.trim(),
-      posicao: novoJogadorDados.posicao,
-      plataforma: novoJogadorDados.plataforma,
-    };
-
-    await addDoc(collection(db, 'convites'), convite);
-
-    alert(`Convite enviado para ${novoJogadorDados.username}.`);
-    setNovoJogadorEmail('');
-    setNovoJogadorDados({
-      username: '',
-      posicao: '',
-      plataforma: '',
-      status: '',
-      numeroCamisa: '',
-    });
-
-  } catch (error) {
-    console.error('Erro ao enviar convite:', error);
-    alert('Erro ao enviar convite. Tente novamente.');
-  }
-}
-
-  async function removerJogador(jogador) {
-  if (!window.confirm(`Remover jogador ${jogador.username}?`)) return;
-
-  try {
-    const usuariosRef = collection(db, 'usuarios');
-    const q = query(usuariosRef, where('username', '==', jogador.username));
-    const snapshot = await getDocs(q);
-    if (!snapshot.empty) {
-      const jogadorDocId = snapshot.docs[0].id;
-      const jogadorRef = doc(db, 'usuarios', jogadorDocId);
-      await updateDoc(jogadorRef, {
-        status: 'livre',
-        clubeAtualId: '',
-        podeEditarNumeroCamisa: true,
-      });
-    }
-  } catch (error) {
-    console.error('Erro ao atualizar jogador no Firestore:', error);
-    alert('Erro ao atualizar dados do jogador. Tente novamente.');
-    return;
-  }
-
-  // Atualiza localmente a lista de jogadores removendo o jogador que saiu
-  setJogadoresTempoReal(prevJogadores => prevJogadores.filter(j => j.username !== jogador.username));
-
-  // Também atualize o número de jogadores se quiser
-  setForm(prev => ({
-    ...prev,
-    numeroDeJogadores: form.numeroDeJogadores > 0 ? form.numeroDeJogadores - 1 : 0,
-  }));
-
-  }
-
-  async function definirCapitao(username) {
-  try {
-    const usuariosRef = collection(db, 'usuarios');
-    const q = query(usuariosRef, where('clubeAtualId', '==', clube.id));
-    const snapshot = await getDocs(q);
-
-    const updates = snapshot.docs.map(docSnap => {
-      const isCapitao = docSnap.data().username === username;
-      return updateDoc(doc(db, 'usuarios', docSnap.id), {
-        capitao: isCapitao,
-      });
-    });
-
-    await Promise.all(updates);
-    alert(`Novo capitão definido: ${username}`);
-  } catch (error) {
-    console.error('Erro ao definir capitão:', error);
-    alert('Erro ao definir capitão.');
-  }
-}
-
-
-  async function atualizarNumeroCamisa(jogadorId, numero) {
-  try {
-    const jogadorRef = doc(db, 'usuarios', jogadorId);
-    await updateDoc(jogadorRef, {
-      numeroCamisa: numero,
-    });
-  } catch (error) {
-    console.error('Erro ao atualizar número da camisa:', error);
-    alert('Erro ao atualizar número.');
-  }
-}
-
 
   function adicionarCampeonato() {
     if (novoCampeonato.trim() === '') return;
@@ -289,6 +85,7 @@ useEffect(() => {
       alert('Nome do clube e fundação são obrigatórios.');
       return;
     }
+
     setSalvando(true);
     try {
       if (clube) {
@@ -299,11 +96,8 @@ useEffect(() => {
           descricao: form.descricao.trim(),
           estaBuscando: form.estaBuscando,
           campeonatos: form.campeonatos,
-          jogadores: [], 
-           numeroDeJogadores: jogadoresTempoReal.length,
           logoUrl: form.logoUrl,
           status: form.status,
-          numeroDeJogadores: form.numeroDeJogadores,
           ultimaAtualizacao: serverTimestamp(),
         });
       } else {
@@ -316,7 +110,7 @@ useEffect(() => {
           campeonatos: form.campeonatos,
           logoUrl: form.logoUrl,
           status: 'ativo',
-          numeroDeJogadores: form.jogadores.length,
+          numeroDeJogadores: 0,
           ultimaAtualizacao: serverTimestamp(),
           criadoPorUsuarioId: usuarioLogado.uid,
           criadoEm: serverTimestamp(),
@@ -330,7 +124,6 @@ useEffect(() => {
 
       alert('Clube salvo com sucesso!');
       setModoEdicao(false);
-
       if (atualizarClubeLocal) atualizarClubeLocal({ ...form });
 
     } catch (error) {
@@ -437,102 +230,6 @@ useEffect(() => {
         )}
       </div>
 
-      <h3>Jogadores do Elenco</h3>
-
-      <table className={styles.tabelaJogadores}>
-        <thead>
-          <tr>
-            <th>Username</th>
-            <th>Posição</th>
-            <th>Plataforma</th>
-            <th>Nº Camisa</th>
-            <th>Capitão</th>
-            {!modoLeitura && <th>Ações</th>}
-          </tr>
-        </thead>
-        <tbody>
-          {jogadoresTempoReal.length === 0 ? (
-  <tr><td colSpan={modoLeitura ? 5 : 6}>Elenco vazio.</td></tr>
-) : (
-  jogadoresTempoReal.map((j, i) => (
-              <tr key={j.username}>
-                <td>{j.username}</td>
-                <td>{j.posicao}</td>
-                <td>{j.plataforma}</td>
-                <td>
-                  {!modoLeitura ? (
-                    <input
-                      type="text"
-                      value={j.numeroCamisa}
-                      onChange={e => atualizarNumeroCamisa(j.id, e.target.value)}
-                      className={styles.inputNumeroCamisa}
-                      maxLength={3}
-                    />
-                  ) : (
-                    j.numeroCamisa
-                  )}
-                </td>
-                <td>{j.capitao ? '🧢' : ''}</td>
-                {!modoLeitura && (
-                  <td>
-                    {!j.capitao && (
-                      <button
-                        type="button"
-                        title="Definir Capitão"
-                        onClick={() => definirCapitao(j.username)}
-                        className={styles.btnCapitao}
-                      >
-                        ⚑
-                      </button>
-                    )}
-                    <button
-                      onClick={() => removerJogador(j)}
-                      className={styles.btnRemoverJogador}
-                      type="button"
-                      title="Remover jogador"
-                    >
-                      ❌
-                    </button>
-                  </td>
-                )}
-              </tr>
-            ))
-          )}
-        </tbody>
-      </table>
-
-      {!modoLeitura && (
-        <div className={styles.adicionarJogador}>
-          <h4>Adicionar Jogador por Email</h4>
-          <input
-            type="email"
-            placeholder="Email do jogador"
-            value={novoJogadorEmail}
-            onChange={e => setNovoJogadorEmail(e.target.value)}
-            className={styles.inputEmail}
-          />
-          <div className={styles.dadosJogador}>
-            <p><strong>Username:</strong> {novoJogadorDados.username || '-'}</p>
-            <p><strong>Posição:</strong> {novoJogadorDados.posicao || '-'}</p>
-            <p><strong>Plataforma:</strong> {novoJogadorDados.plataforma || '-'}</p>
-            <p><strong>Status:</strong> {novoJogadorDados.status || '-'}</p>
-          </div>
-          <label>
-            Nº da Camisa*:
-            <input
-              type="text"
-              value={novoJogadorDados.numeroCamisa}
-              onChange={e => setNovoJogadorDados(prev => ({ ...prev, numeroCamisa: e.target.value }))}
-              maxLength={3}
-              required
-            />
-          </label>
-          <button type="button" onClick={convidarJogador}>
-  Enviar Convite
-</button>
-
-        </div>
-      )}
       {!modoLeitura && (
         <div className={styles.buttonGroup}>
           <button type="button" onClick={handleSalvar} disabled={salvando}>

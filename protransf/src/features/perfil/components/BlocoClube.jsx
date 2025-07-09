@@ -12,7 +12,7 @@ export default function BlocoClube({ usuarioLogado }) {
   const [erro, setErro] = useState(null);
 
   // NOVO: estado para jogadores do clube
-  const [jogadores, setJogadores] = useState([]);
+
 
   useEffect(() => {
     if (!usuarioLogado?.uid) return;
@@ -71,25 +71,6 @@ export default function BlocoClube({ usuarioLogado }) {
     };
   }, [usuarioLogado]);
 
-  // NOVO: useEffect para buscar jogadores do clube
-  useEffect(() => {
-    if (!clube?.id) {
-      setJogadores([]);
-      return;
-    }
-
-    const q = query(collection(db, 'usuarios'), where('clubeAtualId', '==', clube.id));
-
-    const unsubscribe = onSnapshot(q, snapshot => {
-      const jogadoresData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      setJogadores(jogadoresData);
-    }, error => {
-      console.error('Erro ao carregar jogadores do clube:', error);
-      setJogadores([]);
-    });
-
-    return () => unsubscribe();
-  }, [clube?.id]);
 
   function atualizarClubeLocal(novosDados) {
     setClube(prev => ({ ...prev, ...novosDados }));
@@ -167,10 +148,6 @@ export default function BlocoClube({ usuarioLogado }) {
                   </span>
                 </div>
 
-                <div className={styles.infoItem}>
-                  <strong>Número de Jogadores</strong>
-                  <span>{jogadores.length}</span> {/* Mostrando a quantidade do estado jogadores */}
-                </div>
 
                 {clube.logoUrl && (
                   <div className={styles.infoItem}>
@@ -191,14 +168,11 @@ export default function BlocoClube({ usuarioLogado }) {
                 Editar Clube
               </button>
 
-              <h3>Jogadores do Elenco</h3>
+            
               <ElencoClube
-                jogadores={jogadores}  
-                modoEdicao={false}
-                definirCapitao={() => {}}
-                removerJogador={() => {}}
-                atualizarNumeroCamisa={() => {}}
-              />
+                clubeId={clube.id}
+                usuarioLogado={usuarioLogado}
+                />
             </>
           ) : (
             <FormClube

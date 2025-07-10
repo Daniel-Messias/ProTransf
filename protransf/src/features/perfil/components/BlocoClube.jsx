@@ -186,6 +186,7 @@ export default function BlocoClube({
               <ElencoClube
                 clubeId={clube.id}
                 usuarioLogado={usuarioLogado}
+                modoLeitura={modoLeitura}
               />
             </>
           ) : (

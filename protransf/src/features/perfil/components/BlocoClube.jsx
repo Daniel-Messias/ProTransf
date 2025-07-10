@@ -7,69 +7,69 @@ import ElencoClube from './ElencoClube';
 
 export default function BlocoClube({ usuarioLogado }) {
   const [clube, setClube] = useState(null);
-  const [clubeIdFixo, setClubeIdFixo] = useState(null); // ✅ NOVO
+  const [clubeIdFixo, setClubeIdFixo] = useState(null);
   const [modoEdicao, setModoEdicao] = useState(false);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState(null);
 
   useEffect(() => {
-    if (!usuarioLogado?.uid) return;
+  if (!usuarioLogado?.uid) return;
 
-    setCarregando(true);
-    setErro(null);
+  setCarregando(true);
+  setErro(null);
 
-    const usuarioRef = doc(db, 'usuarios', usuarioLogado.uid);
-    let unsubscribeClube = () => {};
+  const usuarioRef = doc(db, 'usuarios', usuarioLogado.uid);
 
-    const unsubscribeUsuario = onSnapshot(usuarioRef, usuarioSnap => {
-      if (!usuarioSnap.exists()) {
-        setErro('Usuário não encontrado no banco.');
-        setClube(null);
-        setCarregando(false);
-        return;
-      }
-
-      const usuarioData = usuarioSnap.data();
-      const clubeId = usuarioData.clubeAtualId;
-
-      if (!clubeId) {
-        setClube(null);
-        setCarregando(false);
-        unsubscribeClube();
-        return;
-      }
-
-     console.log('clubeAtualId do usuário:', clubeId);
-setClubeIdFixo(clubeId);
-console.log('clubeIdFixo setado para:', clubeId);
-
-
-      const clubeRef = doc(db, 'clubes', clubeId);
-      unsubscribeClube = onSnapshot(clubeRef, clubeSnap => {
-        if (!clubeSnap.exists()) {
-          setErro('Clube não encontrado.');
-          setClube(null);
-        } else {
-          setClube({ id: clubeSnap.id, ...clubeSnap.data() });
-          setErro(null);
-        }
-        setCarregando(false);
-      }, error => {
-        setErro('Erro ao ouvir dados do clube.');
-        setClube(null);
-        setCarregando(false);
-      });
-    }, error => {
-      setErro('Erro ao ouvir dados do usuário.');
+  const unsubscribeUsuario = onSnapshot(usuarioRef, usuarioSnap => {
+    if (!usuarioSnap.exists()) {
+      setErro('Usuário não encontrado no banco.');
       setClube(null);
       setCarregando(false);
-    });
+      return;
+    }
 
-    return () => {
-      unsubscribeUsuario();
-      unsubscribeClube();
-    };
-  }, [usuarioLogado]);
+    const usuarioData = usuarioSnap.data();
+    const clubeId = usuarioData.clubeAtualId;
+
+    if (clubeId) {
+      setClubeIdFixo(clubeId); // 🟢 atualiza o ID fixo quando existir
+    }
+
+    setCarregando(false);
+  }, error => {
+    setErro('Erro ao ouvir dados do usuário.');
+    setClube(null);
+    setCarregando(false);
+  });
+
+  return () => unsubscribeUsuario();
+}, [usuarioLogado]);
+
+// ✅ NOVO useEffect separado: ouve sempre o clube pelo clubeIdFixo
+useEffect(() => {
+  if (!clubeIdFixo) return;
+
+  setCarregando(true);
+  setErro(null);
+
+  const clubeRef = doc(db, 'clubes', clubeIdFixo);
+  const unsubscribeClube = onSnapshot(clubeRef, clubeSnap => {
+    if (!clubeSnap.exists()) {
+      setErro('Clube não encontrado.');
+      setClube(null);
+    } else {
+      setClube({ id: clubeSnap.id, ...clubeSnap.data() });
+      setErro(null);
+    }
+    setCarregando(false);
+  }, error => {
+    setErro('Erro ao ouvir dados do clube.');
+    setClube(null);
+    setCarregando(false);
+  });
+
+  return () => unsubscribeClube();
+}, [clubeIdFixo]);
 
   function atualizarClubeLocal(novosDados) {
     setClube(prev => ({ ...prev, ...novosDados }));
@@ -166,7 +166,6 @@ console.log('clubeIdFixo setado para:', clubeId);
                 Editar Clube
               </button>
 
-              {/* ✅ ElencoClube agora depende de clubeIdFixo */}
               {clubeIdFixo && (
                 <ElencoClube
                   clubeId={clubeIdFixo}

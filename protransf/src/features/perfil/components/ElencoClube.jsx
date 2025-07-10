@@ -16,8 +16,53 @@ import {
 } from 'firebase/firestore';
 
 const CapitainIcon = () => (
-  <span title="Capitão" className={styles.capitaoIcon}>🧢</span>
+  <svg
+    title="Capitão"
+    xmlns="http://www.w3.org/2000/svg"
+    width="40"
+    height="24"
+    viewBox="0 0 40 24"
+    role="img"
+    aria-label="Capitão"
+    style={{ verticalAlign: 'middle' }}
+  >
+    <defs>
+      <radialGradient id="grad" cx="50%" cy="50%" r="70%">
+        <stop offset="0%" stopColor="#ff5555" />
+        <stop offset="100%" stopColor="#b22222" />
+      </radialGradient>
+      <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+        <feDropShadow dx="0" dy="1" stdDeviation="1" floodColor="#000" floodOpacity="0.3" />
+      </filter>
+    </defs>
+
+    {/* Faixa curva (braçadeira) */}
+    <path
+      d="M4 6 C15 2, 25 2, 36 6 L36 18 C25 22, 15 22, 4 18 Z"
+      fill="url(#grad)"
+      filter="url(#shadow)"
+      stroke="#7b1212"
+      strokeWidth="1"
+    />
+
+    {/* Letra C estilizada no centro */}
+    <text
+      x="20"
+      y="15"
+      fill="#fff"
+      fontWeight="bold"
+      fontSize="14"
+      fontFamily="Georgia, serif"
+      textAnchor="middle"
+      alignmentBaseline="middle"
+      pointerEvents="none"
+      style={{ userSelect: 'none' }}
+    >
+      C
+    </text>
+  </svg>
 );
+
 
 export default function ElencoClube({ clubeId, usuarioLogado, modoLeitura = false }) {
   const [jogadores, setJogadores] = useState([]);

@@ -5,15 +5,30 @@ import { doc, onSnapshot } from 'firebase/firestore';
 import { db } from '../../../services/firebase';
 import ElencoClube from './ElencoClube';
 
-export default function BlocoClube({ usuarioLogado }) {
-  const [clube, setClube] = useState(null);
+export default function BlocoClube({
+  usuarioLogado,
+  clube: clubeProp,
+  modoLeitura = false,
+  carregando: carregandoProp = false // <- 👈 corrigido aqui
+}) {
+   console.log('BlocoClube props recebidas:', { usuarioLogado, clubeProp, modoLeitura, carregandoProp });
+  const [clube, setClube] = useState(clubeProp || null);
   const [clubeIdFixo, setClubeIdFixo] = useState(null);
   const [modoEdicao, setModoEdicao] = useState(false);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState(null);
 
+  // Atualiza o estado local quando o perfil for visitado
   useEffect(() => {
-  if (!usuarioLogado?.uid) return;
+    console.log('BlocoClube useEffect clubeProp mudou:', clubeProp);
+    if (clubeProp) {
+      setClube(clubeProp);
+       setCarregando(false);
+    }
+  }, [clubeProp]);
+
+  useEffect(() => {
+  if (!usuarioLogado?.uid || clubeProp) return;
 
   setCarregando(true);
   setErro(null);
@@ -43,11 +58,10 @@ export default function BlocoClube({ usuarioLogado }) {
   });
 
   return () => unsubscribeUsuario();
-}, [usuarioLogado]);
+}, [usuarioLogado, clubeProp]);
 
-// ✅ NOVO useEffect separado: ouve sempre o clube pelo clubeIdFixo
-useEffect(() => {
-  if (!clubeIdFixo) return;
+  useEffect(() => {
+  if (!clubeIdFixo || clubeProp) return;
 
   setCarregando(true);
   setErro(null);
@@ -69,13 +83,14 @@ useEffect(() => {
   });
 
   return () => unsubscribeClube();
-}, [clubeIdFixo]);
+}, [clubeIdFixo, clubeProp]);
 
   function atualizarClubeLocal(novosDados) {
     setClube(prev => ({ ...prev, ...novosDados }));
   }
 
-  if (carregando) {
+  // 👇 usa tanto o estado local quanto a prop
+  if (carregando || carregandoProp) {
     return (
       <div className={styles.blocoClube}>
         <p>Carregando dados do clube...</p>
@@ -97,7 +112,7 @@ useEffect(() => {
         <div>
           <p>Você ainda não possui um clube cadastrado.</p>
 
-          {!modoEdicao && (
+          {!modoEdicao && !modoLeitura && (
             <button
               className={styles.btnEditar}
               onClick={() => setModoEdicao(true)}
@@ -109,7 +124,7 @@ useEffect(() => {
           {modoEdicao && (
             <FormClube
               usuarioLogado={usuarioLogado}
-              modoLeitura={false}
+              modoLeitura={modoLeitura}
               setModoEdicao={setModoEdicao}
               atualizarClubeLocal={atualizarClubeLocal}
               clube={null}
@@ -159,25 +174,25 @@ useEffect(() => {
                 )}
               </div>
 
-              <button
-                className={styles.btnEditar}
-                onClick={() => setModoEdicao(true)}
-              >
-                Editar Clube
-              </button>
-
-              {clubeIdFixo && (
-                <ElencoClube
-                  clubeId={clubeIdFixo}
-                  usuarioLogado={usuarioLogado}
-                />
+              {!modoLeitura && (
+                <button
+                  className={styles.btnEditar}
+                  onClick={() => setModoEdicao(true)}
+                >
+                  Editar Clube
+                </button>
               )}
+
+              <ElencoClube
+                clubeId={clube.id}
+                usuarioLogado={usuarioLogado}
+              />
             </>
           ) : (
             <FormClube
               clube={clube}
               usuarioLogado={usuarioLogado}
-              modoLeitura={false}
+              modoLeitura={modoLeitura}
               setModoEdicao={setModoEdicao}
               atualizarClubeLocal={atualizarClubeLocal}
             />

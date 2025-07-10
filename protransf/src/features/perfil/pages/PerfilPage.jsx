@@ -159,6 +159,7 @@ export default function PerfilPage() {
   if (loadingPerfil) return <p>Carregando perfil...</p>;
   if (erro) return <p>{erro}</p>;
   if (!perfil) return <p>Perfil não encontrado.</p>;
+console.log('PerfilPage - clube:', clube);
 
   return (
     <div className={styles.layout}>

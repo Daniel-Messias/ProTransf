@@ -456,12 +456,15 @@ const handleChamarAmistoso = async () => {
 />
 
       {/* Central de Notificações (Convites) */}
-      <CentralNotificacoes
+     <CentralNotificacoes
   convites={convites}
   loadingConvites={loadingConvites}
   handleAtualizarStatusConvite={handleAtualizarStatusConvite}
   isDonoPerfil={isDonoPerfil}
+  jogadorId={jogador.id}
+  clubeId={jogador.clubeAtualId}
 />
+
 
       {/* Amistosos Recebidos */}
       <AmistososRecebidos

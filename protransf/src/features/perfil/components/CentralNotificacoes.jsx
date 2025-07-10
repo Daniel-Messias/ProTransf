@@ -2,7 +2,15 @@ import React from 'react';
 import styles from '../styles/SidebarPerfil.module.css';
 import { GiConfirmed, GiCancel } from 'react-icons/gi';
 
-export default function CentralNotificacoes({ convites, loadingConvites, handleAtualizarStatusConvite, isDonoPerfil }) {
+export default function CentralNotificacoes({
+  convites,
+  loadingConvites,
+  handleAtualizarStatusConvite,
+  isDonoPerfil,
+  jogadorId,
+  clubeId
+}) {
+
   return (
     <div className={styles.section}>
       <h4>
@@ -15,7 +23,20 @@ export default function CentralNotificacoes({ convites, loadingConvites, handleA
       ) : (
         <ul className={styles.convitesList}>
           {convites
-            .filter(convite => convite.tipo === 'clube_para_jogador' && convite.status === 'pendente') // Mostra só pendentes
+            .filter(convite => {
+  // Mostrar apenas convites pendentes
+  if (convite.status !== 'pendente') return false;
+
+  // Mostrar convite clube_para_jogador se for para este jogador
+  if (convite.tipo === 'clube_para_jogador' && convite.jogadorId === jogadorId) return true;
+
+  // Mostrar convite jogador_para_clube se for para este clube
+  if (convite.tipo === 'jogador_para_clube' && convite.clubeId === clubeId) return true;
+
+  // Caso contrário, não mostrar
+  return false;
+})
+
             .map((convite) => {
               const nomeClube = convite.clubeNome || 'Clube desconhecido';
               const podeResponder = isDonoPerfil && convite.status === 'pendente';

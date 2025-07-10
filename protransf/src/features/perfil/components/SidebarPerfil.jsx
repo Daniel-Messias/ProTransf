@@ -9,6 +9,8 @@ import { GiGamepad, GiCardDiscard, GiConfirmed, GiCancel } from 'react-icons/gi'
 import { AiOutlineEdit, AiOutlineSave, AiOutlineClose, AiOutlineMail } from 'react-icons/ai';
 import CentralNotificacoes from './CentralNotificacoes.jsx';
 import Historico from './Historico.jsx';
+import { sendPasswordResetEmail } from 'firebase/auth';
+
 
 export default function SidebarPerfil({ jogador }) {
   
@@ -232,11 +234,11 @@ const amistososParaNotificacao = amistosos.filter(a => a.status === 'pendente');
 
   // Mudar senha
   const handleMudarSenha = () => {
-    const email = currentUser.email;
-    auth.sendPasswordResetEmail(email)
-      .then(() => alert('Link de redefinição de senha enviado.'))
-      .catch(err => alert('Erro ao enviar email: ' + err.message));
-  };
+  const email = currentUser.email;
+  sendPasswordResetEmail(auth, email)
+    .then(() => alert('Link de redefinição de senha enviado.'))
+    .catch(err => alert('Erro ao enviar email: ' + err.message));
+};
 
   // Atualizar status convites (aceitar/recusar)
   const handleAtualizarStatusConvite = async (conviteId, novoStatus, nomeClube, clubeId, numeroCamisa) => {

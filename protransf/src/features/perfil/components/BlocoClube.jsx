@@ -1,18 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import styles from '../styles/BlocoClube.module.css';
 import FormClube from './FormClube';
-import { doc, onSnapshot, collection, query, where } from 'firebase/firestore';
+import { doc, onSnapshot } from 'firebase/firestore';
 import { db } from '../../../services/firebase';
 import ElencoClube from './ElencoClube';
 
 export default function BlocoClube({ usuarioLogado }) {
   const [clube, setClube] = useState(null);
+  const [clubeIdFixo, setClubeIdFixo] = useState(null); // ✅ NOVO
   const [modoEdicao, setModoEdicao] = useState(false);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState(null);
-
-  // NOVO: estado para jogadores do clube
-
 
   useEffect(() => {
     if (!usuarioLogado?.uid) return;
@@ -20,7 +18,6 @@ export default function BlocoClube({ usuarioLogado }) {
     setCarregando(true);
     setErro(null);
 
-    // Listener no documento do usuário
     const usuarioRef = doc(db, 'usuarios', usuarioLogado.uid);
     let unsubscribeClube = () => {};
 
@@ -42,7 +39,11 @@ export default function BlocoClube({ usuarioLogado }) {
         return;
       }
 
-      // Listener no documento do clube
+     console.log('clubeAtualId do usuário:', clubeId);
+setClubeIdFixo(clubeId);
+console.log('clubeIdFixo setado para:', clubeId);
+
+
       const clubeRef = doc(db, 'clubes', clubeId);
       unsubscribeClube = onSnapshot(clubeRef, clubeSnap => {
         if (!clubeSnap.exists()) {
@@ -64,13 +65,11 @@ export default function BlocoClube({ usuarioLogado }) {
       setCarregando(false);
     });
 
-    // Cleanup geral
     return () => {
       unsubscribeUsuario();
       unsubscribeClube();
     };
   }, [usuarioLogado]);
-
 
   function atualizarClubeLocal(novosDados) {
     setClube(prev => ({ ...prev, ...novosDados }));
@@ -148,7 +147,6 @@ export default function BlocoClube({ usuarioLogado }) {
                   </span>
                 </div>
 
-
                 {clube.logoUrl && (
                   <div className={styles.infoItem}>
                     <strong>Logo do Clube</strong>
@@ -168,11 +166,13 @@ export default function BlocoClube({ usuarioLogado }) {
                 Editar Clube
               </button>
 
-            
-              <ElencoClube
-                clubeId={clube.id}
-                usuarioLogado={usuarioLogado}
+              {/* ✅ ElencoClube agora depende de clubeIdFixo */}
+              {clubeIdFixo && (
+                <ElencoClube
+                  clubeId={clubeIdFixo}
+                  usuarioLogado={usuarioLogado}
                 />
+              )}
             </>
           ) : (
             <FormClube

@@ -53,25 +53,23 @@ export default function ElencoClube({ clubeId, usuarioLogado }) {
     }
   }
 
-  async function removerJogador(index) {
-    const jogador = jogadores[index];
-    if (!window.confirm(`Deseja remover ${jogador.username} do clube?`)) return;
+  async function removerJogador(jogadorId, username) {
+     if (!window.confirm(`Deseja remover ${username} do clube?`)) return;
 
-    try {
-      const jogadorRef = doc(db, 'usuarios', jogador.id);
-      await updateDoc(jogadorRef, {
-        clubeAtualId: '',
-        status: 'livre',
-        podeEditarNumeroCamisa: true,
-        capitao: false,
-      });
-      alert('Jogador removido com sucesso!');
-    } catch (error) {
-      console.error('Erro ao remover jogador:', error);
-      alert('Erro ao remover jogador.');
-    }
+  try {
+    const jogadorRef = doc(db, 'usuarios', jogadorId);
+    await updateDoc(jogadorRef, {
+      clubeAtualId: '',
+      status: 'livre',
+      podeEditarNumeroCamisa: true,
+      capitao: false,
+    });
+    alert('Jogador removido com sucesso!');
+  } catch (error) {
+    console.error('Erro ao remover jogador:', error);
+    alert('Erro ao remover jogador.');
   }
-
+  }
   async function enviarConvite() {
   if (!emailConvite.trim()) {
     alert('Informe o e-mail do jogador.');
@@ -123,7 +121,13 @@ export default function ElencoClube({ clubeId, usuarioLogado }) {
 
   setEnviandoConvite(false);
 }
-  if (!jogadores.length) return <p>Elenco vazio.</p>;
+ {jogadores.length === 0 ? (
+  <p>Elenco vazio.</p>
+) : (
+  <table className={styles.tabelaJogadores}>
+    {/* ... cabeçalho e corpo da tabela ... */}
+  </table>
+)}
 
   return (
     <div className={styles.containerElenco}>
@@ -175,13 +179,13 @@ export default function ElencoClube({ clubeId, usuarioLogado }) {
               </td>
               <td data-label="Ações">
                 <button
-                  onClick={() => removerJogador(i)}
-                  className={styles.btnRemoverJogador}
-                  type="button"
-                  title="Remover jogador"
-                >
-                  ❌
-                </button>
+  onClick={() => removerJogador(j.id, j.username)}
+  className={styles.btnRemoverJogador}
+  type="button"
+  title="Remover jogador"
+>
+  ❌
+</button>
               </td>
             </tr>
           ))}

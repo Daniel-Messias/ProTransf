@@ -9,7 +9,6 @@ import { GiGamepad, GiCardDiscard, GiConfirmed, GiCancel } from 'react-icons/gi'
 import { AiOutlineEdit, AiOutlineSave, AiOutlineClose, AiOutlineMail } from 'react-icons/ai';
 import CentralNotificacoes from './CentralNotificacoes.jsx';
 import Historico from './Historico.jsx';
-import AmistososRecebidos from './AmistososRecebidos';
 
 export default function SidebarPerfil({ jogador }) {
   
@@ -42,6 +41,7 @@ export default function SidebarPerfil({ jogador }) {
   const [amistosos, setAmistosos] = useState([]);
   const [loadingAmistosos, setLoadingAmistosos] = useState(true);
   const [usuarioExtra, setUsuarioExtra] = useState(null);
+const amistososParaNotificacao = amistosos.filter(a => a.status === 'pendente');
 
 
   useEffect(() => {
@@ -99,29 +99,47 @@ export default function SidebarPerfil({ jogador }) {
 
   // Carregar amistosos para clube atual do jogador
   useEffect(() => {
-    async function carregarAmistosos() {
-      if (!jogador.clubeAtualId) {
-        setAmistosos([]);
-        setLoadingAmistosos(false);
-        return;
-      }
-      setLoadingAmistosos(true);
-      try {
-        const q = query(
-  collection(db, 'amistosos'),
-  where('destinatarioClubeId', '==', jogador.clubeAtualId)
-);
-        const querySnapshot = await getDocs(q);
-        const dados = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        setAmistosos(dados);
-      } catch (error) {
-        console.error('Erro ao carregar amistosos:', error);
-      } finally {
-        setLoadingAmistosos(false);
-      }
+  async function carregarAmistosos() {
+    if (!jogador.clubeAtualId) {
+      setAmistosos([]);
+      setLoadingAmistosos(false);
+      return;
     }
-    carregarAmistosos();
-  }, [jogador.clubeAtualId]);
+    setLoadingAmistosos(true);
+    try {
+      const q = query(
+        collection(db, 'amistosos'),
+        where('destinatarioClubeId', '==', jogador.clubeAtualId)
+      );
+      const querySnapshot = await getDocs(q);
+      const dadosRaw = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+      // Pega o nome do clube remetente para cada amistoso
+      const dadosComNomeClube = await Promise.all(dadosRaw.map(async amistoso => {
+        if (!amistoso.remetenteClubeId) {
+          return { ...amistoso, remetenteClubeNome: 'Clube desconhecido' };
+        }
+        const clubeRef = doc(db, 'clubes', amistoso.remetenteClubeId);
+        const clubeSnap = await getDoc(clubeRef);
+        const nomeClube = clubeSnap.exists() ? clubeSnap.data().nome : 'Clube desconhecido';
+
+        return {
+          ...amistoso,
+          remetenteClubeNome: nomeClube,
+        };
+      }));
+
+      setAmistosos(dadosComNomeClube);
+    } catch (error) {
+      console.error('Erro ao carregar amistosos:', error);
+    } finally {
+      setLoadingAmistosos(false);
+    }
+  }
+  carregarAmistosos();
+}, [jogador.clubeAtualId]);
+
+  
   useEffect(() => {
   async function buscarDadosExtras() {
     if (!currentUser) return;
@@ -141,24 +159,29 @@ export default function SidebarPerfil({ jogador }) {
 }, [currentUser]);
 
 
-  const atualizarResultadoAmistoso = async (amistosoId, resultado) => {
+  const atualizarResultadoAmistoso = async (amistoso, resultadoDigitado) => {
   try {
-    const amistosoRef = doc(db, 'amistosos', amistosoId);
-    await updateDoc(amistosoRef, { resultado });
-    
-    // Atualiza o estado local para mostrar o resultado na UI sem recarregar
+    const amistosoRef = doc(db, 'amistosos', amistoso.id);
+    const isRemetente = clubeAtualIdUsuario === amistoso.remetenteClubeId;
+    const campoAtualizar = isRemetente ? 'resultadoRemetente' : 'resultadoDestinatario';
+
+    await updateDoc(amistosoRef, {
+      [campoAtualizar]: resultadoDigitado
+    });
+
     setAmistosos(prev =>
       prev.map(a =>
-        a.id === amistosoId ? { ...a, resultado } : a
+        a.id === amistoso.id ? { ...a, [campoAtualizar]: resultadoDigitado } : a
       )
     );
 
-    alert('Resultado do amistoso atualizado com sucesso!');
+    alert('Resultado atualizado com sucesso!');
   } catch (error) {
-    console.error('Erro ao atualizar resultado do amistoso:', error);
+    console.error('Erro ao atualizar resultado:', error);
     alert('Erro ao atualizar resultado. Tente novamente.');
   }
 };
+
 
 
   // Upload foto/avatar
@@ -332,8 +355,11 @@ const handleChamarAmistoso = async () => {
   dataCriacao: new Date(),
   dataAgendada: {
     seconds: Math.floor(new Date(dataHoraAmistoso).getTime() / 1000)
-  }
+  },
+  resultadoRemetente: '',
+  resultadoDestinatario: ''
 });
+
 
 
     alert('Convite para amistoso enviado com sucesso!');
@@ -482,22 +508,16 @@ const handleChamarAmistoso = async () => {
      <CentralNotificacoes
   convites={convites}
   loadingConvites={loadingConvites}
+  amistosos={amistososParaNotificacao}
+  loadingAmistosos={loadingAmistosos}
   handleAtualizarStatusConvite={handleAtualizarStatusConvite}
+  aceitarAmistoso={aceitarAmistoso}
+  recusarAmistoso={recusarAmistoso}
   isDonoPerfil={isDonoPerfil}
   jogadorId={jogador.id}
   clubeId={jogador.clubeAtualId}
 />
 
-
-      {/* Amistosos Recebidos */}
-      <AmistososRecebidos
-  amistosos={amistosos}
-  isDonoPerfil={isDonoPerfil}
-  handleDataAgendadaChange={handleDataAgendadaChange}
-  aceitarAmistoso={aceitarAmistoso}
-  recusarAmistoso={recusarAmistoso}
-  atualizarResultadoAmistoso={atualizarResultadoAmistoso}  // <- aqui
-/>
 
 
       {/* Botões editar (aparece só para dono) */}

@@ -1,9 +1,7 @@
 import React, { useRef, useState, useEffect } from 'react';
 import styles from '../styles/SidebarPerfil.module.css';
 import { auth, db, storage } from '../../../services/firebase';
-import { 
-  doc, updateDoc, collection, query, where, getDocs, onSnapshot
-} from 'firebase/firestore';
+import { doc, updateDoc, collection, query, where, getDocs, onSnapshot, getDoc, addDoc } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
 import { FaWhatsapp, FaInstagram } from 'react-icons/fa';
@@ -43,6 +41,8 @@ export default function SidebarPerfil({ jogador }) {
 
   const [amistosos, setAmistosos] = useState([]);
   const [loadingAmistosos, setLoadingAmistosos] = useState(true);
+  const [usuarioExtra, setUsuarioExtra] = useState(null);
+
 
   useEffect(() => {
   if (!jogador.id) return;
@@ -122,6 +122,24 @@ export default function SidebarPerfil({ jogador }) {
     }
     carregarAmistosos();
   }, [jogador.clubeAtualId]);
+  useEffect(() => {
+  async function buscarDadosExtras() {
+    if (!currentUser) return;
+
+    try {
+      const docRef = doc(db, 'usuarios', currentUser.uid);
+      const docSnap = await getDoc(docRef);
+      if (docSnap.exists()) {
+        setUsuarioExtra(docSnap.data());
+      }
+    } catch (error) {
+      console.error('Erro ao buscar dados extras do usuário:', error);
+    }
+  }
+
+  buscarDadosExtras();
+}, [currentUser]);
+
 
   const atualizarResultadoAmistoso = async (amistosoId, resultado) => {
   try {
@@ -273,9 +291,13 @@ export default function SidebarPerfil({ jogador }) {
   };
 
   // Botão chamar amistoso — só aparece se usuário logado for clube ou clube_jogador e NÃO for dono do perfil
-  const podeChamarAmistoso = currentUser &&
-    ['clube', 'clube_jogador'].includes(currentUser.tipo) &&
-    !isDonoPerfil;
+  const tipoUsuario = usuarioExtra?.tipo || '';
+const clubeAtualIdUsuario = usuarioExtra?.clubeAtualId || null;
+
+const podeChamarAmistoso = currentUser &&
+  ['clube', 'clube_jogador'].includes(tipoUsuario) &&
+  !isDonoPerfil;
+
 // Estado para mostrar/ocultar modal de convite amistoso
 const [mostrarModalChamarAmistoso, setMostrarModalChamarAmistoso] = useState(false);
 
@@ -302,16 +324,17 @@ const handleChamarAmistoso = async () => {
 
   try {
     await addDoc(collection(db, 'amistosos'), {
-      remetenteClubeId: currentUser.clubeAtualId || null,
-      remetenteNome: currentUser.nome || 'Clube desconhecido',
-      destinatarioClubeId: jogador.clubeAtualId || null,
-      destinatarioNome: jogador.clubeAtual || 'Clube desconhecido',
-      status: 'pendente',
-      dataCriacao: new Date(),
-      dataAgendada: {
-        seconds: Math.floor(new Date(dataHoraAmistoso).getTime() / 1000)
-      }
-    });
+  remetenteClubeId: clubeAtualIdUsuario,
+  remetenteNome: usuarioExtra?.nome || 'Clube desconhecido',
+  destinatarioClubeId: jogador.clubeAtualId || null,
+  destinatarioNome: jogador.clubeAtual || 'Clube desconhecido',
+  status: 'pendente',
+  dataCriacao: new Date(),
+  dataAgendada: {
+    seconds: Math.floor(new Date(dataHoraAmistoso).getTime() / 1000)
+  }
+});
+
 
     alert('Convite para amistoso enviado com sucesso!');
     fecharModalChamarAmistoso();

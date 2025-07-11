@@ -49,13 +49,30 @@ h2 {
 
 .resultados {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   gap: 1rem;
   margin-bottom: 3rem;
+  overflow-x: auto;      /* permite rolar horizontalmente */
+  scroll-behavior: smooth;
+  padding-bottom: 0.5rem; /* dá espaço para scrollbar */
 }
 
-/* Seções de transferência - container das seções Aceitas, Recusadas e Pendentes */
-/* Ajuste: aplicar grid somente em divs que NÃO sejam .carrossel */
+.resultados::-webkit-scrollbar {
+  height: 6px;
+}
+
+.resultados::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 4px;
+}
+
+/* Garantir que cada card fique com largura fixa e não encolha */
+.cardBusca {
+  flex: 0 0 auto;
+  width: 320px; /* ou 300px, pode ajustar */
+}
+
+
 .transferenciaSection > div:not(.carrossel) {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));

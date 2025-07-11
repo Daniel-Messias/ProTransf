@@ -110,22 +110,40 @@ export default function ElencoClube({ clubeId, usuarioLogado, modoLeitura = fals
   }
 
   async function removerJogador(jogadorId, username) {
-    if (!window.confirm(`Deseja remover ${username} do clube?`)) return;
+  if (!window.confirm(`Deseja remover ${username} do clube?`)) return;
 
-    try {
-      const jogadorRef = doc(db, 'usuarios', jogadorId);
+  try {
+    const jogadorRef = doc(db, 'usuarios', jogadorId);
+
+    // Consulta se o jogador é dono de algum clube
+    const clubesRef = collection(db, 'clubes');
+    const q = query(clubesRef, where('donoUid', '==', jogadorId));
+    const snapshot = await getDocs(q);
+    const ehDonoDeClube = !snapshot.empty;
+
+    if (ehDonoDeClube) {
+      // Dono: só muda o status para livre, mas mantém o clubeAtualId
+      await updateDoc(jogadorRef, {
+        status: 'livre',
+        podeEditarNumeroCamisa: true,
+        capitao: false,
+      });
+    } else {
+      // Não dono: limpa tudo normalmente
       await updateDoc(jogadorRef, {
         clubeAtualId: '',
         status: 'livre',
         podeEditarNumeroCamisa: true,
         capitao: false,
       });
-      alert('Jogador removido com sucesso!');
-    } catch (error) {
-      console.error('Erro ao remover jogador:', error);
-      alert('Erro ao remover jogador.');
     }
+
+    alert('Jogador removido com sucesso!');
+  } catch (error) {
+    console.error('Erro ao remover jogador:', error);
+    alert('Erro ao remover jogador.');
   }
+}
 
   async function enviarConvite() {
     if (!emailConvite.trim()) {

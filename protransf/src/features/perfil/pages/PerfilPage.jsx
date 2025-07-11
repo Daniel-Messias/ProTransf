@@ -16,7 +16,7 @@ import MainPerfil from '../components/MainPerfil';
 import styles from '../styles/Perfil.module.css';
 
 export default function PerfilPage() {
-  const { id } = useParams(); // Pode ser username ou UID
+  const { id } = useParams();
 
   const [perfil, setPerfil] = useState(null);
   const [clube, setClube] = useState(null);
@@ -29,29 +29,37 @@ export default function PerfilPage() {
 
   const unsubscribeClubeRef = useRef(null);
 
-  // Função para resolver o id para uid real
   async function resolverUid(id) {
     try {
-      // Tenta buscar doc por UID direto
       const userDocSnap = await getDoc(doc(db, 'usuarios', id));
-      if (userDocSnap.exists()) {
-        return id;
-      }
+      if (userDocSnap.exists()) return id;
 
-      // Se não existir, tenta buscar pelo username
       const usernameQuery = query(collection(db, 'usuarios'), where('username', '==', id));
       const querySnapshot = await getDocs(usernameQuery);
 
-      if (!querySnapshot.empty) {
-        return querySnapshot.docs[0].id;
-      }
+      if (!querySnapshot.empty) return querySnapshot.docs[0].id;
 
-      // Não achou nenhum
       return null;
     } catch (err) {
       console.error('Erro ao resolver UID:', err);
       return null;
     }
+  }
+
+  async function buscarClubeDono(jogadorId) {
+    try {
+      const clubesRef = collection(db, 'clubes');
+      const q = query(clubesRef, where('criadoPorUsuarioId', '==', jogadorId));
+      const snapshot = await getDocs(q);
+
+      if (!snapshot.empty) {
+        const clubeDoc = snapshot.docs[0];
+        return { id: clubeDoc.id, ...clubeDoc.data() };
+      }
+    } catch (error) {
+      console.error('Erro ao buscar clube do dono:', error);
+    }
+    return null;
   }
 
   useEffect(() => {
@@ -69,7 +77,6 @@ export default function PerfilPage() {
       let uidParaBuscar = authUser?.uid;
 
       if (id) {
-        // Se estiver acessando outro perfil, ativa modo leitura
         if (!authUser || id !== authUser.uid) {
           setModoLeitura(true);
         }
@@ -83,59 +90,60 @@ export default function PerfilPage() {
         uidParaBuscar = uidResolvido;
       }
 
-      // Listener em tempo real do jogador
       const jogadorRef = doc(db, 'usuarios', uidParaBuscar);
+
       unsubscribeJogador = onSnapshot(
         jogadorRef,
-        (docSnap) => {
-          if (docSnap.exists()) {
-            const data = docSnap.data();
-            setPerfil({ id: docSnap.id, ...data });
-
-            // Atualiza modo leitura se for o próprio usuário
-            if (authUser && uidParaBuscar === authUser.uid) {
-              setModoLeitura(false);
-            } else {
-              setModoLeitura(true);
-            }
-
-            // Gerencia listener do clube
-            if (data.clubeAtualId) {
-              if (unsubscribeClubeRef.current) {
-                unsubscribeClubeRef.current();
-                unsubscribeClubeRef.current = null;
-              }
-              setLoadingClube(true);
-              const clubeRef = doc(db, 'clubes', data.clubeAtualId);
-              unsubscribeClubeRef.current = onSnapshot(
-                clubeRef,
-                (clubeSnap) => {
-                  if (clubeSnap.exists()) {
-                    setClube({ id: clubeSnap.id, ...clubeSnap.data() });
-                  } else {
-                    setClube(null);
-                  }
-                  setLoadingClube(false);
-                },
-                (error) => {
-                  console.error('Erro onSnapshot clube:', error);
-                  setErro('Erro ao carregar dados do clube.');
-                  setLoadingClube(false);
-                }
-              );
-            } else {
-              if (unsubscribeClubeRef.current) {
-                unsubscribeClubeRef.current();
-                unsubscribeClubeRef.current = null;
-              }
-              setClube(null);
-              setLoadingClube(false);
-            }
-          } else {
+        async (docSnap) => {
+          if (!docSnap.exists()) {
             setPerfil(null);
             setClube(null);
+            setLoadingPerfil(false);
+            return;
+          }
+
+          const data = docSnap.data();
+          setPerfil({ id: docSnap.id, ...data });
+
+          const jogadorId = docSnap.id;
+
+          // Sempre remove o listener anterior do clube
+          if (unsubscribeClubeRef.current) {
+            unsubscribeClubeRef.current();
+            unsubscribeClubeRef.current = null;
+          }
+
+          if (data.clubeAtualId) {
+            setLoadingClube(true);
+            const clubeRef = doc(db, 'clubes', data.clubeAtualId);
+            unsubscribeClubeRef.current = onSnapshot(
+              clubeRef,
+              (clubeSnap) => {
+                if (clubeSnap.exists()) {
+                  setClube({ id: clubeSnap.id, ...clubeSnap.data() });
+                } else {
+                  setClube(null);
+                }
+                setLoadingClube(false);
+              },
+              (error) => {
+                console.error('Erro onSnapshot clubeAtual:', error);
+                setClube(null);
+                setLoadingClube(false);
+              }
+            );
+          } else {
+            // Se não tem clubeAtualId, tenta buscar se é dono
+            setLoadingClube(true);
+            const clubeComoDono = await buscarClubeDono(jogadorId);
+            if (clubeComoDono) {
+              setClube(clubeComoDono);
+            } else {
+              setClube(null);
+            }
             setLoadingClube(false);
           }
+
           setLoadingPerfil(false);
         },
         (error) => {
@@ -159,7 +167,6 @@ export default function PerfilPage() {
   if (loadingPerfil) return <p>Carregando perfil...</p>;
   if (erro) return <p>{erro}</p>;
   if (!perfil) return <p>Perfil não encontrado.</p>;
-console.log('PerfilPage - clube:', clube);
 
   return (
     <div className={styles.layout}>

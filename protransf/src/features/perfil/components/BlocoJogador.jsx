@@ -123,38 +123,39 @@ export default function BlocoJogador({ jogadorId, modoLeitura }) {
   };
 
   async function pedirDemissao() {
-    if (!window.confirm('Tem certeza que deseja pedir demissão do clube?')) return;
+  if (!window.confirm('Tem certeza que deseja pedir demissão do clube?')) return;
 
-    try {
-      const jogadorRef = doc(db, 'usuarios', jogadorId);
+  try {
+    const jogadorRef = doc(db, 'usuarios', jogadorId);
 
-      // Consulta se o jogador é dono de algum clube
-      const clubesRef = collection(db, 'clubes');
-      const q = query(clubesRef, where('donoUid', '==', jogadorId));
-      const snapshot = await getDocs(q);
-      const ehDonoDeClube = !snapshot.empty;
+    // Consulta se o jogador é dono de algum clube
+    const clubesRef = collection(db, 'clubes');
+    const q = query(clubesRef, where('donoUid', '==', jogadorId));
+    const snapshot = await getDocs(q);
+    const ehDonoDeClube = !snapshot.empty;
 
-      if (ehDonoDeClube) {
-        // Se for dono do clube, só muda status para 'Livre', mantém clubeAtualId
-        await updateDoc(jogadorRef, {
-          pedidoDemissao: true,
-          status: 'Livre',
-        });
-      } else {
-        // Se não for dono, limpa clubeAtualId e atualiza status para 'Livre'
-        await updateDoc(jogadorRef, {
-          pedidoDemissao: true,
-          status: 'Livre',
-          clubeAtualId: '',
-        });
-      }
-
-      alert('Pedido de demissão enviado com sucesso!');
-    } catch (error) {
-      console.error('Erro ao pedir demissão:', error);
-      alert('Erro ao enviar pedido. Tente novamente.');
+    if (ehDonoDeClube) {
+      // Dono: muda status para 'Livre' mas mantém clubeAtualId
+      await updateDoc(jogadorRef, {
+        pedidoDemissao: true,
+        status: 'Livre',
+        // Não limpa clubeAtualId
+      });
+    } else {
+      // Não dono: limpa clubeAtualId para sair do clube
+      await updateDoc(jogadorRef, {
+        pedidoDemissao: true,
+        status: 'Livre',
+        clubeAtualId: '',
+      });
     }
+
+    alert('Pedido de demissão enviado com sucesso!');
+  } catch (error) {
+    console.error('Erro ao pedir demissão:', error);
+    alert('Erro ao enviar pedido. Tente novamente.');
   }
+}
 
   return (
     <div className={styles.container}>

@@ -1,7 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import styles from '../styles/BlocoClube.module.css';
 import FormClube from './FormClube';
-import { doc, onSnapshot } from 'firebase/firestore';
+import { 
+  doc, 
+  onSnapshot, 
+  collection, 
+  query, 
+  where, 
+  getDocs 
+} from 'firebase/firestore';
 import { db } from '../../../services/firebase';
 import ElencoClube from './ElencoClube';
 
@@ -35,7 +42,7 @@ export default function BlocoClube({
 
   const usuarioRef = doc(db, 'usuarios', usuarioLogado.uid);
 
-  const unsubscribeUsuario = onSnapshot(usuarioRef, usuarioSnap => {
+  const unsubscribeUsuario = onSnapshot(usuarioRef, async (usuarioSnap) => {
     if (!usuarioSnap.exists()) {
       setErro('Usuário não encontrado no banco.');
       setClube(null);
@@ -44,14 +51,27 @@ export default function BlocoClube({
     }
 
     const usuarioData = usuarioSnap.data();
-    const clubeId = usuarioData.clubeAtualId;
+    let clubeId = usuarioData.clubeAtualId;
+
+    if (!clubeId) {
+      // Se não estiver no clube, verifica se é dono de algum clube
+      const clubesRef = collection(db, 'clubes');
+      const q = query(clubesRef, where('donoUid', '==', usuarioLogado.uid));
+      const snapshot = await getDocs(q);
+      if (!snapshot.empty) {
+        clubeId = snapshot.docs[0].id;
+      }
+    }
 
     if (clubeId) {
-      setClubeIdFixo(clubeId); // 🟢 atualiza o ID fixo quando existir
+      setClubeIdFixo(clubeId);
+    } else {
+      setClubeIdFixo(null);
     }
 
     setCarregando(false);
-  }, error => {
+  }, (error) => {
+    console.error('Erro ao ouvir dados do usuário:', error);
     setErro('Erro ao ouvir dados do usuário.');
     setClube(null);
     setCarregando(false);
@@ -59,6 +79,7 @@ export default function BlocoClube({
 
   return () => unsubscribeUsuario();
 }, [usuarioLogado, clubeProp]);
+
 
   useEffect(() => {
   if (!clubeIdFixo || clubeProp) return;

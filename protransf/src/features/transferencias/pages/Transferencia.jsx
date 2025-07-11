@@ -59,7 +59,8 @@ export default function Transferencia() {
   }
 
   if (filtro === 'clubes' || filtro === 'todos') {
-    const q = query(clubesRef, where('procura', '==', 'sim'));
+    // Corrigido aqui para usar 'estaBuscando' boolean
+    const q = query(clubesRef, where('estaBuscando', '==', true));
     promessas.push(getDocs(q));
   }
 
@@ -68,9 +69,18 @@ export default function Transferencia() {
 
   console.log('Resultados da busca:', resultados);
 
-  // Se não teve resultado para jogadores ou clubes, cria vazio para evitar erro
-  const jogadoresSnap = filtro === 'clubes' ? { docs: [] } : (resultados[0] || { docs: [] });
-  const clubesSnap = filtro === 'jogadores' ? { docs: [] } : (resultados[1] || { docs: [] });
+  // Ajusta resultados conforme filtro para evitar índices errados
+  let jogadoresSnap = { docs: [] };
+  let clubesSnap = { docs: [] };
+
+  if (filtro === 'jogadores') {
+    jogadoresSnap = resultados[0] || { docs: [] };
+  } else if (filtro === 'clubes') {
+    clubesSnap = resultados[0] || { docs: [] };
+  } else if (filtro === 'todos') {
+    jogadoresSnap = resultados[0] || { docs: [] };
+    clubesSnap = resultados[1] || { docs: [] };
+  }
 
   const jogadores = (jogadoresSnap.docs || []).map(doc => ({
     id: doc.id,
@@ -86,6 +96,7 @@ export default function Transferencia() {
 
   setResultadosBusca([...jogadores, ...clubes]);
 }, [filtro, posicaoFiltro]);
+
 
 
   useEffect(() => {

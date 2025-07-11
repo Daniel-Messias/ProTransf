@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import styles from '../styles/BlocoJogador.module.css';
-import { doc, onSnapshot, updateDoc, getDoc } from 'firebase/firestore';
+import { doc, onSnapshot, updateDoc, getDoc, collection, query, where, getDocs } from 'firebase/firestore';
 import { auth, db } from '../../../services/firebase';
 
 export default function BlocoJogador({ jogadorId, modoLeitura }) {
@@ -127,11 +127,28 @@ export default function BlocoJogador({ jogadorId, modoLeitura }) {
 
     try {
       const jogadorRef = doc(db, 'usuarios', jogadorId);
-      await updateDoc(jogadorRef, {
-        pedidoDemissao: true,
-        status: 'pedido_demissao',
-        clubeAtualId: '',
-      });
+
+      // Consulta se o jogador é dono de algum clube
+      const clubesRef = collection(db, 'clubes');
+      const q = query(clubesRef, where('donoUid', '==', jogadorId));
+      const snapshot = await getDocs(q);
+      const ehDonoDeClube = !snapshot.empty;
+
+      if (ehDonoDeClube) {
+        // Se for dono do clube, só muda status para 'Livre', mantém clubeAtualId
+        await updateDoc(jogadorRef, {
+          pedidoDemissao: true,
+          status: 'Livre',
+        });
+      } else {
+        // Se não for dono, limpa clubeAtualId e atualiza status para 'Livre'
+        await updateDoc(jogadorRef, {
+          pedidoDemissao: true,
+          status: 'Livre',
+          clubeAtualId: '',
+        });
+      }
+
       alert('Pedido de demissão enviado com sucesso!');
     } catch (error) {
       console.error('Erro ao pedir demissão:', error);
@@ -320,25 +337,25 @@ export default function BlocoJogador({ jogadorId, modoLeitura }) {
               <p className={styles.vazio}>Sem jogadas registradas.</p>
             )}
           </div>
-<div className={styles.actionButtons}>
-      <button
-        className={styles.editButton}
-        onClick={() => setModoEdicao(true)}
-        type="button"
-      >
-        Editar Perfil do Jogador
-      </button>
+          <div className={styles.actionButtons}>
+            <button
+              className={styles.editButton}
+              onClick={() => setModoEdicao(true)}
+              type="button"
+            >
+              Editar Perfil do Jogador
+            </button>
 
-      {isContratado && (
-        <button
-          onClick={pedirDemissao}
-          type="button"
-          className={styles.btnDemissao}
-        >
-          Pedir Demissão
-        </button>
-      )}
-    </div>
+            {isContratado && (
+              <button
+                onClick={pedirDemissao}
+                type="button"
+                className={styles.btnDemissao}
+              >
+                Pedir Demissão
+              </button>
+            )}
+          </div>
         </>
       )}
     </div>

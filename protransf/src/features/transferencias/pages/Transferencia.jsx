@@ -40,37 +40,53 @@ export default function Transferencia() {
   }
 
   const buscar = useCallback(async () => {
-    const usuariosRef = collection(db, 'usuarios');
-    const clubesRef = collection(db, 'clubes');
-    const promessas = [];
+  const usuariosRef = collection(db, 'usuarios');
+  const clubesRef = collection(db, 'clubes');
+  const promessas = [];
 
-    if (filtro === 'jogadores' || filtro === 'todos') {
-      let q = query(usuariosRef, where('status', '==', 'Livre no mercado'));
-      if (posicaoFiltro) {
-        q = query(
-          usuariosRef,
-          where('status', '==', 'Livre no mercado'),
-          where('posicaoPrimaria', '==', posicaoFiltro)
-        );
-      }
-      promessas.push(getDocs(q));
+  if (filtro === 'jogadores' || filtro === 'todos') {
+    let q;
+    if (posicaoFiltro) {
+      q = query(
+        usuariosRef,
+        where('status', '==', 'Livre'),
+        where('posicaoPrimaria', '==', posicaoFiltro)
+      );
+    } else {
+      q = query(usuariosRef, where('status', '==', 'Livre'));
     }
+    promessas.push(getDocs(q));
+  }
 
-    if (filtro === 'clubes' || filtro === 'todos') {
-      let q = query(clubesRef, where('procura', '==', 'sim'));
-      promessas.push(getDocs(q));
-    }
+  if (filtro === 'clubes' || filtro === 'todos') {
+    const q = query(clubesRef, where('procura', '==', 'sim'));
+    promessas.push(getDocs(q));
+  }
 
-    const [jogadoresSnap, clubesSnap] = await Promise.all([
-      filtro === 'clubes' ? { docs: [] } : promessas[0],
-      filtro === 'jogadores' ? { docs: [] } : promessas[1] || promessas[0],
-    ]);
+  // Aguarda as promessas
+  const resultados = await Promise.all(promessas);
 
-    const jogadores = jogadoresSnap.docs.map(doc => ({ id: doc.id, tipo: 'jogador', ...doc.data() }));
-    const clubes = clubesSnap.docs.map(doc => ({ id: doc.id, tipo: 'clube', ...doc.data() }));
+  console.log('Resultados da busca:', resultados);
 
-    setResultadosBusca([...jogadores, ...clubes]);
-  }, [filtro, posicaoFiltro]);
+  // Se não teve resultado para jogadores ou clubes, cria vazio para evitar erro
+  const jogadoresSnap = filtro === 'clubes' ? { docs: [] } : (resultados[0] || { docs: [] });
+  const clubesSnap = filtro === 'jogadores' ? { docs: [] } : (resultados[1] || { docs: [] });
+
+  const jogadores = (jogadoresSnap.docs || []).map(doc => ({
+    id: doc.id,
+    tipo: 'jogador',
+    ...doc.data(),
+  }));
+
+  const clubes = (clubesSnap.docs || []).map(doc => ({
+    id: doc.id,
+    tipo: 'clube',
+    ...doc.data(),
+  }));
+
+  setResultadosBusca([...jogadores, ...clubes]);
+}, [filtro, posicaoFiltro]);
+
 
   useEffect(() => {
     const ref = collection(db, 'convites');
@@ -136,7 +152,7 @@ export default function Transferencia() {
     carregarUsuarioEClube();
   }, []);
 
-  // Funções para envio de convite/pedido (igual ao seu código)
+  
   const enviarConvite = async (clube, jogador) => {
     try {
       const conviteRef = doc(collection(db, 'convites'));

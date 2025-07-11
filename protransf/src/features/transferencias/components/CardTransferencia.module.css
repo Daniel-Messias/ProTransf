@@ -34,34 +34,6 @@
   box-shadow: 0 2px 8px rgba(0,0,0,0.4);
 }
 
-.label {
-  font-size: 0.85rem;
-  color: #888888;
-  margin-bottom: 2px;
-}
-
-.value {
-  font-size: 1rem;
-  font-weight: 700;
-  color: #00bfff; /* azul ProTransf */
-  text-shadow: 0 0 4px rgba(0, 191, 255, 0.3); /* leve brilho azul */
-}
-
-
-.seta {
-  font-size: 1.5rem;
-  color: #00bfff;
-  margin: 0 10px;
-}
-
-.clubeNome {
-  color: #00bfff;
-}
-
-.jogadorNome {
-  color: #ffcc00;
-}
-
 .info {
   flex: 1;
 }
@@ -110,18 +82,6 @@ p {
   color: #000;
 }
 
-.posicaoBadge {
-  display: inline-block;
-  background-color: #007bff;
-  color: white;
-  padding: 3px 8px;
-  font-size: 0.75rem;
-  border-radius: 12px;
-  margin-left: 8px;
-  font-weight: 600;
-  vertical-align: middle;
-}
-
 .btn {
   background-color: #00bfff;
   color: white;
@@ -135,6 +95,72 @@ p {
 
 .btn:hover {
   background-color: #009acd;
+}
+
+.username {
+  font-size: 0.85rem;
+  color: #cccccc;
+  margin-top: -4px;
+  margin-bottom: 6px;
+}
+
+.fichaJogador {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px 0;
+}
+
+.nome {
+  font-size: 1.2rem;
+  color: #00bfff;
+  font-weight: bold;
+  margin-bottom: 0;
+}
+
+.linha {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.9rem;
+  color: #e0e0e0;
+}
+
+.icone {
+  font-size: 1rem;
+  color: #00bfff;
+}
+
+.label {
+  font-weight: 600;
+  color: #aaa;
+}
+
+.valor {
+  font-weight: 700;
+  color: #fff;
+}
+
+.numeroCamisa {
+  background-color: #111;
+  color: #00bfff;
+  font-size: 0.85rem;
+  padding: 3px 8px;
+  border-radius: 8px;
+  font-weight: 700;
+  display: inline-block;
+  margin-left: 6px;
+}
+
+.cardJogador {
+  background: rgba(0, 0, 0, 0.85);
+  border: 1px solid #00bfff;
+  padding: 1.5rem;
+  min-width: 280px;
+  max-width: 320px;
+  min-height: auto;
+  box-shadow: 0 4px 12px rgba(0, 191, 255, 0.3);
+  border-radius: 12px;
 }
 
 @keyframes fadeIn {

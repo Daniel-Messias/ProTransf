@@ -6,19 +6,20 @@ import { auth } from '../../../services/firebase';
 export default function CardTransferencia({ dados, tipo }) {
   const user = auth.currentUser;
 
-  // Detecta se o card é de transferência (exibe Clube → Jogador)
   const isTransferencia = tipo === 'transferencia' && dados.clubeNome && dados.jogadorNome;
+  const isJogador = tipo === 'jogador' || tipo === 'clube_jogador';
+  const isClube = tipo === 'clube';
 
-  // Define se pode enviar convite (clubes convidam jogadores, jogadores convidam clubes)
+  // Clubes convidam jogadores, jogadores (inclusive clube_jogador) convidam clubes
   const podeConvidar = !!user && (
-    (tipo === 'jogador' && user.tipoUsuario === 'clube') ||
-    (tipo === 'clube' && user.tipoUsuario === 'jogador')
+    (isJogador && user.tipoUsuario === 'clube') ||
+    (isClube && (user.tipoUsuario === 'jogador' || user.tipoUsuario === 'clube_jogador'))
   );
 
   const handleClick = () => {
-    if (tipo === 'jogador') {
+    if (isJogador) {
       alert(`Enviar convite para jogador: ${dados.username || dados.email}`);
-    } else if (tipo === 'clube') {
+    } else if (isClube) {
       alert(`Enviar pedido para clube: ${dados.nome}`);
     }
   };
@@ -55,20 +56,46 @@ export default function CardTransferencia({ dados, tipo }) {
     );
   }
 
-  // Layout padrão para jogadores e clubes na busca
   return (
-    <div className={styles.card} role="region" aria-label={`Card de ${tipo}`}>
+    <div
+      className={`${styles.card} ${isJogador ? styles.cardJogador : styles.cardClube}`}
+      role="region"
+      aria-label={`Card de ${tipo}`}
+    >
       <div className={styles.info}>
-        {tipo === 'jogador' ? (
-          <>
-            <h4>@{dados.username || 'jogador'}</h4>
-            <p>
-              Posição:
-              <span className={styles.posicaoBadge}>{dados.posicaoPrimaria || 'N/A'}</span>
-            </p>
+        {isJogador ? (
+          <div className={styles.fichaJogador}>
+            <h4 className={styles.nome}>{dados.nome || 'Jogador'}</h4>
+            <p className={styles.username}>@{dados.username || 'usuario'}</p>
 
-            <p>Status: {dados.status}</p>
-            <p>Plataforma: {dados.plataforma || 'N/A'}</p>
+            <div className={styles.linha}>
+              <span className={styles.icone}>⚽</span>
+              <span className={styles.label}>Posição principal:</span>
+              <span className={styles.valor}>{dados.posicaoPrimaria || dados.posicao || 'N/A'}</span>
+            </div>
+
+            {dados.posicaoSecundaria && (
+              <div className={styles.linha}>
+                <span className={styles.icone}>🎯</span>
+                <span className={styles.label}>Posição secundária:</span>
+                <span className={styles.valor}>{dados.posicaoSecundaria}</span>
+              </div>
+            )}
+
+            {dados.numeroCamisa && (
+              <div className={styles.linha}>
+                <span className={styles.icone}>🎽</span>
+                <span className={styles.label}>Camisa:</span>
+                <span className={styles.numeroCamisa}>{dados.numeroCamisa}</span>
+              </div>
+            )}
+
+            <div className={styles.linha}>
+              <span className={styles.icone}>🎮</span>
+              <span className={styles.label}>Plataforma:</span>
+              <span className={styles.valor}>{dados.plataforma || 'N/A'}</span>
+            </div>
+
             <Link
               to={`/perfil/${dados.id}`}
               className={styles.link}
@@ -76,12 +103,27 @@ export default function CardTransferencia({ dados, tipo }) {
             >
               Ver Perfil
             </Link>
-          </>
+          </div>
         ) : (
-          <>
-            <h4>{dados.nome}</h4>
-            <p>Procurando jogadores: {dados.procura === 'sim' ? 'Sim' : 'Não'}</p>
-            <p>Campeonatos: {dados.campeonatos?.join(', ') || 'N/A'}</p>
+          <div className={styles.fichaClube}>
+            <h4 className={styles.nome}>{dados.nome || 'Clube'}</h4>
+
+            <div className={styles.linha}>
+              <span className={styles.icone}>🔎</span>
+              <span className={styles.label}>Buscando jogadores:</span>
+              <span className={styles.valor}>{dados.estaBuscando ? 'Sim' : 'Não'}</span>
+            </div>
+
+            <div className={styles.linha}>
+              <span className={styles.icone}>🏆</span>
+              <span className={styles.label}>Campeonatos:</span>
+              <span className={styles.valor}>
+                {dados.campeonatos && dados.campeonatos.length > 0
+                  ? dados.campeonatos.join(', ')
+                  : 'Nenhum campeonato registrado'}
+              </span>
+            </div>
+
             <Link
               to={`/perfil/${dados.id}`}
               className={styles.link}
@@ -89,7 +131,7 @@ export default function CardTransferencia({ dados, tipo }) {
             >
               Ver Perfil
             </Link>
-          </>
+          </div>
         )}
       </div>
 
@@ -97,10 +139,10 @@ export default function CardTransferencia({ dados, tipo }) {
         <button
           className={styles.btn}
           onClick={handleClick}
-          aria-label={tipo === 'jogador' ? `Enviar convite para ${dados.username}` : `Enviar pedido para ${dados.nome}`}
+          aria-label={isJogador ? `Enviar convite para ${dados.username}` : `Enviar pedido para ${dados.nome}`}
           type="button"
         >
-          {tipo === 'jogador' ? 'Enviar Convite' : 'Enviar Pedido'}
+          {isJogador ? 'Enviar Convite' : 'Enviar Pedido'}
         </button>
       )}
     </div>

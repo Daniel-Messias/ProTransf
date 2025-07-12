@@ -65,43 +65,84 @@ export default function CentralNotificacoes({
         <ul className={styles.lista}>
           {/* Notificações de Convites */}
           {tipoSelecionado === 'convites' && convitesPendentes.map((convite) => {
-            const nomeClube = convite.clubeNome || 'Clube desconhecido';
+            if (convite.tipo === 'clube_para_jogador') {
+              const nomeClube = convite.clubeNome || 'Clube desconhecido';
 
-            return (
-              <li key={convite.id} className={styles.item}>
-                <div>
-                  <strong>{nomeClube}</strong> está convidando você para jogar.
-                  <span className={styles.statusPendente}>pendente</span>
-                </div>
+              return (
+                <li key={convite.id} className={styles.item}>
+                  <div>
+                    <strong>{nomeClube}</strong> está convidando você para jogar.
+                    <span className={styles.statusPendente}>pendente</span>
+                  </div>
 
-                <div className={styles.acoesConvite}>
-                  <button
-                    onClick={() =>
-                      handleAtualizarStatusConvite(
-                        convite.id,
-                        'aceito',
-                        convite.clubeNome,
-                        convite.clubeId,
-                        convite.numeroCamisa
-                      )
-                    }
-                    className={`${styles.btnAceitar} ${styles.btnIcon}`}
-                    title="Aceitar Convite"
-                  >
-                    <GiConfirmed />
-                  </button>
-                  <button
-                    onClick={() =>
-                      handleAtualizarStatusConvite(convite.id, 'recusado')
-                    }
-                    className={`${styles.btnRecusar} ${styles.btnIcon}`}
-                    title="Recusar Convite"
-                  >
-                    <GiCancel />
-                  </button>
-                </div>
-              </li>
-            );
+                  <div className={styles.acoesConvite}>
+                    <button
+                      onClick={() =>
+                        handleAtualizarStatusConvite(
+                          convite.id,
+                          'aceito',
+                          convite.clubeNome,
+                          convite.clubeId,
+                          convite.numeroCamisa
+                        )
+                      }
+                      className={`${styles.btnAceitar} ${styles.btnIcon}`}
+                      title="Aceitar Convite"
+                    >
+                      <GiConfirmed />
+                    </button>
+                    <button
+                      onClick={() =>
+                        handleAtualizarStatusConvite(convite.id, 'recusado')
+                      }
+                      className={`${styles.btnRecusar} ${styles.btnIcon}`}
+                      title="Recusar Convite"
+                    >
+                      <GiCancel />
+                    </button>
+                  </div>
+                </li>
+              );
+            } else if (convite.tipo === 'jogador_para_clube') {
+              const usernameJogador = convite.username || convite.jogadorNome || 'Jogador desconhecido';
+
+              return (
+                <li key={convite.id} className={styles.item}>
+                  <div>
+                    <strong>{usernameJogador}</strong> está pedindo para fazer parte do seu time.
+                    <span className={styles.statusPendente}>pendente</span>
+                  </div>
+
+                  <div className={styles.acoesConvite}>
+                    <button
+                      onClick={() =>
+                        handleAtualizarStatusConvite(
+                          convite.id,
+                          'aceito',
+                          convite.clubeNome,
+                          convite.clubeId,
+                          convite.numeroCamisa
+                        )
+                      }
+                      className={`${styles.btnAceitar} ${styles.btnIcon}`}
+                      title="Aceitar Pedido"
+                    >
+                      <GiConfirmed />
+                    </button>
+                    <button
+                      onClick={() =>
+                        handleAtualizarStatusConvite(convite.id, 'recusado')
+                      }
+                      className={`${styles.btnRecusar} ${styles.btnIcon}`}
+                      title="Recusar Pedido"
+                    >
+                      <GiCancel />
+                    </button>
+                  </div>
+                </li>
+              );
+            }
+            return null;
           })}
 
           {/* Notificações de Amistosos */}

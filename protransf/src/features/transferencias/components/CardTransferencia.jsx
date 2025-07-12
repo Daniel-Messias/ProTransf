@@ -125,12 +125,13 @@ export default function CardTransferencia({ dados, tipo }) {
             </div>
 
             <Link
-              to={`/perfil/${dados.id}`}
-              className={styles.link}
-              aria-label={`Ver perfil do clube ${dados.nome}`}
-            >
-              Ver Perfil
-            </Link>
+  to={`/perfil/${dados.criadoPorUsuarioId}`}
+  className={styles.link}
+  aria-label={`Ver perfil do dono do clube ${dados.nome}`}
+>
+  Ver Perfil
+</Link>
+
           </div>
         )}
       </div>

@@ -72,9 +72,21 @@ export default function PerfilPage() {
       setLoadingClube(false);
 
       const authUser = auth.currentUser;
-      setUsuarioLogado(authUser);
+let uidParaBuscar = authUser?.uid;
 
-      let uidParaBuscar = authUser?.uid;
+// Buscar dados completos do usuário logado
+let usuarioLogadoFirestore = null;
+if (authUser?.uid) {
+  const usuarioDocSnap = await getDoc(doc(db, 'usuarios', authUser.uid));
+  if (usuarioDocSnap.exists()) {
+    usuarioLogadoFirestore = {
+      uid: authUser.uid,
+      ...usuarioDocSnap.data(),
+    };
+  }
+}
+setUsuarioLogado(usuarioLogadoFirestore);
+
 
       if (id) {
         if (!authUser || id !== authUser.uid) {

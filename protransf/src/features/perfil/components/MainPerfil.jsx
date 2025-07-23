@@ -12,7 +12,7 @@ export default function MainPerfil({ jogador, clube, modoLeitura, usuarioLogado,
       <BlocoClube
   clube={clube}
   modoLeitura={modoLeitura}
-  usuarioLogado={modoLeitura ? null : usuarioLogado}
+  usuarioLogado={modoLeitura ? jogador : usuarioLogado}
   carregando={carregandoClube}
 />
 

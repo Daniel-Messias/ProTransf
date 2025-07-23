@@ -174,3 +174,28 @@ label {
   background-color: #0056b3;
   box-shadow: 0 6px 14px rgba(0, 86, 179, 0.6);
 }
+.chamadaUpgrade {
+  border: 2px solid #ff6f61;
+  background-color: #fff0f0;
+  padding: 20px;
+  margin: 20px 0;
+  text-align: center;
+  border-radius: 8px;
+  box-shadow: 0 0 10px #ff6f61;
+}
+
+.btnUpgrade {
+  background-color: #ff6f61;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  font-size: 16px;
+  margin-top: 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.btnUpgrade:hover {
+  background-color: #e55a4e;
+}

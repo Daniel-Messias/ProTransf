@@ -223,3 +223,149 @@
     transform: translateY(0);
   }
 }
+/* Grupo checkbox lembrar-me */
+.formGroupCheckbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 20px;
+  font-size: 14px;
+  color: var(--text);
+  user-select: none;
+}
+
+.formGroupCheckbox input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
+/* Botão que parece link para "Esqueci a senha" */
+.linkEsqueciSenha {
+  margin-top: 8px;
+  text-align: right;
+}
+
+.linkButton {
+  background: none;
+  border: none;
+  color: var(--primary);
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 0;
+  text-decoration: underline;
+  transition: color 0.2s ease;
+}
+
+.linkButton:hover:not(:disabled) {
+  color: #4fa9dd;
+}
+
+/* Modal overlay (fundo escuro transparente) */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(13, 27, 42, 0.85);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1100;
+  animation: fadeInUp 0.3s ease forwards;
+}
+
+/* Conteúdo do modal */
+.modal {
+  background-color: var(--surface);
+  padding: 24px 32px;
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+  max-width: 400px;
+  width: 90%;
+  color: var(--text);
+  font-family: 'Inter', sans-serif;
+  text-align: center;
+  animation: fadeInUp 0.4s ease forwards;
+}
+
+/* Título do modal */
+.modal h3 {
+  margin-bottom: 16px;
+  font-weight: 700;
+  font-size: 22px;
+}
+
+/* Input do modal */
+.modal input[type="email"] {
+  width: 100%;
+  padding: 10px;
+  font-size: 14px;
+  border-radius: 6px;
+  border: none;
+  background-color: #243447;
+  color: var(--text);
+  margin-bottom: 8px;
+  box-sizing: border-box;
+}
+
+.modal input[type="email"]:focus {
+  outline: 2px solid var(--primary);
+}
+
+/* Mensagens de erro e sucesso no modal */
+.modal .errorMsg {
+  color: var(--error);
+  font-size: 13px;
+  margin-bottom: 8px;
+}
+
+.modal .successMsg {
+  color: #59d17a; /* verde claro para sucesso */
+  font-size: 13px;
+  margin-bottom: 8px;
+}
+
+/* Botões do modal */
+.modalActions {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.modalActions button {
+  flex: 1;
+  padding: 10px 0;
+  border-radius: 8px;
+  border: none;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  font-size: 14px;
+}
+
+.modalActions button:first-child {
+  background-color: var(--primary);
+  color: #000;
+}
+
+.modalActions button:first-child:hover:not(:disabled) {
+  background-color: #4fa9dd;
+}
+
+.modalActions button:last-child {
+  background-color: #555;
+  color: #eee;
+}
+
+.modalActions button:last-child:hover:not(:disabled) {
+  background-color: #777;
+}
+
+.modalActions button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

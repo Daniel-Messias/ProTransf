@@ -83,7 +83,8 @@ export default function CentralNotificacoes({
                           'aceito',
                           convite.clubeNome,
                           convite.clubeId,
-                          convite.numeroCamisa
+                          convite.numeroCamisa,
+                          convite.jogadorId  // <<< jogadorId aqui
                         )
                       }
                       className={`${styles.btnAceitar} ${styles.btnIcon}`}
@@ -93,7 +94,14 @@ export default function CentralNotificacoes({
                     </button>
                     <button
                       onClick={() =>
-                        handleAtualizarStatusConvite(convite.id, 'recusado')
+                        handleAtualizarStatusConvite(
+                          convite.id,
+                          'recusado',
+                          convite.clubeNome,
+                          convite.clubeId,
+                          convite.numeroCamisa,
+                          convite.jogadorId
+                        )
                       }
                       className={`${styles.btnRecusar} ${styles.btnIcon}`}
                       title="Recusar Convite"
@@ -121,7 +129,8 @@ export default function CentralNotificacoes({
                           'aceito',
                           convite.clubeNome,
                           convite.clubeId,
-                          convite.numeroCamisa
+                          convite.numeroCamisa,
+                          convite.jogadorId  // <<< jogadorId aqui também
                         )
                       }
                       className={`${styles.btnAceitar} ${styles.btnIcon}`}
@@ -131,7 +140,14 @@ export default function CentralNotificacoes({
                     </button>
                     <button
                       onClick={() =>
-                        handleAtualizarStatusConvite(convite.id, 'recusado')
+                        handleAtualizarStatusConvite(
+                          convite.id,
+                          'recusado',
+                          convite.clubeNome,
+                          convite.clubeId,
+                          convite.numeroCamisa,
+                          convite.jogadorId
+                        )
                       }
                       className={`${styles.btnRecusar} ${styles.btnIcon}`}
                       title="Recusar Pedido"

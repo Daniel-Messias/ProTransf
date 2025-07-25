@@ -241,7 +241,14 @@ const amistososParaNotificacao = amistosos.filter(a => a.status === 'pendente');
 };
 
   // Atualizar status convites (aceitar/recusar)
-  const handleAtualizarStatusConvite = async (conviteId, novoStatus, nomeClube, clubeId, numeroCamisa) => {
+const handleAtualizarStatusConvite = async (
+  conviteId,
+  novoStatus,
+  nomeClube,
+  clubeId,
+  numeroCamisa,
+  jogadorIdDoConvite // novo parâmetro para o ID do jogador do convite
+) => {
   try {
     const conviteRef = doc(db, 'convites', conviteId);
     await updateDoc(conviteRef, { status: novoStatus });
@@ -253,7 +260,7 @@ const amistososParaNotificacao = amistosos.filter(a => a.status === 'pendente');
     );
 
     if (novoStatus === 'aceito') {
-      const userRef = doc(db, 'usuarios', jogador.id);
+      const userRef = doc(db, 'usuarios', jogadorIdDoConvite); // usa o ID do jogador do convite
 
       // Atualiza o perfil do jogador com o clube correto
       await updateDoc(userRef, {
@@ -270,7 +277,7 @@ const amistososParaNotificacao = amistosos.filter(a => a.status === 'pendente');
     alert('Erro ao atualizar convite. Tente novamente.');
   }
 };
-;
+
 
   // Amistosos: aceitar e recusar
   const handleDataAgendadaChange = (amistosoId, valorData) => {

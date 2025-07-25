@@ -5,9 +5,15 @@ import { GiCardDiscard, GiGamepad } from 'react-icons/gi';
 export default function Historico({ amistosos, convites, loadingAmistosos, loadingConvites }) {
   const [tipoSelecionado, setTipoSelecionado] = useState(null);
 
-  const convitesHistorico = (convites || []).filter(
-    c => c.status === 'aceito' || c.status === 'recusado'
-  );
+  const convitesHistorico = (convites || [])
+  .filter(c => c.status === 'aceito' || c.status === 'recusado')
+  .sort((a, b) => {
+    const dataA = a.criadoEm?.seconds || 0;
+    const dataB = b.criadoEm?.seconds || 0;
+    return dataB - dataA; // mais recente primeiro
+  })
+  .slice(0, 10);
+
 
   const amistososHistorico = (amistosos || []).filter(
     a => a.status === 'aceito' || a.status === 'recusado'

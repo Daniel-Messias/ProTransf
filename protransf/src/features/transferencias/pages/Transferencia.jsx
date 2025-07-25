@@ -272,18 +272,6 @@ export default function Transferencia() {
             resultadosBusca.map((item, index) => (
               <div key={index} className={styles.cardBusca}>
                 <CardTransferencia dados={item} tipo={item.tipo} />
-
-                {usuarioAtual && usuarioAtual.tipo?.includes('clube') && item.tipo === 'jogador' && (
-                  <button onClick={() => enviarConvite(usuarioAtual, item)} className={styles.botaoConvite}>
-                    Enviar convite
-                  </button>
-                )}
-
-                {usuarioAtual && usuarioAtual.tipo === 'jogador' && item.tipo === 'clube' && (
-                  <button onClick={() => enviarPedido(usuarioAtual, item)} className={styles.botaoConvite}>
-                    Pedir para entrar
-                  </button>
-                )}
               </div>
             ))
           )}

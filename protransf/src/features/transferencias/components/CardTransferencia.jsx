@@ -2,7 +2,16 @@ import React, { useState, useEffect } from 'react';
 import styles from './CardTransferencia.module.css';
 import { Link } from 'react-router-dom';
 import { auth, db } from '../../../services/firebase';
-import { collection, addDoc, doc, getDoc, serverTimestamp } from 'firebase/firestore';
+import {
+  collection,
+  addDoc,
+  doc,
+  getDoc,
+  serverTimestamp,
+  query,
+  where,
+  getDocs,
+} from 'firebase/firestore';
 
 export default function CardTransferencia({ dados, tipo }) {
   const user = auth.currentUser;
@@ -38,21 +47,52 @@ export default function CardTransferencia({ dados, tipo }) {
 
   // Permissão para enviar convite
   const podeConvidar = !!user && (
-    (isJogador && tipoUsuario === 'clube') ||
+    (isJogador && (tipoUsuario === 'clube' || tipoUsuario === 'clube_jogador')) ||
     (isClube && (tipoUsuario === 'jogador' || tipoUsuario === 'clube_jogador'))
   );
 
-  // Função para enviar convite no Firestore
+  // Função para enviar convite no Firestore com verificação de duplicidade
   const enviarConvite = async () => {
     if (!user) {
       alert('Você precisa estar logado para enviar convites.');
       return;
     }
     setEnviando(true);
+
     try {
+      const convitesRef = collection(db, 'convites');
+      let conviteQuery;
+
       if (isJogador) {
         // Clube convidando jogador
-        await addDoc(collection(db, 'convites'), {
+        conviteQuery = query(
+          convitesRef,
+          where('tipo', '==', 'clube_para_jogador'),
+          where('clubeId', '==', clubeAtualIdUsuario || ''),
+          where('jogadorId', '==', dados.id),
+          where('status', '==', 'pendente')
+        );
+      } else if (isClube) {
+        // Jogador convidando clube
+        conviteQuery = query(
+          convitesRef,
+          where('tipo', '==', 'jogador_para_clube'),
+          where('jogadorId', '==', user.uid),
+          where('clubeId', '==', dados.id),
+          where('status', '==', 'pendente')
+        );
+      }
+
+      const conviteSnapshot = await getDocs(conviteQuery);
+
+      if (!conviteSnapshot.empty) {
+        alert('Já existe um convite pendente para essa transferência.');
+        setEnviando(false);
+        return;
+      }
+
+      if (isJogador) {
+        await addDoc(convitesRef, {
           tipo: 'clube_para_jogador',
           clubeId: clubeAtualIdUsuario || '',
           clubeNome: nomeClubeUsuario || '',
@@ -64,8 +104,7 @@ export default function CardTransferencia({ dados, tipo }) {
           plataforma: dados.plataforma || '',
         });
       } else if (isClube) {
-        // Jogador convidando clube
-        await addDoc(collection(db, 'convites'), {
+        await addDoc(convitesRef, {
           tipo: 'jogador_para_clube',
           jogadorId: user.uid,
           jogadorNome: user.displayName || '',
@@ -75,6 +114,7 @@ export default function CardTransferencia({ dados, tipo }) {
           criadoEm: serverTimestamp(),
         });
       }
+
       alert('Convite enviado com sucesso!');
     } catch (error) {
       console.error('Erro ao enviar convite:', error);

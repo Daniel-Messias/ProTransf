@@ -104,16 +104,22 @@ export default function CardTransferencia({ dados, tipo }) {
           plataforma: dados.plataforma || '',
         });
       } else if (isClube) {
-        await addDoc(convitesRef, {
-          tipo: 'jogador_para_clube',
-          jogadorId: user.uid,
-          jogadorNome: user.displayName || '',
-          clubeId: dados.id,
-          clubeNome: dados.nome,
-          status: 'pendente',
-          criadoEm: serverTimestamp(),
-        });
-      }
+  // Buscar username do jogador
+  const userDoc = await getDoc(doc(db, 'usuarios', user.uid));
+  const userData = userDoc.exists() ? userDoc.data() : {};
+
+  await addDoc(convitesRef, {
+    tipo: 'jogador_para_clube',
+    jogadorId: user.uid,
+    jogadorNome: user.displayName || '',
+    jogadorUsername: userData.username || '',
+    clubeId: dados.id,
+    clubeNome: dados.nome,
+    status: 'pendente',
+    criadoEm: serverTimestamp(),
+  });
+}
+
 
       alert('Convite enviado com sucesso!');
     } catch (error) {

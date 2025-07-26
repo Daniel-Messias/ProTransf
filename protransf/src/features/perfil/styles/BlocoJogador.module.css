@@ -249,3 +249,56 @@ label {
 .btnDemissao {
   min-width: 220px;
 }
+@media (max-width: 700px) {
+  .container {
+    padding: 20px 16px;
+    max-width: 100%;
+    margin-bottom: 24px;
+  }
+
+  .title {
+    font-size: 22px;
+    margin-bottom: 20px;
+  }
+
+  .infoGrid,
+  .formGrid {
+    grid-template-columns: 1fr; /* colunas únicas em telas pequenas */
+    gap: 16px;
+  }
+
+  .videosList {
+    grid-template-columns: 1fr; /* vídeo full width */
+    gap: 16px;
+  }
+
+  .videosList iframe {
+    height: 160px; /* altura um pouco menor para caber */
+  }
+
+  .infoItem {
+    padding: 12px 14px;
+  }
+
+  textarea,
+  select,
+  input[type="text"],
+  input[type="url"],
+  input[type="number"],
+  input[type="email"] {
+    font-size: 14px;
+    padding: 8px 12px;
+  }
+
+  .buttonGroup {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .buttonGroup button,
+  .editButton,
+  .btnDemissao {
+    width: 100%;
+    min-width: auto;
+  }
+}

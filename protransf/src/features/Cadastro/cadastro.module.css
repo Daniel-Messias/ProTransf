@@ -260,3 +260,51 @@ select:focus {
   border-color: #74c0fc;
   box-shadow: 0 0 5px #74c0fc66;
 }
+@media (max-width: 480px) {
+  .container {
+    padding: 1rem;
+    margin: 1rem;
+  }
+
+  .titulo {
+    font-size: 1.5rem;
+  }
+
+  .subtitulo {
+    font-size: 0.95rem;
+  }
+
+  .formInput,
+  select {
+    font-size: 0.95rem;
+    padding: 0.45rem 0.7rem;
+  }
+
+  .btnSecondary,
+  .fileInputLabel {
+    font-size: 0.95rem;
+    padding: 0.6rem 1rem;
+  }
+
+  .modal {
+    padding: 1.5rem 1.2rem;
+  }
+
+  .modal h3 {
+    font-size: 1.4rem;
+  }
+
+  .modal p {
+    font-size: 0.95rem;
+  }
+
+  .countdown-item {
+    min-width: 55px;
+    font-size: 1rem;
+  }
+
+  .avatarPreview {
+    width: 80px;
+    height: 80px;
+  }
+}

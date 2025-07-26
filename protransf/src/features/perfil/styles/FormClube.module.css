@@ -260,3 +260,59 @@ textarea:focus {
 .btnDemissao:hover {
   background-color: #d9363e;
 }
+/* Responsividade para telas pequenas */
+@media (max-width: 700px) {
+  .formClube {
+    max-width: 95vw; /* quase toda largura da tela */
+    padding: 1.5rem 1rem;
+    margin: 2rem auto;
+  }
+
+  /* Ajustar tamanho do título para caber melhor */
+  h3, h4 {
+    font-size: 1.25rem;
+  }
+
+  /* Botões na mesma linha podem quebrar para evitar overflow */
+  .buttonGroup {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: stretch;
+  }
+
+  /* Ajustar tabela para scroll horizontal se necessário */
+  .tabelaJogadores {
+    display: block;
+    width: 100%;
+    overflow-x: auto;
+  }
+
+  /* Inputs com largura total */
+  input[type="text"],
+  input[type="email"],
+  input[type="file"],
+  select,
+  textarea,
+  .inputEmail,
+  .inputNumeroCamisa {
+    font-size: 1rem;
+  }
+
+  /* Input número camisa fica maior para toque */
+  .inputNumeroCamisa {
+    width: 80px;
+    padding: 0.5rem;
+  }
+
+  /* Ajustar área de adicionar campeonato para coluna */
+  .adicionarCampeonato {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .adicionarCampeonato button {
+    width: 100%;
+    border-radius: 10px;
+    font-size: 1.1rem;
+  }
+}

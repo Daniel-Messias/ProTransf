@@ -90,3 +90,34 @@
   font-size: 0.85rem;
   font-weight: 500;
 }
+@media (max-width: 600px) {
+  .historicoContainer {
+    padding: 10px 12px;
+  }
+
+  .titulo {
+    font-size: 1rem;
+    gap: 6px;
+  }
+
+  .botoesToggle {
+    gap: 6px;
+  }
+
+  .botaoToggle {
+    padding: 6px 10px;
+    font-size: 0.85rem;
+  }
+
+  .item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+    font-size: 13px;
+    padding: 10px;
+  }
+
+  .data {
+    font-size: 0.75rem;
+  }
+}

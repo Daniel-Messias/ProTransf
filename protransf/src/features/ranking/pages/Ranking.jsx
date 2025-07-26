@@ -48,6 +48,30 @@ export default function Ranking() {
           --text-muted: #cccccc;
         }
 
+        @media (max-width: 480px) {
+  .ranking-card {
+    padding: 30px 20px;
+    max-width: 90vw;
+  }
+  .ranking-title {
+    font-size: 1.8rem;
+  }
+  .ranking-text {
+    font-size: 1rem;
+  }
+  .countdown {
+    gap: 10px;
+  }
+  .countdown-item {
+    min-width: 50px;
+    padding: 10px;
+    font-size: 1rem;
+  }
+  .countdown-item span {
+    font-size: 1.2rem;
+  }
+}
+
         .ranking-container {
           min-height: calc(100vh - 80px);
           background: url('/fundo-campo.jpg') no-repeat center center/cover;

@@ -1,5 +1,11 @@
-/* src/features/perfil/styles/MainPerfil.module.css */
 .main {
   flex: 1;
   padding: 40px;
+}
+
+/* Ajuste para telas pequenas */
+@media (max-width: 600px) {
+  .main {
+    padding: 16px;
+  }
 }

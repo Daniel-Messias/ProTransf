@@ -369,3 +369,67 @@
   opacity: 0.6;
   cursor: not-allowed;
 }
+@media (max-width: 480px) {
+  .loginContainer {
+    padding: 10px;
+    flex-direction: column;
+  }
+
+  .mainContent {
+    max-width: 100%;
+    padding: 0 10px;
+  }
+
+  .formulario {
+    padding: 24px 20px;
+    border-radius: 16px;
+  }
+
+  .title {
+    font-size: 24px;
+  }
+
+  .subtitle {
+    font-size: 16px;
+    margin-bottom: 24px;
+  }
+
+  .formInput {
+    font-size: 13px;
+    padding: 8px;
+  }
+
+  .btnSecondary {
+    font-size: 14px;
+    padding: 10px;
+  }
+
+  .linkCadastro,
+  .linkEsqueciSenha {
+    font-size: 13px;
+  }
+
+  .modal {
+    padding: 20px;
+  }
+
+  .modal h3 {
+    font-size: 18px;
+  }
+
+  .modalActions button {
+    font-size: 13px;
+    padding: 8px;
+  }
+
+  .logoTop {
+    font-size: 20px;
+    top: 12px;
+    left: 12px;
+  }
+
+  .logoTop img {
+    width: 24px;
+    height: 24px;
+  }
+}

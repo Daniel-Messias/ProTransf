@@ -199,3 +199,53 @@ label {
 .btnUpgrade:hover {
   background-color: #e55a4e;
 }
+@media (max-width: 700px) {
+  .blocoClube {
+    padding: 20px 16px;
+    max-width: 100%;
+    margin-bottom: 24px;
+  }
+
+  .tituloClube {
+    font-size: 22px;
+    margin-bottom: 20px;
+  }
+
+  .infoGrid,
+  .formGrid {
+    grid-template-columns: 1fr; /* empilha em uma coluna */
+    gap: 16px;
+  }
+
+  .infoItem {
+    padding: 12px 14px;
+  }
+
+  textarea,
+  select,
+  input[type="text"],
+  input[type="url"],
+  input[type="number"],
+  input[type="email"] {
+    font-size: 14px;
+    padding: 8px 12px;
+  }
+
+  .buttonGroup {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .buttonGroup button,
+  .btnEditar,
+  .btnUpgrade {
+    width: 100%;
+    min-width: auto;
+  }
+
+  .logoClube {
+    width: 100px;
+    margin: 0 auto 12px;
+    display: block;
+  }
+}

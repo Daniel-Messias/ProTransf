@@ -173,3 +173,25 @@ p {
     transform: translateY(0);
   }
 }
+@media (max-width: 600px) {
+  .cardTransferencia,
+  .card,
+  .cardJogador {
+    min-width: 100%;
+    max-width: 100%;
+    padding: 1rem;
+  }
+
+  h4.nome {
+    font-size: 1rem;
+  }
+
+  .linha {
+    font-size: 0.85rem;
+  }
+
+  .btn {
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+  }
+}

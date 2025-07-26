@@ -351,3 +351,61 @@
 .btnCancelar:hover {
   background-color: #333;
 }
+/* Responsividade para telas até 600px (celulares) */
+@media (max-width: 600px) {
+  .sidebar {
+    width: 100%; /* usa toda a largura da tela */
+    padding: 12px 16px; /* menos espaçamento */
+    border-right: none; /* remove a borda lateral */
+    min-height: auto; /* deixa flexível */
+  }
+
+  .avatar {
+    width: 80px;
+    height: 80px;
+  }
+
+  .avatarPlaceholder {
+    width: 80px;
+    height: 80px;
+    font-size: 28px;
+  }
+
+  .info h2 {
+    font-size: 1.3rem;
+  }
+
+  .btnGroup {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .btnGroup button {
+    width: 100%;
+  }
+
+  .contatosLinks {
+    justify-content: center;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  .section input {
+    font-size: 14px;
+  }
+
+  .modalAmistoso {
+    width: 90vw;
+    max-width: 320px;
+    padding: 16px;
+  }
+
+  .modalBotoes {
+    flex-direction: column;
+  }
+
+  .btnConfirmar, .btnCancelar {
+    width: 100%;
+    margin: 6px 0;
+  }
+}

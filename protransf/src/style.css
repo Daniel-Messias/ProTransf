@@ -1,91 +1,90 @@
+:root {
+  --primary: #5fbdf2;
+  --background: #0d1b2a;
+  --surface: #1b263b;
+  --text: #ffffff;
+  --text-muted: #cccccc;
+}
 
-    :root {
-      --primary: #5fbdf2;
-      --background: #0d1b2a;
-      --surface: #1b263b;
-      --text: #ffffff;
-      --text-muted: #cccccc;
-    }
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
 
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
-    .imagem-fundo {
+.imagem-fundo {
   background-image: url(assets/fotos/campo1.png);
   background-size: cover;
   background-position: center;
   background-attachment: fixed;
   min-height: 100%;
-  color: white; 
+  color: white;
   position: relative;
   z-index: 0;
-  
 }
 
-    body {
-      font-family: 'Inter', sans-serif;
-      background-color: var(--background);
-      color: var(--text);
-      line-height: 1.6;
-    }
+body {
+  font-family: 'Inter', sans-serif;
+  background-color: var(--background);
+  color: var(--text);
+  line-height: 1.6;
+}
 
-    header {
-      background-color: #0a192f;
-      padding: 20px 40px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
-    }
+header {
+  background-color: #0a192f;
+  padding: 20px 40px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+}
 
-    .logo {
-      font-size: 24px;
-      font-weight: 700;
-       font-size: 28px;
-       text-decoration: none;   
-       color: var(--text);       
-       cursor: pointer;          
-       display: inline-block;
-    }
-    .logo span {
-      color: var(--primary);
-    }
+.logo {
+  font-size: 28px;
+  font-weight: 700;
+  text-decoration: none;
+  color: var(--text);
+  cursor: pointer;
+  display: inline-block;
+}
 
-    .logo-bola {
+.logo span {
+  color: var(--primary);
+}
+
+.logo-bola {
   width: 26px;
   height: 26px;
   object-fit: contain;
-  margin: 0 4px;
   margin: 0 1px;
-   transform: translateY(3px);
+  transform: translateY(3px);
 }
 
-    .centro span{
-      color: var(--primary);
-    }
-    .soccer-ball {
+.centro span {
+  color: var(--primary);
+}
+
+.soccer-ball {
   width: 68px;
   height: 68px;
-   vertical-align: middle;
+  vertical-align: middle;
   transform: translateY(-5px);
-  margin: 0 4
+  margin: 0 4px;
 }
-    nav a {
-      color: var(--text);
-      text-decoration: none;
-      margin: 0 15px;
-      font-weight: 500;
-      transition: color 0.2s;
-    }
 
-    nav a:hover {
-      color: var(--primary);
-    }
+nav a {
+  color: var(--text);
+  text-decoration: none;
+  margin: 0 15px;
+  font-weight: 500;
+  transition: color 0.2s;
+}
 
-    .btn-login {
+nav a:hover {
+  color: var(--primary);
+}
+
+.btn-login {
   display: inline-block;
   padding: 10px 20px;
   background-color: transparent;
@@ -95,6 +94,7 @@
   font-weight: 600;
   text-decoration: none;
   transition: all 0.3s ease;
+  cursor: pointer;
 }
 
 .btn-login:hover {
@@ -102,20 +102,18 @@
   color: #000;
 }
 
-    
+.hero {
+  text-align: center;
+  padding: 80px 20px 60px;
+}
 
-    .hero {
-      text-align: center;
-      padding: 80px 20px 60px;
-    }
+.hero h1 {
+  font-size: 56px;
+  font-weight: 700;
+  margin-bottom: 10px;
+}
 
-    .hero h1 {
-      font-size: 56px;
-      font-weight: 700;
-      margin-bottom: 10px;
-    }
-
-    .hero h2 {
+.hero h2 {
   width: 100%;
   text-align: center !important;
   margin: 0 auto;
@@ -123,66 +121,66 @@
   border-bottom: none !important;
 }
 
+.hero p {
+  color: var(--text-muted);
+  font-size: 16px;
+}
 
-    .hero p {
-      color: var(--text-muted);
-      font-size: 16px;
-    }
+.buttons {
+  margin-top: 32px;
+}
 
-    .buttons {
-      margin-top: 32px;
-    }
+.buttons button {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  margin: 0 8px;
+  transition: all 0.2s ease;
+}
 
-    .buttons button {
-      padding: 12px 24px;
-      border: none;
-      border-radius: 8px;
-      font-weight: 600;
-      cursor: pointer;
-      margin: 0 8px;
-      transition: all 0.2s ease;
-    }
+.btn-primary {
+  background-color: var(--primary);
+  color: #000;
+}
 
-    .btn-primary {
-      background-color: var(--primary);
-      color: #000;
-    }
-
-    .btn-secondary {
-       display: inline-block;       
+.btn-secondary {
+  display: inline-block;
   padding: 6px 12px;
   margin-top: 32px;
   background-color: var(--primary);
   color: #000;
   border-radius: 8px;
   margin: 0 8px;
-  text-decoration: none;       
+  text-decoration: none;
   font-weight: 500;
   cursor: pointer;
   border: none;
   text-align: center;
   transition: all 0.2s ease;
-    }
+}
 
-    .btn-secondary:hover {
-      background-color: var(--primary);
-      color: #000;
-    }
+.btn-secondary:hover {
+  background-color: var(--primary);
+  color: #000;
+}
 
-    section {
-      max-width: 1100px;
-      margin: 40px auto;
-      padding: 0 20px;
-    }
+section {
+  max-width: 1100px;
+  margin: 40px auto;
+  padding: 0 20px;
+}
 
-    h3 {
-      font-size: 20px;
-      font-weight: 600;
-      margin-bottom: 12px;
-      border-bottom: 2px solid var(--primary);
-      display: inline-block;
-      padding-bottom: 4px;
-    }
+h3 {
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 12px;
+  border-bottom: 2px solid var(--primary);
+  display: inline-block;
+  padding-bottom: 4px;
+}
+
 table {
   width: 100%;
   border-collapse: collapse;
@@ -190,12 +188,14 @@ table {
   background-color: #0e1a36;
   border-radius: 12px;
   overflow: hidden;
-  box-shadow: 0 0 12px rgba(0,0,0,0.3);
+  box-shadow: 0 0 12px rgba(0, 0, 0, 0.3);
 }
+
 tbody tr td {
   border-bottom: none;
   padding: 14px 16px;
 }
+
 tbody tr {
   background-color: var(--surface);
   border-radius: 12px;
@@ -203,15 +203,18 @@ tbody tr {
   transition: transform 0.2s ease, box-shadow 0.2s ease;
   display: table-row;
 }
+
 tbody tr:hover {
   transform: translateY(-4px);
   box-shadow: 0 8px 20px rgba(95, 189, 242, 0.4);
 }
+
 tbody td:first-child {
   display: flex;
   align-items: center;
   gap: 12px;
 }
+
 tbody td:first-child img {
   width: 48px;
   height: 48px;
@@ -221,21 +224,19 @@ tbody td:first-child img {
   border: 2px solid var(--primary);
 }
 
-
-    th, td {
+th, td {
   padding: 14px 16px;
   text-align: center;
   vertical-align: middle;
 }
-   
 
-    th {
+th {
   color: #00cfff;
   font-weight: bold;
   font-size: 15px;
 }
 
-    .columns {
+.columns {
   display: flex;
   flex-wrap: wrap;
   gap: 40px;
@@ -243,19 +244,19 @@ tbody td:first-child img {
   justify-content: center;
 }
 
-    .column {
-      flex: 1;
-      min-width: 100px;
-      text-decoration: none;
-    }
+.column {
+  flex: 1;
+  min-width: 100px;
+  text-decoration: none;
+}
 
-    
 .column table tbody tr:hover {
   background-color: var(--primary);
   color: #000;
   cursor: default;
 }
-  .contact {
+
+.contact {
   width: 100%;
   background-color: var(--surface);
   padding: 10px 5%;
@@ -328,14 +329,14 @@ tbody td:first-child img {
   font-size: 1rem;
   cursor: pointer;
   transition: background-color 0.3s ease, transform 0.2s ease;
-  margin-top: 20px;
-   margin-top: 10px;
+  margin-top: 10px;
 }
 
 .contact button.btn-primary:hover {
   background-color: #3fa5e8;
   transform: scale(1.05);
 }
+
 section h3 {
   margin-bottom: 16px;
   color: #ffffff;
@@ -371,9 +372,11 @@ section h3 {
 thead {
   background-color: #142544;
 }
+
 tbody tr:nth-child(even) {
   background-color: #101f3c;
 }
+
 td img {
   width: 48px;
   height: 48px;
@@ -381,12 +384,15 @@ td img {
   object-fit: cover;
   border: 2px solid #00cfff;
 }
+
 td.attack {
   background-color: #00b894;
 }
+
 td.defense {
   background-color: #0984e3;
 }
+
 .section-dupla {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -469,12 +475,13 @@ td.defense {
   font-weight: 600;
   text-decoration: none;
 }
+
 .table-container {
-  max-width: 900px; 
+  max-width: 900px;
   margin: 0 auto;
-  padding: 50px 50px; 
-  
+  padding: 50px 50px;
 }
+
 /* Base comum para os dois botões */
 .btn-cadastrar,
 .btn-ver-perfil {
@@ -512,9 +519,93 @@ td.defense {
 .arrow-pendente {
   color: #fd7e14; /* laranja */
 }
+
 .msg-sucesso {
   margin-top: 12px;
   color: #00ff88;
   font-weight: 600;
   text-align: center;
+}
+
+.btn-hamburguer {
+  display: none;
+  background: none;
+  border: none;
+  font-size: 2rem;
+  cursor: pointer;
+  color: white; /* ajuste conforme seu tema */
+}
+
+.nav-links {
+  display: flex;
+  gap: 1rem;
+}
+
+@media (max-width: 768px) {
+  .btn-hamburguer {
+    display: block;
+  }
+
+  .nav-links {
+    position: fixed;
+    top: 60px; /* ajuste conforme seu header */
+    right: 0;
+    background-color: #333;
+    flex-direction: column;
+    width: 200px;
+    height: calc(100% - 60px);
+    padding: 1rem;
+    transform: translateX(100%);
+    transition: transform 0.3s ease-in-out;
+    z-index: 999;
+  }
+
+  .nav-links.aberto {
+    transform: translateX(0);
+  }
+
+  .nav-links a,
+  .nav-links button.btn-login {
+    color: white;
+    padding: 0.5rem 0;
+    text-decoration: none;
+    font-size: 1.2rem;
+    border: none;
+    background: none;
+    cursor: pointer;
+  }
+
+  header {
+    position: relative;
+    padding: 0.5rem 1rem;
+  }
+}
+
+nav.nav-links {
+  display: flex;
+  align-items: center;
+  justify-content: center; /* Muda de space-between para center */
+  gap: 2rem;
+  flex-grow: 1; /* Para crescer dentro do header */
+}
+
+
+nav.nav-links .links-centrais {
+  display: flex;
+  gap: 2rem;
+  justify-content: center; /* centraliza os links no espaço que ocupa */
+  flex-grow: 1; /* ocupa o máximo espaço possível */
+}
+
+nav.nav-links .links-centrais a {
+  white-space: nowrap; /* evita quebra no texto dos links */
+  padding: 0.5rem 0;
+  display: inline-block;
+}
+
+nav.nav-links .login-container {
+  display: flex;
+  justify-content: flex-end;
+  flex-shrink: 0;
+  min-width: 100px;
 }

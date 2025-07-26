@@ -132,43 +132,44 @@ export default function Home() {
             </tr>
           </thead>
           <tbody>
-            {jogadores.slice(0, 5).map((jogador) => (
-              <tr
-                key={jogador.id}
-                style={{ cursor: "pointer" }}
-                onClick={() => navigate(`/perfil/${jogador.id}`)}
-              >
-                <td>
-                  <img
-                    src={jogador.fotoURL || "https://via.placeholder.com/50"}
-                    alt={`Foto de ${jogador.nome}`}
-                    style={{
-                      width: "50px",
-                      height: "50px",
-                      borderRadius: "50%",
-                      objectFit: "cover",
-                    }}
-                  />
-                </td>
-                <td>{jogador.nome}</td>
-                <td>
-                  <span
-                    className={`posicao ${
-                      ["Goleiro", "Zagueiro", "Lateral Direito", "Lateral Esquerdo", "Volante"].includes(
-                        jogador.posicao
-                      )
-                        ? "defense"
-                        : "attack"
-                    }`}
-                  >
-                    {jogador.posicao}
-                  </span>
-                </td>
-                <td>{jogador.status || "-"}</td>
-                <td>{jogador.plataforma}</td>
-              </tr>
-            ))}
-          </tbody>
+  {jogadores.slice(0, 5).map((jogador) => (
+    <tr
+      key={jogador.id}
+      style={{ cursor: "pointer" }}
+      onClick={() => navigate(`/perfil/${jogador.id}`)}
+    >
+      <td data-label="Foto">
+        <img
+          src={jogador.fotoURL || "https://via.placeholder.com/50"}
+          alt={`Foto de ${jogador.nome}`}
+          style={{
+            width: "50px",
+            height: "50px",
+            borderRadius: "50%",
+            objectFit: "cover",
+          }}
+        />
+      </td>
+      <td data-label="Jogador">{jogador.nome}</td>
+      <td data-label="Posição">
+        <span
+          className={`posicao ${
+            ["Goleiro", "Zagueiro", "Lateral Direito", "Lateral Esquerdo", "Volante"].includes(
+              jogador.posicao
+            )
+              ? "defense"
+              : "attack"
+          }`}
+        >
+          {jogador.posicao}
+        </span>
+      </td>
+      <td data-label="Status">{jogador.status || "-"}</td>
+      <td data-label="Plataforma">{jogador.plataforma}</td>
+    </tr>
+  ))}
+</tbody>
+
         </table>
       </section>
 

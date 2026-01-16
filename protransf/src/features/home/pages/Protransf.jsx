@@ -132,10 +132,10 @@ export default function Home() {
             </Link>
 
             <nav className="main-nav">
-              <Link to="/" className="nav-link nav-link-active">
+              <Link to="/Protransf" className="nav-link nav-link-active">
                 Início
               </Link>
-              <Link to="/" className="nav-link">
+              <Link to="/Transferencias" className="nav-link">
                 Mercado de Tranferência
               </Link>
               <Link to="/jogadores" className="nav-link">

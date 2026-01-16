@@ -21,6 +21,7 @@ import Login from "./features/auth/pages/Login";
 import PerfilPage from "./features/perfil/pages/PerfilPage";
 import RankingPage from "../src/features/ranking/pages/Ranking";
 
+
 function Header({ user, tipo }) {
   const [menuAberto, setMenuAberto] = useState(false);
   const navigate = useNavigate();

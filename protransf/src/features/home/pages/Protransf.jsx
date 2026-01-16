@@ -1,15 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import bola from "../../../assets/fotos/bola.png";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth, db } from "../../../services/firebase";
 import { buscarJogadores } from "../../../services/firestoreService";
 import { doc, getDoc, collection, limit, query, orderBy, getDocs } from "firebase/firestore";
 import { addDoc, serverTimestamp } from "firebase/firestore";
-import { FaUser } from "react-icons/fa";
 import UltimasTransferencias from "../components/UltimasTransferencias";
-
-
+import logo from "../../../assets/fotos/logo.png";
+import CampoRealista from "../../../assets/fotos/CampoRealista.png";
 export default function Home() {
   const [user, setUser] = useState(null);
   const [tipo, setTipo] = useState(null);
@@ -19,6 +17,14 @@ export default function Home() {
   const [formEnviado, setFormEnviado] = useState(false);
 
   const navigate = useNavigate();
+
+  useEffect(() => {
+    // Atualizar ano no footer
+    const yearElement = document.getElementById("year");
+    if (yearElement) {
+      yearElement.textContent = new Date().getFullYear();
+    }
+  }, []);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
@@ -38,24 +44,24 @@ export default function Home() {
     });
     return () => unsubscribe();
   }, []);
-  useEffect(() => {
-  async function carregarClubes() {
-    try {
-      const q = query(collection(db, "clubes"), limit(4));
-      const snapshot = await getDocs(q);
-      const lista = snapshot.docs.map((doc, i) => ({
-        id: doc.id,
-        ...doc.data(),
-        pontos: 70 - i * 4 // pontos fictícios decrescentes
-      }));
-      setClubes(lista);
-    } catch (error) {
-      console.error("Erro ao buscar clubes:", error);
-    }
-  }
 
-  carregarClubes();
-}, []);
+  useEffect(() => {
+    async function carregarClubes() {
+      try {
+        const q = query(collection(db, "clubes"), limit(4));
+        const snapshot = await getDocs(q);
+        const lista = snapshot.docs.map((doc, i) => ({
+          id: doc.id,
+          ...doc.data(),
+          pontos: 70 - i * 4
+        }));
+        setClubes(lista);
+      } catch (error) {
+        console.error("Erro ao buscar clubes:", error);
+      }
+    }
+    carregarClubes();
+  }, []);
 
   useEffect(() => {
     async function carregarJogadores() {
@@ -68,160 +74,182 @@ export default function Home() {
       }
       setLoading(false);
     }
-
     carregarJogadores();
   }, []);
 
- const handleSubmit = async (e) => {
-  e.preventDefault();
-  const nome = e.target.nome.value;
-  const email = e.target.email.value;
-  const mensagem = e.target.mensagem.value;
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const nome = e.target.nome.value;
+    const email = e.target.email.value;
+    const mensagem = e.target.mensagem.value;
 
-  try {
-    await addDoc(collection(db, "mensagensContato"), {
-      nome,
-      email,
-      mensagem,
-      enviadoEm: serverTimestamp(),
-    });
+    try {
+      await addDoc(collection(db, "mensagensContato"), {
+        nome,
+        email,
+        mensagem,
+        enviadoEm: serverTimestamp(),
+      });
 
-    setFormEnviado(true);
-    e.target.reset(); // limpa o formulário após envio
-  } catch (error) {
-    console.error("Erro ao enviar mensagem:", error);
-    alert("Erro ao enviar. Tente novamente.");
-  }
-};
-  if (loading) return <p style={{ textAlign: "center" }}>Carregando jogadores...</p>;
+      setFormEnviado(true);
+      setTimeout(() => setFormEnviado(false), 3000);
+      e.target.reset();
+    } catch (error) {
+      console.error("Erro ao enviar mensagem:", error);
+      alert("Erro ao enviar. Tente novamente.");
+    }
+  };
 
-  return (
-    <>
-      <div className="hero">
-        <h1 className="centro">
-          PR<img src={bola} alt="bola de futebol" className="soccer-ball" />
-          <span>TRANSFER</span>
-        </h1>
-        <h2>MERCADO DE TRANSFERÊNCIAS</h2>
-        <p>
-          Buscando um novo clube ou reforços? No PROTRANSFER você encontra as melhores oportunidades.
-        </p>
-        <div className="buttons">
-  {!user ? (
-    <Link to="/cadastro" className="btn-cadastrar">
-      CADASTRAR-SE
-    </Link>
-  ) : (
-    <Link to="/perfil" className="btn-ver-perfil">
-      <FaUser style={{ marginRight: 6 }} />
-      PERFIL
-    </Link>
-  )}
-</div>
-      </div>
-      <section>
-        <h3>JOGADORES EM DESTAQUE</h3>
-        <table>
-          <thead>
-            <tr>
-              <th></th>
-              <th>Jogador</th>
-              <th>Posição</th>
-              <th>Status</th>
-              <th>Plataforma</th>
-            </tr>
-          </thead>
-          <tbody>
-  {jogadores.slice(0, 5).map((jogador) => (
-    <tr
-      key={jogador.id}
-      style={{ cursor: "pointer" }}
-      onClick={() => navigate(`/perfil/${jogador.id}`)}
-    >
-      <td data-label="Foto">
-        <img
-          src={jogador.fotoURL || "https://via.placeholder.com/50"}
-          alt={`Foto de ${jogador.nome}`}
-          style={{
-            width: "50px",
-            height: "50px",
-            borderRadius: "50%",
-            objectFit: "cover",
-          }}
-        />
-      </td>
-      <td data-label="Jogador">{jogador.nome}</td>
-      <td data-label="Posição">
-        <span
-          className={`posicao ${
-            ["Goleiro", "Zagueiro", "Lateral Direito", "Lateral Esquerdo", "Volante"].includes(
-              jogador.posicao
-            )
-              ? "defense"
-              : "attack"
-          }`}
-        >
-          {jogador.posicao}
-        </span>
-      </td>
-      <td data-label="Status">{jogador.status || "-"}</td>
-      <td data-label="Plataforma">{jogador.plataforma}</td>
-    </tr>
-  ))}
-</tbody>
-
-        </table>
-      </section>
-
-      <div className="table-container">
-        <div className="columns">
-          <div className="column">
-            <h3>RANKING DE CLUBES</h3>
-            <ul className="ranking-list">
-              {clubes.map((clube, i) => (
-                <li
-                key={clube.id}
-                style={{ cursor: "pointer" }}
-                onClick={() => navigate(`/perfil/${clube.id}`)}>
-                  <span className="pos">{i + 1}</span>
-                  <span className="team-name">{clube.nome}</span>
-                  <span className="pontos">{clube.pontos} pts</span>
-                  </li>
-                ))}
-            </ul>
-
-          </div>
-
-          <div className="column">
-            <div className="column">
-              <h3>ÚLTIMAS TRANSFERÊNCIAS</h3>
-              <UltimasTransferencias />
-              </div>
-          </div>
+  if (loading) {
+    return (
+      <div className="page">
+        <div className="bg-image"></div>
+        <div className="bg-overlay"></div>
+        <div className="shell">
+          <p style={{ textAlign: "center", color: "#e5e7eb", padding: "2rem" }}>
+            Carregando jogadores...
+          </p>
         </div>
       </div>
+    );
+  }
 
-      <section className="contact">
-        <h3>Entre em contato conosco</h3>
-        <form onSubmit={handleSubmit}>
-          <div className="form-group">
-            <label htmlFor="nome">Nome</label>
-            <input type="text" id="nome" name="nome" placeholder="Seu nome completo" required />
+  return (
+    <div clasName="page">
+      <div className="bg-image"></div>
+      <div className="bg-overlay"></div>
+
+      <div className="shell">
+        {/* HEADER */}
+        <header className="main-header">
+          <div className="header-left">
+            <Link to="/" className="brand">
+              <div className="brand-logo"><img src={logo} /></div>
+              <div className="brand-text">
+                <span className="brand-title">Pro Transfer</span>
+                <span className="brand-subtitle">Mercado de Pro Clubs</span>
+              </div>
+            </Link>
+
+            <nav className="main-nav">
+              <Link to="/" className="nav-link nav-link-active">
+                Início
+              </Link>
+              <Link to="/jogadores" className="nav-link">
+                Jogadores
+              </Link>
+              <Link to="/clubes" className="nav-link">
+                Clubes
+              </Link>
+              <Link to="/ranking" className="nav-link">
+                Ranking
+              </Link>
+            </nav>
           </div>
-          <div className="form-group">
-            <label htmlFor="email">E-mail</label>
-            <input type="email" id="email" name="email" placeholder="Seu e-mail" required />
+
+          <div className="header-right">
+            {!user ? (
+              <Link to="/login" className="btn-ghost">
+                Entrar
+              </Link>
+            ) : (
+              <Link to="/perfil" className="btn-ghost">
+                Entrar
+              </Link>
+            )}
           </div>
-          <div className="form-group full-width">
-            <label htmlFor="mensagem">Mensagem</label>
-            <textarea id="mensagem" name="mensagem" rows="3" placeholder="Escreva sua mensagem..." required></textarea>
-          </div>
-          <button type="submit" className="btn-primary">
-            Enviar
-          </button>
-          {formEnviado && <p className="msg-sucesso">Mensagem enviada com sucesso!</p>}
-        </form>
-      </section>
-    </>
+        </header>
+
+        {/* MAIN LAYOUT */}
+        <main className="layout">
+          {/* COLUNA PRINCIPAL */}
+          <section className="main-panel">
+            {/* HERO */}
+            <div className="hero">
+              <div className="hero-tag">Plataforma de transferências de Pro Clubs</div>
+              <h1 className="hero-title">
+                A plataforma que conecta <span>jogadores</span> e <span>clubes</span> de Pro Clubs em um único lugar.
+              </h1>
+              <p className="hero-subtitle">
+                Cadastre jogadores e clubes do EA FC 26+ para organizar transferências sem depender de grupos de redes sociais.
+              </p>
+
+              <div className="hero-cta">
+                {!user ? (
+                  <>
+                    <Link to="/cadastro" className="btn btn-primary">
+                      Sou jogador
+                    </Link>
+                    <Link to="/cadastro-clube" className="btn btn-outline">
+                      Sou clube
+                    </Link>
+                  </>
+                ) : (
+                  <Link to={tipo === "jogador" ? "/meu-perfil" : "/clube"} className="btn btn-primary">
+                    Meu Perfil
+                  </Link>
+                )}
+              </div>
+
+              <div className="hero-microcopy">Cadastro gratuito para jogadores e clubes.</div>
+              <div className="hero-note">Foco em ligas e federações organizadas de Pro Clubs.</div>
+            </div>
+
+            {/* SEÇÃO COMO FUNCIONA */}
+            <section className="mini-section">
+              <div className="mini-title">Como funciona</div>
+              <div className="mini-text">
+                A Pro Transfer centraliza perfis de jogadores e clubes para facilitar contratações de Pro Clubs.
+              </div>
+              <div className="mini-steps">
+                <div className="mini-step">1. Crie sua conta como jogador ou clube.</div>
+                <div className="mini-step">2. Preencha posição, overall, horários ou vagas.</div>
+                <div className="mini-step">3. Use os filtros internos para encontrar a outra ponta.</div>
+              </div>
+            </section>
+          </section>
+
+          {/* SIDEBAR */}
+          <aside className="sidebar">
+            {/* CARD RANKING */}
+            <div className="sidebar-card">
+              <div className="sidebar-header">
+                <span className="sidebar-title">Top Clubes</span>
+                <span className="sidebar-badge">Ao vivo</span>
+              </div>
+              <ul className="market-list ranking-list">
+                {clubes.map((clube, i) => (
+                  <li
+                    key={clube.id}
+                    className="market-item ranking-item"
+                    onClick={() => navigate(`/perfil/${clube.id}`)}
+                  >
+                    <span className="pos">{i + 1}</span>
+                    <span className="team-name">{clube.nome}</span>
+                    <span className="pontos">{clube.pontos} pts</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* CARD ÚLTIMAS TRANSFERÊNCIAS */}
+            <div className="sidebar-card">
+              <div className="sidebar-header">
+                <span className="sidebar-title">Últimas Transferências</span>
+                <span className="sidebar-badge">Ao vivo</span>
+              </div>
+              <div className="transferencias-container">
+                <UltimasTransferencias />
+              </div>
+            </div>
+          </aside>
+        </main>
+        {/* FOOTER */}
+        <footer className="main-footer">
+          © <span id="year"></span> Pro Transfer — plataforma independente focada em Pro Clubs no EA FC.
+        </footer>
+      </div>
+    </div>
+
   );
 }

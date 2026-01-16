@@ -1,0 +1,573 @@
+:root {
+  --bg: #020617;
+  --surface: rgba(15, 23, 42, 0.96);
+  --surface-soft: rgba(15, 23, 42, 0.9);
+  --border: #1f2937;
+  --border-soft: #111827;
+  --primary: #22c55e;
+  --primary-soft: rgba(34, 197, 94, 0.12);
+  --text: #e5e7eb;
+  --muted: #9ca3af;
+}
+
+/* RESET */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* BACKGROUND */
+.page {
+  position: relative;
+  min-height: 100vh;
+  overflow: hidden;
+}
+
+.bg-image {
+  position: fixed;
+  inset: 0;
+  background-image: url('../../../assets/fotos/CampoRealista.png');
+  background-size: cover;
+  background-position: center;
+  filter: blur(2px);
+  transform: scale(1.04);
+  z-index: -2;
+}
+
+
+.bg-overlay {
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(circle at top, rgba(15, 23, 42, 0.9), rgba(15, 23, 42, 0.98));
+  z-index: -1;
+}
+
+/* CONTAINER */
+.shell {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 0.9rem 1.25rem 2.2rem;
+}
+
+
+/* HEADER */
+.main-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.45rem 0.4rem;
+  margin-bottom: 1.6rem;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.95);
+  border: 1px solid var(--border);
+  backdrop-filter: blur(14px);
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  cursor: pointer;
+}
+
+.brand-logo {
+  display: flex;
+  align-items: center;
+}
+
+.brand-logo img {
+  width: 50px;
+  height: 50px;
+  object-fit: contain;
+}
+
+.brand-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.1;
+}
+
+.brand-title {
+  font-size: 0.98rem;
+  font-weight: 700;
+}
+
+.brand-subtitle {
+  font-size: 0.74rem;
+  color: var(--muted);
+}
+
+.main-nav {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.86rem;
+}
+
+.nav-link {
+  padding: 0.4rem 0.8rem;
+  border-radius: 999px;
+  color: var(--muted);
+  border: 1px solid transparent;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.nav-link:hover {
+  color: var(--text);
+  background: rgba(30, 64, 175, 0.25);
+}
+
+.nav-link-active {
+  color: var(--text);
+  background: var(--primary-soft);
+  border-color: rgba(34, 197, 94, 0.4);
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+}
+
+.btn-ghost {
+  font-size: 0.85rem;
+  color: var(--muted);
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  padding: 0.35rem 0.9rem;
+  background: rgba(15, 23, 42, 0.9);
+  transition: all 0.15s ease;
+  transform: translateX(-10px);
+}
+
+.btn-ghost:hover {
+  color: var(--text);
+  border-color: var(--primary);
+}
+
+/* LAYOUT */
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 3.2fr) minmax(260px, 1.4fr);
+  gap: 1.4rem;
+  align-items: flex-start;
+  margin-bottom: 1.8rem;
+}
+
+/* MAIN PANEL */
+.main-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 1.8rem;
+}
+
+/* HERO */
+.hero {
+  background: var(--surface);
+  border-radius: 22px;
+  border: 1px solid var(--border-soft);
+  padding: 1.7rem;
+  box-shadow: 0 26px 70px rgba(0, 0, 0, 0.65);
+}
+
+.hero-tag {
+  font-size: 0.78rem;
+  color: var(--muted);
+  margin-bottom: 0.6rem;
+}
+
+.hero-title {
+  font-size: clamp(2rem, 3.4vw, 2.7rem);
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  margin-bottom: 0.75rem;
+  line-height: 1.2;
+}
+
+.hero-title span {
+  color: #22c55e;
+}
+
+.hero-subtitle {
+  font-size: 0.98rem;
+  color: var(--muted);
+  margin-bottom: 1.5rem;
+  max-width: 520px;
+}
+
+.hero-cta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 0.8rem;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.95rem;
+  padding: 0.6rem 1.5rem;
+  white-space: nowrap;
+  transition: all 0.15s ease;
+}
+
+.btn-primary {
+  background: var(--primary);
+  color: #020617;
+  box-shadow: 0 12px 30px rgba(34, 197, 94, 0.35);
+}
+
+.btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 16px 40px rgba(34, 197, 94, 0.45);
+}
+
+.btn-outline {
+  background: transparent;
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+
+.btn-outline:hover {
+  border-color: var(--primary);
+  background: rgba(34, 197, 94, 0.05);
+}
+
+.hero-microcopy,
+.hero-note {
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.hero-microcopy {
+  margin-bottom: 0.5rem;
+}
+
+/* MINI SEÇÃO */
+.mini-section {
+  border-radius: 18px;
+  border: 1px solid var(--border-soft);
+  padding: 1.1rem;
+  background: var(--surface-soft);
+}
+
+.mini-title {
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin-bottom: 0.35rem;
+}
+
+.mini-text {
+  font-size: 0.86rem;
+  color: var(--muted);
+  margin-bottom: 0.6rem;
+}
+
+.mini-steps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.9rem;
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+
+.mini-step {
+  padding: 0.35rem 0.7rem;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+}
+
+/* GRID JOGADORES */
+.jogadores-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 0.8rem;
+  margin-top: 0.8rem;
+}
+
+.jogador-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0.8rem;
+  border-radius: 12px;
+  background: rgba(15, 23, 42, 0.7);
+  border: 1px solid var(--border);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.jogador-card:hover {
+  background: rgba(34, 197, 94, 0.1);
+  border-color: var(--primary);
+  transform: translateY(-2px);
+}
+
+.jogador-foto {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-bottom: 0.5rem;
+  border: 2px solid var(--primary);
+}
+
+.jogador-info {
+  text-align: center;
+  font-size: 0.75rem;
+}
+
+.jogador-info h4 {
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+
+.jogador-info .posicao {
+  color: var(--primary);
+  font-weight: 500;
+}
+
+.jogador-info .status {
+  color: var(--muted);
+  font-size: 0.7rem;
+}
+
+/* SIDEBAR */
+.sidebar {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+.sidebar-card {
+  background: var(--surface);
+  border-radius: 18px;
+  border: 1px solid var(--border-soft);
+  padding: 1.2rem 1.1rem;
+  box-shadow: 0 22px 60px rgba(0, 0, 0, 0.6);
+}
+
+.sidebar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.9rem;
+}
+
+.sidebar-title {
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.sidebar-badge {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 0.18rem 0.6rem;
+  border-radius: 999px;
+  background: rgba(220, 38, 38, 0.1);
+  color: #fca5a5;
+  border: 1px solid rgba(248, 113, 113, 0.5);
+}
+
+.market-list {
+  list-style: none;
+  font-size: 0.82rem;
+}
+
+.market-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.45rem 0;
+  border-bottom: 1px solid rgba(15, 23, 42, 0.9);
+  cursor: pointer;
+  transition: color 0.15s ease;
+}
+
+.market-item:last-child {
+  border-bottom: none;
+}
+
+.market-item:hover {
+  color: var(--primary);
+}
+
+.market-label {
+  color: var(--muted);
+}
+
+.market-value {
+  color: var(--text);
+  font-weight: 500;
+}
+
+.ranking-list .market-item {
+  align-items: center;
+}
+
+.ranking-item .pos {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  background: var(--primary-soft);
+  border-radius: 50%;
+  font-weight: 600;
+  color: var(--primary);
+  font-size: 0.75rem;
+}
+
+.ranking-item .team-name {
+  flex: 1;
+  margin: 0 0.5rem;
+}
+
+.ranking-item .pontos {
+  font-weight: 600;
+  color: var(--primary);
+}
+
+.transferencias-container {
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+
+/* SEÇÃO CONTATO */
+.contact-section {
+  background: var(--surface);
+  border-radius: 18px;
+  border: 1px solid var(--border-soft);
+  padding: 1.5rem;
+  margin-top: 1.8rem;
+  box-shadow: 0 22px 60px rgba(0, 0, 0, 0.6);
+}
+
+.contact-title {
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin-bottom: 1.2rem;
+}
+
+.contact-form {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-group.full-width {
+  grid-column: 1 / -1;
+}
+
+.form-group label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-bottom: 0.4rem;
+  color: var(--text);
+}
+
+.form-group input,
+.form-group textarea {
+  padding: 0.6rem 0.8rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: rgba(15, 23, 42, 0.9);
+  color: var(--text);
+  font-size: 0.9rem;
+  transition: border-color 0.15s ease;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-soft);
+}
+
+.contact-form > .btn {
+  grid-column: 1 / -1;
+  align-self: flex-start;
+}
+
+.msg-sucesso {
+  grid-column: 1 / -1;
+  color: var(--primary);
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+/* FOOTER */
+.main-footer {
+  margin-top: 1.8rem;
+  font-size: 0.78rem;
+  color: var(--muted);
+  padding-top: 0.9rem;
+  border-top: 1px solid var(--border);
+  text-align: center;
+}
+
+/* RESPONSIVO */
+@media (max-width: 900px) {
+  .main-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.6rem;
+    border-radius: 18px;
+  }
+
+  .header-left {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .main-nav {
+    display: none;
+  }
+}
+
+@media (max-width: 780px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+
+  .jogadores-grid {
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  }
+
+  .contact-form {
+    grid-template-columns: 1fr;
+  }
+
+  .shell {
+    padding: 0.6rem 0.8rem 1.5rem;
+  }
+}

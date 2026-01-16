@@ -11,7 +11,7 @@ import { onAuthStateChanged, signOut } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
 import { auth, db } from "./services/firebase";
 
-import "./style.css";
+import "../src/features/home/styles/Protransf.css";
 import bola from "../src/assets/fotos/bola.png";
 
 import Home from "./features/home/pages/Protransf";
@@ -128,8 +128,7 @@ function LayoutRoutes() {
   const hideHeader = hideHeaderOnRoutes.includes(location.pathname);
 
   return (
-    <div className="imagem-fundo">
-      {!hideHeader && <Header user={user} tipo={tipo} />}
+    <div className="qualquernome">
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/transferencias" element={<Transferencia />} />

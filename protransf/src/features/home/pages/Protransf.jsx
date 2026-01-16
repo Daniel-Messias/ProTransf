@@ -135,6 +135,9 @@ export default function Home() {
               <Link to="/" className="nav-link nav-link-active">
                 Início
               </Link>
+              <Link to="/" className="nav-link">
+                Mercado de Tranferência
+              </Link>
               <Link to="/jogadores" className="nav-link">
                 Jogadores
               </Link>

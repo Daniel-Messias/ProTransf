@@ -11,9 +11,9 @@
 
 h2 {
   font-size: 1.8rem;
-  color: #00bfff;
+  color: #22c55e;
   margin-bottom: 1.5rem;
-  border-bottom: 2px solid #00bfff;
+  border-bottom: 2px solid #22c55e;
   padding-bottom: 0.5rem;
   display: flex;
   align-items: center;
@@ -43,8 +43,8 @@ h2 {
 
 .filtros select:focus {
   outline: none;
-  border-color: #00bfff;
-  box-shadow: 0 0 8px #00bfff;
+  border-color: #22c55e;
+  box-shadow: 0 0 8px #22c55e;
 }
 
 .resultados {
@@ -96,7 +96,7 @@ h2 {
   font-size: 1.3rem;
   font-weight: bold;
   margin-bottom: 1rem;
-  border-bottom: 2px solid #00bfff;
+  border-bottom: 2px solid #22c55e;
   padding-bottom: 5px;
 }
 
@@ -182,7 +182,7 @@ h2 {
 /* Estilos dos cards (copiado do seu cardTransferencia.module.css) */
 .cardTransferencia, .card {
   background: rgba(0, 0, 0, 0.65);
-  border: 1px solid #00bfff;
+  border: 1px solid #22c55e;
   border-radius: 12px;
   padding: 1.5rem;
   color: white;
@@ -232,12 +232,12 @@ h2 {
 
 .seta {
   font-size: 1.5rem;
-  color: #00bfff;
+  color: #22c55e;
   margin: 0 10px;
 }
 
 .clubeNome {
-  color: #00bfff;
+  color: #22c55e;
 }
 
 .jogadorNome {
@@ -251,7 +251,7 @@ h2 {
 h4 {
   font-size: 1.2rem;
   margin-bottom: 0.3rem;
-  color: #00bfff;
+  color: #22c55e;
 }
 
 p {
@@ -262,7 +262,7 @@ p {
 .link {
   margin-top: 0.5rem;
   display: inline-block;
-  color: #00bfff;
+  color: #22c55e;
   text-decoration: underline;
   font-weight: 500;
 }
@@ -305,7 +305,7 @@ p {
 }
 
 .btn {
-  background-color: #00bfff;
+  background-color: #22c55e;
   color: white;
   border: none;
   padding: 0.6rem 1.2rem;

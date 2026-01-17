@@ -1,0 +1,395 @@
+/* src/features/Jogador/Pages/Jogador.module.css */
+
+.container {
+  max-width: 1000px;
+  margin: auto;
+  padding: 2rem 1rem;
+  color: #fff;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+.header::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55); /* ajuste o 0.55 para mais/menos escuro */
+}
+.cardFoto {
+  width: 140px;
+  height: 180px;
+  border-radius: 12px;
+  overflow: hidden;
+  background: rgba(0, 0, 0, 0.6);
+  border: 2px solid #00bfff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.fotoJogador {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.btnTrocarFoto {
+  margin-top: 6px;
+  background-color: #00bfff;
+  color: #fff;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  cursor: pointer;
+  border: none;
+}
+.formEdicao {
+  background: rgba(0, 0, 0, 0.7);
+  border-radius: 12px;
+  padding: 16px 20px;
+  margin-top: 8px;
+  border: 1px solid #00bfff;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.formEdicao h2 {
+  margin: 0 0 4px;
+  font-size: 1.1rem;
+  color: #00ff88;
+}
+
+.gridCampos {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px 16px;
+}
+
+@media (max-width: 768px) {
+  .gridCampos {
+    grid-template-columns: 1fr;
+  }
+}
+
+.campo {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.campo label {
+  font-size: 0.85rem;
+  color: #ccc;
+}
+
+.campo input,
+.campo textarea,
+.campo select {
+  background: rgba(5, 10, 20, 0.9);
+  border: 1px solid #00bfff;
+  border-radius: 8px;
+  padding: 6px 8px;
+  color: #fff;
+  font-size: 0.9rem;
+}
+
+.campo textarea {
+  resize: vertical;
+}
+
+.botoesEdicao {
+  display: flex;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.btnSalvar {
+  background-color: #00bfff;
+  color: #fff;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 999px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btnCancelar {
+  background-color: #444;
+  color: #fff;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 999px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.header {
+  display: flex;
+  gap: 2rem;
+  align-items: center;
+  background-color: #050816;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  padding: 1.5rem;
+  background-size: cover;
+  background-position: center;
+  position: relative;
+  overflow: hidden;
+  z-index: 0;
+}
+
+.cardFoto,
+.infoBasica {
+  position: relative;
+  z-index: 1;
+}
+
+
+.fotoPlaceholder {
+  width: 140px;
+  height: 190px;
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.85);
+  border: 1px solid #22c55e;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 3rem;
+  font-weight: bold;
+  color: #fff;
+    
+}
+
+/* futura foto real */
+.foto {
+  width: 140px;
+  height: 190px;
+  border-radius: 12px;
+  object-fit: cover;
+  border: 1px solid #e6ebe8;
+}
+
+.infoBasica {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.nomeJogador {
+  font-size: 1.8rem;
+  margin: 0;
+  color: #ffff;
+}
+
+.username {
+  font-size: 0.9rem;
+  color: #ccc;
+}
+
+.posicao {
+  font-size: 1rem;
+}
+
+.posicao span {
+  color: #ffcc00;
+  font-weight: 600;
+}
+
+.posicaoSecundaria {
+  color: #22c55e;
+}
+.numeroCamisa,
+.plataforma {
+  font-size: 0.95rem;
+}
+
+.numeroCamisa span,
+.plataforma span {
+  font-weight: 600;
+  color: #22c55e;
+}
+
+.status {
+  font-size: 0.95rem;
+}
+
+.status span {
+  font-weight: 600;
+  color: #fff;
+}
+
+.contatos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.6rem;
+}
+
+/* bolinha de rede social */
+.iconeRede {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background-color: #00bfff;
+  color: #000;
+  font-size: 0.9rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  box-shadow: 0 0 8px rgba(0, 191, 255, 0.6);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+}
+
+.iconeRede:hover {
+  transform: scale(1.05);
+  background-color: #009acd;
+  box-shadow: 0 0 12px rgba(0, 191, 255, 0.9);
+}
+
+
+.contatoItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.85rem;
+  color: #fff;
+  text-decoration: none;
+}
+
+.contatoItem:hover {
+  text-decoration: underline;
+}
+
+.iconeRede {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background-color: #22c55e;
+  color: #000;
+  font-size: 0.8rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btnEditar {
+  margin-top: 0.8rem;
+  align-self: flex-start;
+  background-color: #2ec76c;
+  color: white;
+  border: none;
+  padding: 0.6rem 1.2rem;
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: 700;
+  transition: background-color 0.3s ease;
+  box-shadow: 0 4px 12px rgba(0, 255, 98, 0.3);
+}
+
+.btnEditar:hover {
+  background-color: #009acd;
+}
+
+/* seção genérica (Sobre, Stats, Vídeo, etc.) */
+.section {
+  background-color: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  padding: 1.5rem;
+}
+
+.section h2 {
+  font-size: 1.3rem;
+  color: #00bfff;
+  margin-top: 0;
+  margin-bottom: 1rem;
+  border-bottom: 2px solid #22c55e;
+  padding-bottom: 0.5rem;
+}
+
+/* bio (Sobre o jogador) */
+.bio {
+  font-size: 0.95rem;
+  color: #ddd;
+  margin: 0;
+}
+
+/* estatísticas */
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 1rem;
+}
+
+.statCard {
+  background: rgba(0, 0, 0, 0.65);
+  border: 1px solid #22c55e;
+  border-radius: 12px;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+}
+
+.statLabel {
+  font-size: 0.85rem;
+  color: #888;
+}
+
+.statValue {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #00bfff;
+}
+
+.textoAjuda {
+  font-size: 0.9rem;
+  color: #ccc;
+}
+
+/* vídeo de melhores momentos */
+.videoWrapper {
+  position: relative;
+  max-width: 800px;
+  margin: 0 auto;
+  padding-bottom: 45%; /* mais alto que 16:9 */
+  height: 0;
+  overflow: hidden;
+  border-radius: 12px;
+  border: 1px solid #22c55e;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+  background-color: #000;
+}
+
+.videoWrapper iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/* Responsivo */
+@media (max-width: 600px) {
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .cardFoto {
+    align-self: center;
+  }
+
+  .nomeJogador {
+    font-size: 1.4rem;
+  }
+}

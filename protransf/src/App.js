@@ -1,157 +1,56 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import {
   BrowserRouter as Router,
   Routes,
   Route,
   Link,
   useLocation,
-  useNavigate,
 } from "react-router-dom";
-import { onAuthStateChanged, signOut } from "firebase/auth";
-import { doc, getDoc } from "firebase/firestore";
-import { auth, db } from "./services/firebase";
-
-import "../src/features/home/styles/Protransf.css";
-import bola from "../src/assets/fotos/bola.png";
 
 import Home from "./features/home/pages/Protransf";
 import Transferencia from "./features/transferencias/pages/Transferencia";
 import Cadastro from "./features/Cadastro/pages/Cadastro";
 import Login from "./features/auth/pages/Login";
 import PerfilPage from "./features/perfil/pages/PerfilPage";
-import RankingPage from "../src/features/ranking/pages/Ranking";
+import RankingPage from "./features/ranking/pages/Ranking";
 import Jogador from "./features/Jogador/Pages/Jogador";
+import "./features/home/styles/Protransf.css";
+import Header from "./features/home/components/Header";
 
-function Header({ user, tipo }) {
-  const [menuAberto, setMenuAberto] = useState(false);
-  const navigate = useNavigate();
 
-  const handleLogout = async () => {
-    await signOut(auth);
-    navigate("/");
-  };
+function AppContent() {
+  const location = useLocation();
 
-  const isJogador = tipo === "jogador";
-  const isClubeJogador = tipo === "clube_jogador";
-  const isVisitante = !user;
-
-  const toggleMenu = () => {
-    setMenuAberto(!menuAberto);
-  };
-
-  const fecharMenu = () => {
-    setMenuAberto(false);
-  };
+  const rotasSemMenu = ["/login", "/cadastro"];
+  const esconderMenu = rotasSemMenu.includes(location.pathname);
 
   return (
-    <header>
-      <div className="header-left">
-        <Link to="/" className="logo" onClick={fecharMenu}>
-          PR<img src={bola} alt="Bola" className="logo-bola" />
-          <span>TRANSFER</span>
-        </Link>
-      </div>
+    <>
+        {!esconderMenu && <Header />}
 
-      <button className="btn-hamburguer" onClick={toggleMenu} aria-label="Menu">
-        {menuAberto ? "✕" : "☰"}
-      </button>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/transferencias" element={<Transferencia />} />
+        <Route path="/cadastro" element={<Cadastro />} />
+        <Route path="/login" element={<Login />} />
 
-      <nav className={`nav-links ${menuAberto ? "aberto" : ""}`}>
-        <div className="links-centrais">
-          {isVisitante && (
-            <>
-              <Link to="/transferencias" onClick={fecharMenu}>Transferências</Link>
-              <Link to="/ranking" onClick={fecharMenu}>Ranking</Link>
-              <Link to="/cadastro" onClick={fecharMenu}>Cadastrar-se</Link>
-            </>
-          )}
+        <Route path="/perfil" element={<PerfilPage />} />
+        <Route path="/perfil/:id" element={<PerfilPage />} />
 
-          {(user && (isJogador || isClubeJogador)) && (
-            <>
-              <Link to="/transferencias" onClick={fecharMenu}>Transferências</Link>
-              <Link to="/perfil" onClick={fecharMenu}>Perfil</Link>
-              <Link to="/ranking" onClick={fecharMenu}>Ranking</Link>
-            </>
-          )}
-        </div>
+        <Route path="/jogador/:id" element={<Jogador />} />
 
-        <div className="login-container">
-          {!user ? (
-            <Link to="/login" className="btn-login" onClick={fecharMenu}>Entrar</Link>
-          ) : (
-            <button
-              onClick={() => {
-                handleLogout();
-                fecharMenu();
-              }}
-              className="btn-login"
-            >
-              Sair
-            </button>
-          )}
-        </div>
-      </nav>
-    </header>
+
+        <Route path="/ranking" element={<RankingPage />} />
+      </Routes>
+    </>
   );
 }
 
-function LayoutRoutes() {
-  const location = useLocation();
-  const [user, setUser] = useState(null);
-  const [tipo, setTipo] = useState(null);
-
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-      setUser(firebaseUser);
-
-      if (firebaseUser) {
-        try {
-          const docRef = doc(db, "usuarios", firebaseUser.uid);
-          const docSnap = await getDoc(docRef);
-          if (docSnap.exists()) {
-            const tipoUser = docSnap.data().tipo || null;
-            setTipo(tipoUser);
-          } else {
-            setTipo(null);
-          }
-        } catch (error) {
-          setTipo(null);
-        }
-      } else {
-        setTipo(null);
-      }
-    });
-
-    return () => unsubscribe();
-  }, []);
-
-  const hideHeaderOnRoutes = ["/login"];
-  const hideHeader = hideHeaderOnRoutes.includes(location.pathname);
-
- return (
-  <div className="qualquernome">
-    <Routes>
-      <Route path="/" element={<Home />} />
-      <Route path="/transferencias" element={<Transferencia />} />
-      <Route path="/cadastro" element={<Cadastro />} />
-      <Route path="/login" element={<Login />} />
-      <Route path="/perfil" element={<PerfilPage />} />
-      <Route path="/perfil/:id" element={<PerfilPage />} />
-
-      {/* ROTA DE TESTE PARA O NOVO PERFIL DE JOGADOR */}
-<Route path="/perfil-jogador/:id" element={<Jogador />} />
-
-      <Route path="/ranking" element={<RankingPage />} />
-    </Routes>
-  </div>
-);
-
-}
 
 function App() {
   return (
     <Router>
-      <LayoutRoutes />
+      <AppContent />
     </Router>
   );
 }

@@ -1,61 +1,47 @@
-:root {
-  --primary: #5fbdf2;
-  --background: #0d1b2a;
-  --surface: #1b263b;
-  --text: #ffffff;
-  --text-muted: #cccccc;
-  --error: #ff5c5c;
-}
-
 .loginContainer {
+  --primary-login: #59d17a; /* verde usado no login */
+  --background-login: #0d1b2a;
+  --surface-login: #1b263b;
+  --text-login: #ffffff;
+  --error-login: #ff5c5c;
+
   position: relative;
-  z-index: 1;
-  font-family: 'Inter', sans-serif;
   min-height: 100vh;
   display: flex;
   justify-content: center;
   align-items: center;
   padding: 20px;
-}
-.logo {
-  font-size: 24px;
-  font-weight: 700;
-}
-
-.logo span {
-  color: var(--primary);
+  font-family: 'Inter', sans-serif;
+  background-color: var(--background-login);
+  color: var(--text-login);
 }
 
-.navLinks a {
-  color: var(--text);
-  margin: 0 15px;
-  text-decoration: none;
-  font-weight: 500;
-  transition: color 0.2s;
-}
-
-.navLinks a:hover {
-  color: var(--primary);
-}
-
-.btnLogin {
-  background: transparent;
-  border: 1px solid var(--primary);
-  color: var(--text);
-  padding: 8px 16px;
-  border-radius: 6px;
+/* Logo + texto */
+.logoTop {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 2rem;
   cursor: pointer;
-  transition: all 0.2s ease;
+  text-decoration: none;
 }
 
-.btnLogin:hover {
-  background-color: var(--primary);
-  color: #000;
+.logoTop img {
+  width: 140px;
+  height: auto;
 }
 
+.logoText {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--primary-login);
+}
+
+/* Conteúdo principal */
 .mainContent {
   max-width: 400px;
-  margin: 0 auto;
+  width: 100%;
 }
 
 .title {
@@ -65,20 +51,19 @@
 }
 
 .subtitle {
-  color: var(--primary);
-  text-align: center;
   font-size: 18px;
+  text-align: center;
+  color: var(--primary-login);
   margin-bottom: 32px;
 }
 
 .formulario {
-  background-color: var(--surface);
+  background-color: var(--surface-login);
   padding: 32px;
   border-radius: 20px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
   backdrop-filter: blur(8px);
-  opacity: 0;
-  animation: fadeInUp 0.6s ease-out forwards;
+  animation: fadeInUp 0.6s ease-out;
 }
 
 .formGroup {
@@ -97,23 +82,22 @@
   border-radius: 6px;
   border: none;
   background-color: #243447;
-  color: var(--text);
+  color: var(--text-login);
   font-size: 14px;
 }
 
 .formInput:focus {
-  outline: 2px solid var(--primary);
+  outline: 2px solid var(--primary-login);
 }
 
 .errorInput {
-  outline: 2px solid var(--error);
+  outline: 2px solid var(--error-login);
 }
 
 .errorMsg {
   font-size: 13px;
-  color: var(--error);
+  color: var(--error-login);
   margin-top: 4px;
-  display: block;
 }
 
 .formActions {
@@ -123,7 +107,7 @@
 
 .btnSecondary {
   padding: 10px 20px;
-  background-color: var(--primary);
+  background-color: var(--primary-login);
   color: #000;
   border-radius: 8px;
   font-weight: 600;
@@ -133,7 +117,7 @@
 }
 
 .btnSecondary:hover {
-  background-color: #4fa9dd;
+  background-color: #49b76d; /* verde hover */
 }
 
 .linkCadastro {
@@ -143,94 +127,21 @@
 }
 
 .linkCadastro a {
-  color: var(--primary);
+  color: var(--primary-login);
   text-decoration: none;
 }
 
 .linkCadastro a:hover {
   text-decoration: underline;
 }
-@keyframes fadeInUp {
-  0% {
-    opacity: 0;
-    transform: translateY(30px);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-.logoTop {
-  position: absolute;
-  top: 20px;
-  left: 20px;
-  display: flex;
-  align-items: center;
-  gap: -4px;
-  font-size: 24px;
-  font-weight: bold;
-  text-decoration: none;
-  color: white;
-  z-index: 10;
-  animation: fadeInTop 0.8s ease-out;
-}
 
-.logoTop span {
-  color: var(--primary);
-}
-
-.logoTop img {
-  width: 28px;
-  height: 28px;
-  margin: 0;
-  vertical-align: middle;
-}
-
-
-
-@keyframes fadeInTop {
-  from {
-    opacity: 0;
-    transform: translateY(-20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-.modalSuccess {
-  position: fixed;
-  top: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  background-color: var(--primary);
-  color: #000;
-  padding: 12px 24px;
-  border-radius: 8px;
-  font-weight: 600;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-  z-index: 1000;
-  animation: fadeInTop 0.4s ease-out;
-}
-
-@keyframes fadeInTop {
-  from {
-    opacity: 0;
-    transform: translateY(-20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-/* Grupo checkbox lembrar-me */
+/* Checkbox lembrar-me */
 .formGroupCheckbox {
   display: flex;
   align-items: center;
   gap: 8px;
   margin-bottom: 20px;
   font-size: 14px;
-  color: var(--text);
   user-select: none;
 }
 
@@ -240,7 +151,7 @@
   cursor: pointer;
 }
 
-/* Botão que parece link para "Esqueci a senha" */
+/* Esqueci a senha */
 .linkEsqueciSenha {
   margin-top: 8px;
   text-align: right;
@@ -249,7 +160,7 @@
 .linkButton {
   background: none;
   border: none;
-  color: var(--primary);
+  color: var(--primary-login);
   cursor: pointer;
   font-size: 14px;
   font-weight: 600;
@@ -259,10 +170,10 @@
 }
 
 .linkButton:hover:not(:disabled) {
-  color: #4fa9dd;
+  color: #49b76d;
 }
 
-/* Modal overlay (fundo escuro transparente) */
+/* Modal */
 .modalOverlay {
   position: fixed;
   top: 0;
@@ -277,28 +188,22 @@
   animation: fadeInUp 0.3s ease forwards;
 }
 
-/* Conteúdo do modal */
 .modal {
-  background-color: var(--surface);
+  background-color: var(--surface-login);
   padding: 24px 32px;
   border-radius: 16px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.5);
   max-width: 400px;
   width: 90%;
-  color: var(--text);
-  font-family: 'Inter', sans-serif;
   text-align: center;
-  animation: fadeInUp 0.4s ease forwards;
 }
 
-/* Título do modal */
 .modal h3 {
   margin-bottom: 16px;
   font-weight: 700;
   font-size: 22px;
 }
 
-/* Input do modal */
 .modal input[type="email"] {
   width: 100%;
   padding: 10px;
@@ -306,29 +211,26 @@
   border-radius: 6px;
   border: none;
   background-color: #243447;
-  color: var(--text);
+  color: var(--text-login);
   margin-bottom: 8px;
-  box-sizing: border-box;
 }
 
 .modal input[type="email"]:focus {
-  outline: 2px solid var(--primary);
+  outline: 2px solid var(--primary-login);
 }
 
-/* Mensagens de erro e sucesso no modal */
 .modal .errorMsg {
-  color: var(--error);
+  color: var(--error-login);
   font-size: 13px;
   margin-bottom: 8px;
 }
 
 .modal .successMsg {
-  color: #59d17a; /* verde claro para sucesso */
+  color: #59d17a;
   font-size: 13px;
   margin-bottom: 8px;
 }
 
-/* Botões do modal */
 .modalActions {
   display: flex;
   justify-content: center;
@@ -343,17 +245,16 @@
   border: none;
   font-weight: 600;
   cursor: pointer;
-  transition: background-color 0.2s ease;
   font-size: 14px;
 }
 
 .modalActions button:first-child {
-  background-color: var(--primary);
+  background-color: var(--primary-login);
   color: #000;
 }
 
 .modalActions button:first-child:hover:not(:disabled) {
-  background-color: #4fa9dd;
+  background-color: #49b76d;
 }
 
 .modalActions button:last-child {
@@ -369,67 +270,39 @@
   opacity: 0.6;
   cursor: not-allowed;
 }
-@media (max-width: 480px) {
-  .loginContainer {
-    padding: 10px;
-    flex-direction: column;
-  }
 
-  .mainContent {
-    max-width: 100%;
-    padding: 0 10px;
-  }
-
-  .formulario {
-    padding: 24px 20px;
-    border-radius: 16px;
-  }
-
-  .title {
-    font-size: 24px;
-  }
-
-  .subtitle {
-    font-size: 16px;
-    margin-bottom: 24px;
-  }
-
-  .formInput {
-    font-size: 13px;
-    padding: 8px;
-  }
-
-  .btnSecondary {
-    font-size: 14px;
-    padding: 10px;
-  }
-
-  .linkCadastro,
-  .linkEsqueciSenha {
-    font-size: 13px;
-  }
-
-  .modal {
-    padding: 20px;
-  }
-
-  .modal h3 {
-    font-size: 18px;
-  }
-
-  .modalActions button {
-    font-size: 13px;
-    padding: 8px;
-  }
-
-  .logoTop {
-    font-size: 20px;
-    top: 12px;
-    left: 12px;
-  }
-
-  .logoTop img {
-    width: 24px;
-    height: 24px;
-  }
+/* Animações */
+@keyframes fadeInUp {
+  0% { opacity: 0; transform: translateY(30px); }
+  100% { opacity: 1; transform: translateY(0); }
 }
+
+/* Responsivo */
+@media (max-width: 480px) {
+  .loginContainer { padding: 10px; }
+  .mainContent { max-width: 100%; padding: 0 10px; }
+  .formulario { padding: 24px 20px; border-radius: 16px; }
+  .title { font-size: 24px; }
+  .subtitle { font-size: 16px; margin-bottom: 24px; }
+  .formInput { font-size: 13px; padding: 8px; }
+  .btnSecondary { font-size: 14px; padding: 10px; }
+  .linkCadastro, .linkEsqueciSenha { font-size: 13px; }
+  .modal { padding: 20px; }
+  .modal h3 { font-size: 18px; }
+  .modalActions button { font-size: 13px; padding: 8px; }
+  .logoTop img { width: 80px; height: auto; }
+  .logoText { font-size: 20px; }
+}
+.logoTop span {
+  font-family: 'Poppins', 'Montserrat', sans-serif;
+  font-weight: 700;
+  font-size: 28px;
+  background: linear-gradient(90deg, #20d353, #0b5986); /* degrade verde para azul */
+  -webkit-background-clip: text;
+  background-clip: text; /* adiciona a propriedade padrão */
+  -webkit-text-fill-color: transparent;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+

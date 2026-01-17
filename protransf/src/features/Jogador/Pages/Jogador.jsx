@@ -31,6 +31,8 @@ function transformarUrlYoutube(url) {
 
 export default function Jogador() {
   const { id } = useParams();
+console.log("ID da rota:", id);
+
 
   const [jogador, setJogador] = useState(null);
   const [carregando, setCarregando] = useState(true);
@@ -45,6 +47,8 @@ export default function Jogador() {
   const [posicaoSecundariaEdit, setPosicaoSecundariaEdit] = useState("");
   const [numeroCamisaEdit, setNumeroCamisaEdit] = useState("");
   const [plataformaEdit, setPlataformaEdit] = useState("");
+  const [novoVideo, setNovoVideo] = useState("");
+
 
   const [fotoPreview, setFotoPreview] = useState("");
   const [fotoFile, setFotoFile] = useState(null);   // arquivo real da foto
@@ -72,6 +76,34 @@ export default function Jogador() {
   const handleSalvar = async () => {
     if (!jogador) return;
     setSalvando(true);
+    const handleAdicionarVideo = async () => {
+  if (!novoVideo.trim()) return;
+
+  try {
+    const refUsuario = doc(db, "usuarios", jogador.id);
+
+    const videosAtuais = Array.isArray(jogador.videos)
+      ? jogador.videos
+      : [];
+
+    const novosVideos = [...videosAtuais, novoVideo];
+
+    await updateDoc(refUsuario, {
+      videos: novosVideos,
+    });
+
+    setJogador((prev) => ({
+      ...prev,
+      videos: novosVideos,
+    }));
+
+    setNovoVideo("");
+  } catch (error) {
+    console.error("Erro ao adicionar vídeo:", error);
+    alert("Erro ao adicionar vídeo");
+  }
+};
+
 
     try {
       let fotoUrlFinal = jogador.fotoUrl || "";
@@ -428,6 +460,25 @@ export default function Jogador() {
 
       {primeiroVideo && (
         <section className={`${styles.section} section-global`}>
+          {ehProprioPerfil && !editando && (
+  <section className={`${styles.section} section-global`}>
+    <h2>Adicionar vídeo</h2>
+
+    <div className={styles.videoForm}>
+      <input
+        type="text"
+        placeholder="Cole o link do YouTube"
+        value={novoVideo}
+        onChange={(e) => setNovoVideo(e.target.value)}
+      />
+
+      <button onClick={handleAdicionarVideo}>
+        Adicionar
+      </button>
+    </div>
+  </section>
+)}
+
           <h2>Melhores momentos</h2>
           <div className={styles.videoWrapper}>
             <iframe

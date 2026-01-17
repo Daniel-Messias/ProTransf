@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import styles from "../Login.module.css";
 import fundoLogin from "../../../assets/fotos/fundo-login.jpg";
 import bola from "../../../assets/fotos/bola.png";
+import logo from "../../../assets/fotos/logo.png";
 
 import { auth } from "../../../services/firebase";
 import {
@@ -131,10 +132,14 @@ export default function Login() {
     >
       <div className={styles.overlay}>
         <Link to="/" className={styles.logoTop}>
-          PR
-          <img src={bola} alt="Bola" className={styles.logoBola} />
-          <span>TRANSFER</span>
-        </Link>
+  <img
+    src={logo}
+    alt="Pro Transfer"
+    className={styles.logoImagem}
+  />
+  <span className={styles.logoText}>Pro Transfer</span>
+</Link>
+
 
         <div className={styles.formWrapper}>
           <main className={styles.mainContent}>

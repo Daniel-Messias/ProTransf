@@ -8,6 +8,8 @@ import { addDoc, serverTimestamp } from "firebase/firestore";
 import UltimasTransferencias from "../components/UltimasTransferencias";
 import logo from "../../../assets/fotos/logo.png";
 import CampoRealista from "../../../assets/fotos/CampoRealista.png";
+
+
 export default function Home() {
   const [user, setUser] = useState(null);
   const [tipo, setTipo] = useState(null);
@@ -113,55 +115,15 @@ export default function Home() {
       </div>
     );
   }
+  
 
   return (
-    <div clasName="page">
+    <div className="page">
       <div className="bg-image"></div>
       <div className="bg-overlay"></div>
 
       <div className="shell">
-        {/* HEADER */}
-        <header className="main-header">
-          <div className="header-left">
-            <Link to="/" className="brand">
-              <div className="brand-logo"><img src={logo} /></div>
-              <div className="brand-text">
-                <span className="brand-title">Pro Transfer</span>
-                <span className="brand-subtitle">Mercado de Pro Clubs</span>
-              </div>
-            </Link>
-
-            <nav className="main-nav">
-              <Link to="/Protransf" className="nav-link nav-link-active">
-                Início
-              </Link>
-              <Link to="/Transferencias" className="nav-link">
-                Mercado de Tranferência
-              </Link>
-              <Link to="/jogadores" className="nav-link">
-                Jogadores
-              </Link>
-              <Link to="/clubes" className="nav-link">
-                Clubes
-              </Link>
-              <Link to="/ranking" className="nav-link">
-                Ranking
-              </Link>
-            </nav>
-          </div>
-
-          <div className="header-right">
-            {!user ? (
-              <Link to="/login" className="btn-ghost">
-                Entrar
-              </Link>
-            ) : (
-              <Link to="/perfil" className="btn-ghost">
-                Entrar
-              </Link>
-            )}
-          </div>
-        </header>
+       
 
         {/* MAIN LAYOUT */}
         <main className="layout">

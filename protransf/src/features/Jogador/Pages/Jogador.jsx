@@ -53,6 +53,8 @@ export default function Jogador() {
   const [posicaoSecundariaEdit, setPosicaoSecundariaEdit] = useState("");
   const [numeroCamisaEdit, setNumeroCamisaEdit] = useState("");
   const [plataformaEdit, setPlataformaEdit] = useState("");
+  const [videoEdit, setVideoEdit] = useState("");
+
 
   // ===============================
   // FOTO
@@ -74,6 +76,8 @@ export default function Jogador() {
       setNumeroCamisaEdit(jogador.numeroCamisaPessoal || "");
       setPlataformaEdit(jogador.plataforma || "");
       setFotoPreview(jogador.fotoUrl || "");
+      setVideoEdit(jogador.video || "");
+
     }
 
     setEditando(!editando);
@@ -110,6 +114,7 @@ export default function Jogador() {
         plataforma: plataformaEdit,
         fotoUrl: fotoUrlFinal,
         atualizadoEm: new Date(),
+        video: videoEdit,
       });
 
       setJogador((prev) => ({
@@ -121,6 +126,7 @@ export default function Jogador() {
         numeroCamisaPessoal: Number(numeroCamisaEdit),
         plataforma: plataformaEdit,
         fotoUrl: fotoUrlFinal,
+        video: videoEdit,
       }));
 
       setEditando(false);
@@ -180,7 +186,9 @@ export default function Jogador() {
   }
 
   if (!jogador) {
-    return <section className={styles.container}>Jogador não disponível</section>;
+    return (
+      <section className={styles.container}>Jogador não disponível</section>
+    );
   }
 
   const primeiroVideo =
@@ -191,6 +199,10 @@ export default function Jogador() {
   const headerStyle = {
     backgroundImage: `url(${campo2})`,
   };
+  const videoFinal = jogador.video
+  ? transformarUrlYoutube(jogador.video)
+  : null;
+
 
   return (
     <section className={styles.container}>
@@ -198,7 +210,11 @@ export default function Jogador() {
       <header className={styles.header} style={headerStyle}>
         <div className={styles.cardFoto}>
           {fotoPreview ? (
-            <img src={fotoPreview} alt={jogador.nome} className={styles.fotoJogador} />
+            <img
+              src={fotoPreview}
+              alt={jogador.nome}
+              className={styles.fotoJogador}
+            />
           ) : (
             <div className={styles.fotoPlaceholder}>
               {jogador.nome?.charAt(0) || "J"}
@@ -231,57 +247,101 @@ export default function Jogador() {
 
               <p>
                 Posição: {jogador.posicaoPrimaria || "N/A"}
-                {jogador.posicaoSecundaria && ` | ${jogador.posicaoSecundaria}`}
+                {jogador.posicaoSecundaria &&
+                  ` | ${jogador.posicaoSecundaria}`}
               </p>
 
               <p>Camisa: {jogador.numeroCamisaPessoal || "-"}</p>
               <p>Plataforma: {jogador.plataforma || "N/A"}</p>
-              <p>Status: {jogador.status}</p>
+              <p className={styles.status}>
+  Status:
+  <span
+    className={
+      jogador.status === "em_clube"
+        ? styles.statusOcupado
+        : styles.statusLivre
+    }
+  />
+  <span className={styles.statusTexto}>
+    {jogador.status === "em_clube"
+      ? "Contratado"
+      : "Livre no mercado"}
+  </span>
+</p>
+
+
             </>
           ) : (
-            <>
-              <input value={nomeEdit} onChange={(e) => setNomeEdit(e.target.value)} />
-              <textarea value={bioEdit} onChange={(e) => setBioEdit(e.target.value)} />
+            <div className={styles.formEdicao}>
               <input
+                placeholder="Nome"
+                value={nomeEdit}
+                onChange={(e) => setNomeEdit(e.target.value)}
+              />
+
+              <textarea
+                placeholder="Bio"
+                value={bioEdit}
+                onChange={(e) => setBioEdit(e.target.value)}
+              />
+
+              <input
+                placeholder="Posição principal"
                 value={posicaoPrimariaEdit}
                 onChange={(e) => setPosicaoPrimariaEdit(e.target.value)}
               />
+
               <input
+                placeholder="Posição secundária"
                 value={posicaoSecundariaEdit}
                 onChange={(e) => setPosicaoSecundariaEdit(e.target.value)}
               />
+
               <input
                 type="number"
+                placeholder="Número da camisa"
                 value={numeroCamisaEdit}
                 onChange={(e) => setNumeroCamisaEdit(e.target.value)}
               />
+
               <input
+                placeholder="Plataforma"
                 value={plataformaEdit}
                 onChange={(e) => setPlataformaEdit(e.target.value)}
               />
-            </>
+              <input
+              placeholder="Link do vídeo (YouTube)"
+              value={videoEdit}
+              onChange={(e) => setVideoEdit(e.target.value)}
+              />
+
+            </div>
           )}
 
           {(jogador.instagram || jogador.whatsapp) && !editando && (
             <div className={styles.contatos}>
               {jogador.instagram && (
                 <a
-                  href={`https://instagram.com/${jogador.instagram.replace("@", "")}`}
-                  target="_blank"
-                  rel="noreferrer"
+                className={styles.iconeRede}
+                href={`https://instagram.com/${jogador.instagram.replace("@", "")}`}
+                target="_blank"
+                rel="noreferrer"
                 >
                   <FaInstagram />
-                </a>
+                  </a>
+
               )}
 
               {jogador.whatsapp && (
                 <a
-                  href={`https://wa.me/${jogador.whatsapp.replace(/\D/g, "")}`}
-                  target="_blank"
-                  rel="noreferrer"
+                className={styles.iconeRede}
+                href={`https://wa.me/${jogador.whatsapp.replace(/\D/g, "")}`}
+                target="_blank"
+                rel="noreferrer"
                 >
                   <FaWhatsapp />
-                </a>
+                  </a>
+
               )}
             </div>
           )}
@@ -289,14 +349,26 @@ export default function Jogador() {
           {ehProprioPerfil && (
             <>
               {!editando ? (
-                <button onClick={handleEditarClick}>Editar perfil</button>
+                <button className={styles.btnEditar} onClick={handleEditarClick}>Editar perfil</button>
+
               ) : (
-                <>
-                  <button onClick={handleSalvar} disabled={salvando}>
-                    {salvando ? "Salvando..." : "Salvar"}
-                  </button>
-                  <button onClick={handleEditarClick}>Cancelar</button>
-                </>
+                <div className={styles.botoesEdicao}>
+  <button
+    className={styles.btnSalvar}
+    onClick={handleSalvar}
+    disabled={salvando}
+  >
+    {salvando ? "Salvando..." : "Salvar"}
+  </button>
+
+  <button
+    className={styles.btnCancelar}
+    onClick={handleEditarClick}
+  >
+    Cancelar
+  </button>
+</div>
+
               )}
             </>
           )}
@@ -315,27 +387,56 @@ export default function Jogador() {
       <section className={styles.section}>
         <h2>Estatísticas gerais</h2>
         <div className={styles.statsGrid}>
-          <div>Gols: {jogador.totalGols || 0}</div>
-          <div>Assistências: {jogador.totalAssistencias || 0}</div>
-          <div>Desarmes: {jogador.totalDesarmes || 0}</div>
-          <div>Defesas: {jogador.totalDefesas || 0}</div>
-          <div>Cartões amarelos: {jogador.totalCartoesAmarelos || 0}</div>
-          <div>Cartões vermelhos: {jogador.totalCartoesVermelhos || 0}</div>
-        </div>
+  <div className={styles.statCard}>
+    <div className={styles.statValue}>{jogador.totalGols || 0}</div>
+    <div className={styles.statLabel}>Gols</div>
+  </div>
+
+  <div className={styles.statCard}>
+    <div className={styles.statValue}>{jogador.totalAssistencias || 0}</div>
+    <div className={styles.statLabel}>Assistências</div>
+  </div>
+
+  <div className={styles.statCard}>
+    <div className={styles.statValue}>{jogador.totalDesarmes || 0}</div>
+    <div className={styles.statLabel}>Desarmes</div>
+  </div>
+
+  <div className={styles.statCard}>
+    <div className={styles.statValue}>{jogador.totalDefesas || 0}</div>
+    <div className={styles.statLabel}>Defesas</div>
+  </div>
+
+  <div className={styles.statCard}>
+    <div className={styles.statValue}>{jogador.totalCartoesAmarelos || 0}</div>
+    <div className={styles.statLabel}>Amarelos</div>
+  </div>
+
+  <div className={styles.statCard}>
+    <div className={styles.statValue}>{jogador.totalCartoesVermelhos || 0}</div>
+    <div className={styles.statLabel}>Vermelhos</div>
+  </div>
+</div>
+
       </section>
 
       {/* ================= VÍDEO ================= */}
-      {primeiroVideo && (
-        <section className={styles.section}>
-          <h2>Melhores momentos</h2>
-          <iframe
-            src={primeiroVideo}
-            title="Melhores momentos"
-            frameBorder="0"
-            allowFullScreen
-          />
-        </section>
-      )}
+      {videoFinal && (
+  <section className={styles.section}>
+    <h2>Melhores momentos</h2>
+
+    <div className={styles.videoWrapper}>
+      <iframe
+        src={videoFinal}
+        title="Melhores momentos"
+        frameBorder="0"
+        allowFullScreen
+      />
+    </div>
+  </section>
+)}
+
+    
     </section>
   );
 }

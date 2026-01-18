@@ -2,22 +2,43 @@
    CONTAINER
 =============================== */
 .container {
+  min-height: 100vh;
   max-width: 1100px;
   margin: 0 auto;
   padding: 24px;
   color: #e5e7eb;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(2, 6, 23, 0.75),
+      rgba(2, 6, 23, 0.88)
+
+    ),
+    url("../../../assets/fotos/vestiario.png")
+      center / cover
+      no-repeat
+      fixed;
 }
+
 
 /* ===============================
    HEADER DO CLUBE
 =============================== */
 .header {
-  background: linear-gradient(135deg, #020617, #020617dd),
+  position: relative;
+  background: linear-gradient(
+      180deg,
+      rgba(2, 6, 23, 0.85),
+      rgba(2, 6, 23, 0.95)
+    ),
     url("../../../assets/fotos/campo2.png") center/cover no-repeat;
-  border-radius: 20px;
-  padding: 28px;
-  margin-bottom: 32px;
-  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.55);
+  border-radius: 24px;
+  padding: 36px;
+  margin-bottom: 36px;
+  box-shadow:
+    0 20px 50px rgba(0, 0, 0, 0.7),
+    inset 0 0 0 1px rgba(34, 197, 94, 0.15);
 }
 
 .headerTop {
@@ -25,22 +46,24 @@
   justify-content: space-between;
   align-items: center;
   flex-wrap: wrap;
+  gap: 16px;
 }
 
 .title {
   font-size: 30px;
-  font-weight: 800;
+  font-weight: 900;
   display: flex;
   align-items: center;
   gap: 10px;
+  letter-spacing: 0.3px;
 }
 
 .badge {
   background: #22c55e;
   color: #020617;
   font-size: 12px;
-  font-weight: 700;
-  padding: 4px 10px;
+  font-weight: 800;
+  padding: 4px 12px;
   border-radius: 999px;
 }
 
@@ -50,53 +73,80 @@
   font-size: 14px;
 }
 
+/* Badge visual para status do mercado */
+.subtitle:last-child {
+  display: inline-block;
+  margin-top: 12px;
+  padding: 6px 16px;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 13px;
+  background: rgba(34, 197, 94, 0.15);
+  color: #22c55e;
+}
+
 /* ===============================
    BOTÕES
 =============================== */
 .editBtn {
   background: #22c55e;
   color: #020617;
-  padding: 10px 18px;
-  border-radius: 12px;
+  padding: 12px 20px;
+  border-radius: 14px;
   border: none;
-  font-weight: 700;
+  font-weight: 800;
   cursor: pointer;
-  transition: 0.2s;
+  transition: 0.25s;
+  box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.6);
 }
 
 .editBtn:hover {
   background: #16a34a;
+  box-shadow: 0 0 0 6px rgba(34, 197, 94, 0.15);
 }
 
 .saveBtn {
   width: 100%;
-  background: #22c55e;
+  background: linear-gradient(135deg, #22c55e, #16a34a);
   color: #020617;
-  padding: 14px;
-  border-radius: 14px;
+  padding: 16px;
+  border-radius: 16px;
   border: none;
   font-size: 16px;
-  font-weight: 800;
-  margin-top: 24px;
+  font-weight: 900;
+  margin-top: 28px;
   cursor: pointer;
+  box-shadow: 0 15px 40px rgba(34, 197, 94, 0.35);
 }
 
 /* ===============================
    SEÇÕES
 =============================== */
 .section {
-  background: #020617;
-  border-radius: 18px;
-  padding: 22px;
-  margin-bottom: 24px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+  background: linear-gradient(180deg, #020617, #020617cc);
+  border-radius: 22px;
+  padding: 26px;
+  margin-bottom: 28px;
+  box-shadow:
+    0 12px 30px rgba(0, 0, 0, 0.5),
+    inset 0 0 0 1px rgba(148, 163, 184, 0.06);
 }
 
 .section h2 {
-  font-size: 18px;
-  margin-bottom: 14px;
-  border-bottom: 1px solid #1e293b;
-  padding-bottom: 10px;
+  font-size: 19px;
+  margin-bottom: 18px;
+  font-weight: 900;
+  letter-spacing: 0.3px;
+}
+
+.section h2::after {
+  content: "";
+  display: block;
+  width: 40px;
+  height: 3px;
+  background: #22c55e;
+  margin-top: 8px;
+  border-radius: 999px;
 }
 
 /* ===============================
@@ -108,10 +158,11 @@
   width: 100%;
   background: #020617;
   border: 1px solid #1e293b;
-  border-radius: 12px;
-  padding: 12px 14px;
+  border-radius: 14px;
+  padding: 14px 16px;
   color: #fff;
-  margin-top: 8px;
+  margin-top: 10px;
+  font-size: 14px;
 }
 
 .textarea {
@@ -132,24 +183,25 @@
 .elencoGrid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 16px;
+  gap: 18px;
 }
 
 .jogadorCard {
-  background: #020617;
-  border: 1px solid #1e293b;
-  border-radius: 16px;
-  padding: 16px;
-  transition: 0.2s;
+  background: linear-gradient(180deg, #020617, #020617dd);
+  border-radius: 18px;
+  padding: 18px;
+  border: 1px solid rgba(148, 163, 184, 0.12);
+  transition: 0.25s;
 }
 
 .jogadorCard:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.6);
+  transform: translateY(-6px) scale(1.02);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.65);
 }
 
 .jogadorNome {
-  font-weight: 700;
+  font-size: 16px;
+  font-weight: 900;
   margin-bottom: 6px;
 }
 
@@ -159,13 +211,14 @@
 }
 
 .removeBtn {
-  margin-top: 10px;
+  margin-top: 12px;
   background: #dc2626;
   color: #fff;
   border: none;
-  border-radius: 10px;
-  padding: 8px 12px;
+  border-radius: 12px;
+  padding: 10px 14px;
   font-size: 13px;
+  font-weight: 700;
   cursor: pointer;
 }
 
@@ -174,17 +227,17 @@
 =============================== */
 .addJogador {
   display: flex;
-  gap: 10px;
-  margin-bottom: 18px;
+  gap: 12px;
+  margin-bottom: 22px;
 }
 
 .addJogador button {
-  background: #2563eb;
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
   color: #fff;
-  border-radius: 12px;
-  padding: 10px 14px;
+  border-radius: 14px;
+  padding: 12px 16px;
   border: none;
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
 }
 
@@ -192,13 +245,31 @@
    RESPONSIVO
 =============================== */
 @media (max-width: 768px) {
+  .header {
+    padding: 28px;
+  }
+
   .headerTop {
     flex-direction: column;
     align-items: flex-start;
-    gap: 14px;
   }
 
   .title {
     font-size: 24px;
   }
+
+  .saveBtn {
+    font-size: 15px;
+  }
+}
+
+/* ===============================
+   MICRO ANIMAÇÕES (PREMIUM FEEL)
+=============================== */
+* {
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
 }

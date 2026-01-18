@@ -1,0 +1,204 @@
+/* ===============================
+   CONTAINER
+=============================== */
+.container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 24px;
+  color: #e5e7eb;
+}
+
+/* ===============================
+   HEADER DO CLUBE
+=============================== */
+.header {
+  background: linear-gradient(135deg, #020617, #020617dd),
+    url("../../../assets/fotos/campo2.png") center/cover no-repeat;
+  border-radius: 20px;
+  padding: 28px;
+  margin-bottom: 32px;
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.55);
+}
+
+.headerTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.title {
+  font-size: 30px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.badge {
+  background: #22c55e;
+  color: #020617;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 999px;
+}
+
+.subtitle {
+  margin-top: 6px;
+  color: #94a3b8;
+  font-size: 14px;
+}
+
+/* ===============================
+   BOTÕES
+=============================== */
+.editBtn {
+  background: #22c55e;
+  color: #020617;
+  padding: 10px 18px;
+  border-radius: 12px;
+  border: none;
+  font-weight: 700;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.editBtn:hover {
+  background: #16a34a;
+}
+
+.saveBtn {
+  width: 100%;
+  background: #22c55e;
+  color: #020617;
+  padding: 14px;
+  border-radius: 14px;
+  border: none;
+  font-size: 16px;
+  font-weight: 800;
+  margin-top: 24px;
+  cursor: pointer;
+}
+
+/* ===============================
+   SEÇÕES
+=============================== */
+.section {
+  background: #020617;
+  border-radius: 18px;
+  padding: 22px;
+  margin-bottom: 24px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+}
+
+.section h2 {
+  font-size: 18px;
+  margin-bottom: 14px;
+  border-bottom: 1px solid #1e293b;
+  padding-bottom: 10px;
+}
+
+/* ===============================
+   INPUTS
+=============================== */
+.input,
+.textarea,
+.select {
+  width: 100%;
+  background: #020617;
+  border: 1px solid #1e293b;
+  border-radius: 12px;
+  padding: 12px 14px;
+  color: #fff;
+  margin-top: 8px;
+}
+
+.textarea {
+  min-height: 120px;
+  resize: vertical;
+}
+
+.input:focus,
+.textarea:focus,
+.select:focus {
+  outline: none;
+  border-color: #22c55e;
+}
+
+/* ===============================
+   ELENCO
+=============================== */
+.elencoGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 16px;
+}
+
+.jogadorCard {
+  background: #020617;
+  border: 1px solid #1e293b;
+  border-radius: 16px;
+  padding: 16px;
+  transition: 0.2s;
+}
+
+.jogadorCard:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.6);
+}
+
+.jogadorNome {
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+.camisa {
+  font-size: 14px;
+  color: #94a3b8;
+}
+
+.removeBtn {
+  margin-top: 10px;
+  background: #dc2626;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  padding: 8px 12px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+/* ===============================
+   FORM ADD JOGADOR
+=============================== */
+.addJogador {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+.addJogador button {
+  background: #2563eb;
+  color: #fff;
+  border-radius: 12px;
+  padding: 10px 14px;
+  border: none;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* ===============================
+   RESPONSIVO
+=============================== */
+@media (max-width: 768px) {
+  .headerTop {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
+  }
+
+  .title {
+    font-size: 24px;
+  }
+}

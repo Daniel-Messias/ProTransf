@@ -16,6 +16,7 @@ import RankingPage from "./features/ranking/pages/Ranking";
 import Jogador from "./features/Jogador/Pages/Jogador";
 import "./features/home/styles/Protransf.css";
 import Header from "./features/home/components/Header";
+import Clube from "./features/clubes/pages/clube";
 
 
 function AppContent() {
@@ -38,6 +39,10 @@ function AppContent() {
         <Route path="/perfil/:id" element={<PerfilPage />} />
 
         <Route path="/jogador/:id" element={<Jogador />} />
+        <Route path="/clube/:id" element={<Clube />} />
+        <Route path="/clube" element={<Clube />} />
+
+
 
 
         <Route path="/ranking" element={<RankingPage />} />

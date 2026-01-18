@@ -589,3 +589,20 @@ a {
   }
 
 }
+/* =====================================================
+   PATCH MOBILE — LAYOUT HOME
+   Corrige quebra de layout após ajustes do header
+   ===================================================== */
+@media (max-width: 900px) {
+
+  /* Layout vira coluna única no mobile */
+  .layout {
+    grid-template-columns: 1fr;
+  }
+
+  /* Sidebar desce e ocupa largura total */
+  .sidebar {
+    width: 100%;
+  }
+
+}

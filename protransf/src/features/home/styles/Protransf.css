@@ -1,3 +1,7 @@
+/* =====================================================
+   VARIÁVEIS GLOBAIS
+   Cores e identidade visual do projeto
+   ===================================================== */
 :root {
   --bg: #020617;
   --surface: rgba(15, 23, 42, 0.96);
@@ -10,7 +14,9 @@
   --muted: #9ca3af;
 }
 
-/* RESET */
+/* =====================================================
+   RESET GLOBAL
+   ===================================================== */
 * {
   margin: 0;
   padding: 0;
@@ -29,7 +35,9 @@ a {
   text-decoration: none;
 }
 
-/* BACKGROUND */
+/* =====================================================
+   BACKGROUND GLOBAL (Home)
+   ===================================================== */
 .page {
   position: relative;
   min-height: 100vh;
@@ -47,44 +55,48 @@ a {
   z-index: -2;
 }
 
-
 .bg-overlay {
   position: fixed;
   inset: 0;
-  background: radial-gradient(circle at top, rgba(15, 23, 42, 0.9), rgba(15, 23, 42, 0.98));
+  background: radial-gradient(
+    circle at top,
+    rgba(15, 23, 42, 0.9),
+    rgba(15, 23, 42, 0.98)
+  );
   z-index: -1;
 }
 
-/* CONTAINER */
+/* =====================================================
+   CONTAINER PADRÃO
+   Usado em Home e outras páginas
+   ===================================================== */
 .shell {
   max-width: 1180px;
   margin: 0 auto;
   padding: 0.9rem 1.25rem 2.2rem;
 }
 
-
-/* ================= HEADER ================= */
-
+/* =====================================================
+   HEADER (DESKTOP FIRST)
+   Usado em todas as páginas
+   ===================================================== */
 .main-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 0.7rem 1rem;
-  margin-bottom: 1.6rem;
+  margin: 2rem auto 1.6rem;
+  max-width: 1180px;
+  min-height: 64px;
   border-radius: 999px;
   background: rgba(15, 23, 42, 0.96);
   border: 1px solid var(--border);
   backdrop-filter: blur(14px);
-  min-height: 64px; /* trava a altura visual */
-   margin-top: 2rem;
-    max-width: 1180px;
-     margin-left: auto;
-  margin-right: auto;
-
-
+  position: relative;
+  z-index: 999; /* garante ficar acima do overlay */
 }
 
-/* LEFT */
+/* ----- Área esquerda do header (logo + nome) ----- */
 .header-left {
   display: flex;
   align-items: center;
@@ -97,13 +109,17 @@ a {
   cursor: pointer;
 }
 
+/* ATENÇÃO:
+   havia um erro de digitação no width (54 px).
+   Aqui mantemos o valor correto (54px).
+*/
 .brand-logo img {
-  width: 54 px;
+  width: 54px;
   height: 54px;
   object-fit: contain;
 }
 
-
+/* Usado para empilhar textos se necessário */
 .brand-text {
   display: flex;
   flex-direction: column;
@@ -121,7 +137,9 @@ a {
   color: var(--muted);
 }
 
-/* NAV */
+/* =====================================================
+   NAVEGAÇÃO (DESKTOP)
+   ===================================================== */
 .main-nav {
   display: flex;
   align-items: center;
@@ -142,13 +160,16 @@ a {
   background: var(--primary-soft);
 }
 
+/* Classe opcional para link ativo */
 .nav-link-active {
   color: var(--text);
   background: var(--primary-soft);
   border-color: rgba(34, 197, 94, 0.35);
 }
 
-/* ACTIONS */
+/* =====================================================
+   AÇÕES DO HEADER (DESKTOP)
+   ===================================================== */
 .header-actions {
   display: flex;
   align-items: center;
@@ -179,22 +200,10 @@ a {
   cursor: pointer;
 }
 
-/* RESPONSIVO */
-@media (max-width: 900px) {
-  .main-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.6rem;
-    border-radius: 18px;
-  }
-
-  .main-nav {
-    display: none;
-  }
-}
-
-
-/* LAYOUT */
+/* =====================================================
+   LAYOUT PRINCIPAL (HOME)
+   Grid principal: conteúdo + sidebar
+   ===================================================== */
 .layout {
   display: grid;
   grid-template-columns: minmax(0, 3.2fr) minmax(260px, 1.4fr);
@@ -203,14 +212,15 @@ a {
   margin-bottom: 1.8rem;
 }
 
-/* MAIN PANEL */
 .main-panel {
   display: flex;
   flex-direction: column;
   gap: 1.8rem;
 }
 
-/* HERO */
+/* =====================================================
+   HERO (Home principal)
+   ===================================================== */
 .hero {
   background: var(--surface);
   border-radius: 22px;
@@ -234,7 +244,7 @@ a {
 }
 
 .hero-title span {
-  color: #22c55e;
+  color: var(--primary);
 }
 
 .hero-subtitle {
@@ -251,6 +261,7 @@ a {
   margin-bottom: 0.8rem;
 }
 
+/* Botões genéricos */
 .btn {
   display: inline-flex;
   align-items: center;
@@ -297,7 +308,9 @@ a {
   margin-bottom: 0.5rem;
 }
 
-/* MINI SEÇÃO */
+/* =====================================================
+   MINI SEÇÃO "COMO FUNCIONA"
+   ===================================================== */
 .mini-section {
   border-radius: 18px;
   border: 1px solid var(--border-soft);
@@ -331,62 +344,9 @@ a {
   border: 1px solid var(--border);
 }
 
-/* GRID JOGADORES */
-.jogadores-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-  gap: 0.8rem;
-  margin-top: 0.8rem;
-}
-
-.jogador-card {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 0.8rem;
-  border-radius: 12px;
-  background: rgba(15, 23, 42, 0.7);
-  border: 1px solid var(--border);
-  cursor: pointer;
-  transition: all 0.15s ease;
-}
-
-.jogador-card:hover {
-  background: rgba(34, 197, 94, 0.1);
-  border-color: var(--primary);
-  transform: translateY(-2px);
-}
-
-.jogador-foto {
-  width: 70px;
-  height: 70px;
-  border-radius: 50%;
-  object-fit: cover;
-  margin-bottom: 0.5rem;
-  border: 2px solid var(--primary);
-}
-
-.jogador-info {
-  text-align: center;
-  font-size: 0.75rem;
-}
-
-.jogador-info h4 {
-  font-weight: 600;
-  margin-bottom: 0.25rem;
-}
-
-.jogador-info .posicao {
-  color: var(--primary);
-  font-weight: 500;
-}
-
-.jogador-info .status {
-  color: var(--muted);
-  font-size: 0.7rem;
-}
-
-/* SIDEBAR */
+/* =====================================================
+   SIDEBAR (Ranking + Últimas Transferências)
+   ===================================================== */
 .sidebar {
   position: relative;
   display: flex;
@@ -447,19 +407,6 @@ a {
   color: var(--primary);
 }
 
-.market-label {
-  color: var(--muted);
-}
-
-.market-value {
-  color: var(--text);
-  font-weight: 500;
-}
-
-.ranking-list .market-item {
-  align-items: center;
-}
-
 .ranking-item .pos {
   display: inline-flex;
   align-items: center;
@@ -488,75 +435,9 @@ a {
   color: var(--muted);
 }
 
-/* SEÇÃO CONTATO */
-.contact-section {
-  background: var(--surface);
-  border-radius: 18px;
-  border: 1px solid var(--border-soft);
-  padding: 1.5rem;
-  margin-top: 1.8rem;
-  box-shadow: 0 22px 60px rgba(0, 0, 0, 0.6);
-}
-
-.contact-title {
-  font-size: 1.3rem;
-  font-weight: 700;
-  margin-bottom: 1.2rem;
-}
-
-.contact-form {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 1rem;
-}
-
-.form-group {
-  display: flex;
-  flex-direction: column;
-}
-
-.form-group.full-width {
-  grid-column: 1 / -1;
-}
-
-.form-group label {
-  font-size: 0.85rem;
-  font-weight: 600;
-  margin-bottom: 0.4rem;
-  color: var(--text);
-}
-
-.form-group input,
-.form-group textarea {
-  padding: 0.6rem 0.8rem;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  background: rgba(15, 23, 42, 0.9);
-  color: var(--text);
-  font-size: 0.9rem;
-  transition: border-color 0.15s ease;
-}
-
-.form-group input:focus,
-.form-group textarea:focus {
-  outline: none;
-  border-color: var(--primary);
-  box-shadow: 0 0 0 3px var(--primary-soft);
-}
-
-.contact-form > .btn {
-  grid-column: 1 / -1;
-  align-self: flex-start;
-}
-
-.msg-sucesso {
-  grid-column: 1 / -1;
-  color: var(--primary);
-  font-size: 0.9rem;
-  font-weight: 500;
-}
-
-/* FOOTER */
+/* =====================================================
+   FOOTER
+   ===================================================== */
 .main-footer {
   margin-top: 1.8rem;
   font-size: 0.78rem;
@@ -566,44 +447,9 @@ a {
   text-align: center;
 }
 
-/* RESPONSIVO */
-@media (max-width: 900px) {
-  .main-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.6rem;
-    border-radius: 18px;
-  }
-
-  .header-left {
-    width: 100%;
-    justify-content: space-between;
-  }
-
-  .main-nav {
-    display: none;
-  }
-}
-
-@media (max-width: 780px) {
-  .layout {
-    grid-template-columns: 1fr;
-  }
-
-  .jogadores-grid {
-    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-  }
-
-  .contact-form {
-    grid-template-columns: 1fr;
-  }
-
-  .shell {
-    padding: 0.6rem 0.8rem 1.5rem;
-  }
-}
-/* ================= MENU MOBILE ================= */
-
+/* =====================================================
+   MENU MOBILE (Hambúrguer)
+   ===================================================== */
 .menu-toggle {
   display: none;
   width: 42px;
@@ -625,19 +471,11 @@ a {
   transition: all 0.25s ease;
 }
 
-.menu-toggle span:nth-child(1) {
-  top: 13px;
-}
+.menu-toggle span:nth-child(1) { top: 13px; }
+.menu-toggle span:nth-child(2) { top: 20px; }
+.menu-toggle span:nth-child(3) { top: 27px; }
 
-.menu-toggle span:nth-child(2) {
-  top: 20px;
-}
-
-.menu-toggle span:nth-child(3) {
-  top: 27px;
-}
-
-/* animação X */
+/* animação do X */
 .menu-toggle.open span:nth-child(1) {
   transform: rotate(45deg);
   top: 20px;
@@ -652,63 +490,9 @@ a {
   top: 20px;
 }
 
-/* MOBILE */
-@media (max-width: 900px) {
-  .menu-toggle {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .brand-title {
-    display: none;
-  }
-
-  .main-header {
-    flex-direction: column;
-    align-items: stretch;
-    border-radius: 18px;
-  }
-
-  .header-left {
-    width: 100%;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-
-  .main-nav {
-    display: flex;
-    flex-direction: column;
-    gap: 0.4rem;
-    margin-top: 0.6rem;
-    padding-top: 0.6rem;
-    border-top: 1px solid var(--border);
-    display: none;
-  }
-
-  .main-nav.open {
-    display: flex;
-  }
-
-  .nav-link {
-    width: 100%;
-    padding: 0.7rem 1rem;
-    border-radius: 10px;
-  }
-
-  .brand-logo img {
-    width: 40px;
-    height: 40px;
-  }
-
-  .btn-login,
-  .btn-logout {
-    min-height: 44px;
-  }
-}
-/* ================= OVERLAY MOBILE ================= */
-
+/* =====================================================
+   OVERLAY MOBILE
+   ===================================================== */
 .menu-overlay {
   position: fixed;
   inset: 0;
@@ -725,8 +509,83 @@ a {
   pointer-events: auto;
 }
 
-/* garantir que o header fique acima do overlay */
-.main-header {
-  position: relative;
-  z-index: 999;
+/* =====================================================
+   RESPONSIVO (MOBILE / TABLET)
+   ATENÇÃO: existem duplicações históricas aqui.
+   Não removidas por segurança visual.
+   ===================================================== */
+@media (max-width: 900px) {
+  .main-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.6rem;
+    border-radius: 18px;
+  }
+
+  .header-left {
+    width: 100%;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .menu-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* no mobile o menu fica fechado por padrão */
+  .main-nav {
+    display: none;
+    flex-direction: column;
+    gap: 0.4rem;
+    margin-top: 0.6rem;
+    padding-top: 0.6rem;
+    border-top: 1px solid var(--border);
+  }
+
+  .main-nav.open {
+    display: flex;
+  }
+
+  .nav-link {
+    width: 100%;
+    padding: 0.7rem 1rem;
+    border-radius: 10px;
+  }
+
+  /* botões maiores para toque */
+  .btn-login,
+  .btn-logout {
+    min-height: 44px;
+  }
+
+  .brand-logo img {
+    width: 40px;
+    height: 40px;
+  }
+}
+
+/* =====================================================
+   REGRAS DESKTOP ESPECÍFICAS
+   ===================================================== */
+@media (min-width: 769px) {
+  /* botão sair do menu mobile não aparece no desktop */
+  .menu-logout {
+    display: none;
+  }
+}
+/* =====================================================
+   PATCH MOBILE — HEADER
+   Correção de duplicação do botão "Sair"
+   Desktop NÃO é afetado
+   ===================================================== */
+@media (max-width: 900px) {
+
+  /* Esconde ações do header no mobile
+     (login / sair do topo) */
+  .header-actions {
+    display: none;
+  }
+
 }

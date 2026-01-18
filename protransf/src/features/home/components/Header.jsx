@@ -15,6 +15,7 @@ export default function Header() {
   const menuRef = useRef(null);
   const navigate = useNavigate();
 
+  // 🔐 Auth + Clube
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (usuario) => {
       setUser(usuario);
@@ -43,7 +44,7 @@ export default function Header() {
     return () => unsubscribe();
   }, []);
 
-  // 🔥 FECHAR AO CLICAR FORA
+  // 🖱️ Fechar menu ao clicar fora
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (menuOpen && menuRef.current && !menuRef.current.contains(e.target)) {
@@ -55,9 +56,17 @@ export default function Header() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [menuOpen]);
 
+  // 🔒 Bloquear scroll quando menu aberto (mobile)
+  useEffect(() => {
+    document.body.style.overflow = menuOpen ? "hidden" : "auto";
+    return () => {
+      document.body.style.overflow = "auto";
+    };
+  }, [menuOpen]);
+
   const handleLogout = async () => {
-    await signOut(auth);
     setMenuOpen(false);
+    await signOut(auth);
     setClubeId(null);
     navigate("/login");
   };
@@ -82,11 +91,12 @@ export default function Header() {
             <span className="brand-title">Pro Transfer</span>
           </Link>
 
-          {/* BOTÃO MOBILE */}
+          {/* BOTÃO HAMBÚRGUER (MOBILE) */}
           <button
             className={`menu-toggle ${menuOpen ? "open" : ""}`}
-            onClick={() => setMenuOpen(!menuOpen)}
+            onClick={() => setMenuOpen((prev) => !prev)}
             aria-label="Abrir menu"
+            aria-expanded={menuOpen}
           >
             <span />
             <span />
@@ -94,10 +104,15 @@ export default function Header() {
           </button>
         </div>
 
-        {/* NAV */}
+        {/* MENU / NAV */}
         <nav className={`main-nav ${menuOpen ? "open" : ""}`}>
-          <Link to="/" className="nav-link" onClick={closeMenu}>Início</Link>
-          <Link to="/transferencias" className="nav-link" onClick={closeMenu}>Mercado</Link>
+          <Link to="/" className="nav-link" onClick={closeMenu}>
+            Início
+          </Link>
+
+          <Link to="/transferencias" className="nav-link" onClick={closeMenu}>
+            Mercado
+          </Link>
 
           {user && (
             <Link
@@ -122,12 +137,19 @@ export default function Header() {
           <Link to="/ranking" className="nav-link" onClick={closeMenu}>
             Ranking
           </Link>
+
+          {/* BOTÃO SAIR (APENAS MENU MOBILE) */}
+          {user && (
+            <button onClick={handleLogout} className="btn-logout menu-logout">
+              Sair
+            </button>
+          )}
         </nav>
 
-        {/* AÇÕES */}
+        {/* AÇÕES (DESKTOP) */}
         <div className="header-actions">
           {!user ? (
-            <Link to="/login" className="btn-login" onClick={closeMenu}>
+            <Link to="/login" className="btn-login">
               Entrar
             </Link>
           ) : (

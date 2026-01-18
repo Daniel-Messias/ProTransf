@@ -5,11 +5,14 @@ import "../styles/Protransf.css";
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
 import { auth, db } from "../../../services/firebase";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 export default function Header() {
   const [user, setUser] = useState(null);
   const [clubeId, setClubeId] = useState(null);
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  const menuRef = useRef(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -40,53 +43,100 @@ export default function Header() {
     return () => unsubscribe();
   }, []);
 
+  // 🔥 FECHAR AO CLICAR FORA
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (menuOpen && menuRef.current && !menuRef.current.contains(e.target)) {
+        setMenuOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [menuOpen]);
+
   const handleLogout = async () => {
     await signOut(auth);
+    setMenuOpen(false);
     setClubeId(null);
     navigate("/login");
   };
 
+  const closeMenu = () => setMenuOpen(false);
+
   return (
-    <header className="main-header">
-      <div className="header-left">
-        <Link to="/" className="brand">
-          <div className="brand-logo">
-            <img src={logo} alt="Pro Transfer" />
-          </div>
-          <span className="brand-title">Pro Transfer</span>
-        </Link>
-      </div>
+    <>
+      {/* OVERLAY */}
+      <div
+        className={`menu-overlay ${menuOpen ? "open" : ""}`}
+        onClick={closeMenu}
+      />
 
-      <nav className="main-nav">
-        <Link to="/" className="nav-link">Início</Link>
-        <Link to="/transferencias" className="nav-link">Mercado</Link>
-
-        {user && (
-          <Link to={`/jogador/${user.uid}`} className="nav-link">
-            Meu Perfil
+      <header className="main-header" ref={menuRef}>
+        {/* ESQUERDA */}
+        <div className="header-left">
+          <Link to="/" className="brand" onClick={closeMenu}>
+            <div className="brand-logo">
+              <img src={logo} alt="Pro Transfer" />
+            </div>
+            <span className="brand-title">Pro Transfer</span>
           </Link>
-        )}
 
-        {clubeId && (
-          <Link to={`/clube/${clubeId}`} className="nav-link">
-            Meu Clube
-          </Link>
-        )}
-
-        <Link to="/ranking" className="nav-link">Ranking</Link>
-      </nav>
-
-      <div className="header-actions">
-        {!user ? (
-          <Link to="/login" className="btn-login">
-            Entrar
-          </Link>
-        ) : (
-          <button onClick={handleLogout} className="btn-logout">
-            Sair
+          {/* BOTÃO MOBILE */}
+          <button
+            className={`menu-toggle ${menuOpen ? "open" : ""}`}
+            onClick={() => setMenuOpen(!menuOpen)}
+            aria-label="Abrir menu"
+          >
+            <span />
+            <span />
+            <span />
           </button>
-        )}
-      </div>
-    </header>
+        </div>
+
+        {/* NAV */}
+        <nav className={`main-nav ${menuOpen ? "open" : ""}`}>
+          <Link to="/" className="nav-link" onClick={closeMenu}>Início</Link>
+          <Link to="/transferencias" className="nav-link" onClick={closeMenu}>Mercado</Link>
+
+          {user && (
+            <Link
+              to={`/jogador/${user.uid}`}
+              className="nav-link"
+              onClick={closeMenu}
+            >
+              Meu Perfil
+            </Link>
+          )}
+
+          {clubeId && (
+            <Link
+              to={`/clube/${clubeId}`}
+              className="nav-link"
+              onClick={closeMenu}
+            >
+              Meu Clube
+            </Link>
+          )}
+
+          <Link to="/ranking" className="nav-link" onClick={closeMenu}>
+            Ranking
+          </Link>
+        </nav>
+
+        {/* AÇÕES */}
+        <div className="header-actions">
+          {!user ? (
+            <Link to="/login" className="btn-login" onClick={closeMenu}>
+              Entrar
+            </Link>
+          ) : (
+            <button onClick={handleLogout} className="btn-logout">
+              Sair
+            </button>
+          )}
+        </div>
+      </header>
+    </>
   );
 }

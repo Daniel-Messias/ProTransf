@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 
 import { db, auth } from "../../../services/firebase";
-import { doc, getDoc, updateDoc } from "firebase/firestore";
+import { doc, getDoc, updateDoc,collection, addDoc } from "firebase/firestore";
 import { storage } from "../../../services/firebase";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
@@ -61,6 +61,21 @@ export default function Jogador() {
   // ===============================
   const [fotoPreview, setFotoPreview] = useState("");
   const [fotoFile, setFotoFile] = useState(null);
+
+// ===============================
+// FORMULÁRIO DE ESTATÍSTICAS
+// ===============================
+const [golsPartida, setGolsPartida] = useState("");
+const [assistenciasPartida, setAssistenciasPartida] = useState("");
+const [desarmesPartida, setDesarmesPartida] = useState("");
+const [defesasPartida, setDefesasPartida] = useState("");
+const [amarelosPartida, setAmarelosPartida] = useState("");
+const [vermelhosPartida, setVermelhosPartida] = useState("");
+const [dataPartida, setDataPartida] = useState("");
+const [observacoesPartida, setObservacoesPartida] = useState("");
+
+const [fotoStatsFile, setFotoStatsFile] = useState(null);
+const [enviandoStats, setEnviandoStats] = useState(false);
 
   // ===============================
   // EDITAR
@@ -138,6 +153,68 @@ export default function Jogador() {
       setSalvando(false);
     }
   }
+
+// ===============================
+// ENVIAR ESTATÍSTICAS DA PARTIDA
+// ===============================
+async function handleEnviarEstatisticas(e) {
+  e.preventDefault();
+  if (!jogador) return;
+
+  // Foto obrigatória
+  if (!fotoStatsFile) {
+    alert("Envie uma foto das estatísticas para podermos validar.");
+    return;
+  }
+
+  setEnviandoStats(true);
+
+  try {
+    // 1) Upload da foto para o Storage
+   const pasta = `fotosJogadores`;
+
+    const nomeArquivo = `${Date.now()}-${fotoStatsFile.name}`;
+    const storageRef = ref(storage, `${pasta}/${nomeArquivo}`);
+
+    await uploadBytes(storageRef, fotoStatsFile);
+    const fotoUrl = await getDownloadURL(storageRef);
+
+    // 2) Criar documento em solicitacoesEstatisticas com status pendente
+    const colecao = collection(db, "solicitacoesEstatisticas");
+    await addDoc(colecao, {
+      jogadorId: jogador.id,
+      gols: Number(golsPartida) || 0,
+      assistencias: Number(assistenciasPartida) || 0,
+      desarmes: Number(desarmesPartida) || 0,
+      defesas: Number(defesasPartida) || 0,
+      amarelos: Number(amarelosPartida) || 0,
+      vermelhos: Number(vermelhosPartida) || 0,
+      dataPartida: dataPartida || null,
+      observacoes: observacoesPartida || "",
+      fotoUrl,
+      status: "pendente",
+      criadoEm: new Date(),
+    });
+
+    alert("Estatísticas enviadas para revisão. Aguarde aprovação.");
+
+    // 3) Limpar formulário
+    setGolsPartida("");
+    setAssistenciasPartida("");
+    setDesarmesPartida("");
+    setDefesasPartida("");
+    setAmarelosPartida("");
+    setVermelhosPartida("");
+    setDataPartida("");
+    setObservacoesPartida("");
+    setFotoStatsFile(null);
+  } catch (err) {
+    console.error("Erro ao enviar estatísticas:", err);
+    alert("Erro ao enviar estatísticas. Tente novamente.");
+  } finally {
+    setEnviandoStats(false);
+  }
+}
 
   // ===============================
   // CARREGAR JOGADOR
@@ -419,6 +496,115 @@ export default function Jogador() {
 </div>
 
       </section>
+
+      {ehProprioPerfil && (
+  <section className={styles.section}>
+    <h2>Enviar estatísticas de partida</h2>
+
+    <form className={styles.formStats} onSubmit={handleEnviarEstatisticas}>
+      <div className={styles.gridStatsForm}>
+        <div className={styles.campo}>
+          <label>Data da partida</label>
+          <input
+            type="date"
+            value={dataPartida}
+            onChange={(e) => setDataPartida(e.target.value)}
+          />
+        </div>
+
+        <div className={styles.campo}>
+          <label>Gols</label>
+          <input
+            type="number"
+            min="0"
+            value={golsPartida}
+            onChange={(e) => setGolsPartida(e.target.value)}
+          />
+        </div>
+
+        <div className={styles.campo}>
+          <label>Assistências</label>
+          <input
+            type="number"
+            min="0"
+            value={assistenciasPartida}
+            onChange={(e) => setAssistenciasPartida(e.target.value)}
+          />
+        </div>
+
+        <div className={styles.campo}>
+          <label>Desarmes</label>
+          <input
+            type="number"
+            min="0"
+            value={desarmesPartida}
+            onChange={(e) => setDesarmesPartida(e.target.value)}
+          />
+        </div>
+
+        <div className={styles.campo}>
+          <label>Defesas</label>
+          <input
+            type="number"
+            min="0"
+            value={defesasPartida}
+            onChange={(e) => setDefesasPartida(e.target.value)}
+          />
+        </div>
+
+        <div className={styles.campo}>
+          <label>Cartões amarelos</label>
+          <input
+            type="number"
+            min="0"
+            value={amarelosPartida}
+            onChange={(e) => setAmarelosPartida(e.target.value)}
+          />
+        </div>
+
+        <div className={styles.campo}>
+          <label>Cartões vermelhos</label>
+          <input
+            type="number"
+            min="0"
+            value={vermelhosPartida}
+            onChange={(e) => setVermelhosPartida(e.target.value)}
+          />
+        </div>
+      </div>
+
+      <div className={styles.campo}>
+        <label>Observações (opcional)</label>
+        <textarea
+          rows={3}
+          value={observacoesPartida}
+          onChange={(e) => setObservacoesPartida(e.target.value)}
+        />
+      </div>
+
+      <div className={styles.campo}>
+        <label>Foto das estatísticas (obrigatória)</label>
+        <input
+          type="file"
+          accept="image/*"
+          onChange={(e) => {
+            const file = e.target.files?.[0];
+            setFotoStatsFile(file || null);
+          }}
+        />
+      </div>
+
+      <button
+        type="submit"
+        className={styles.btnSalvar}
+        disabled={enviandoStats}
+      >
+        {enviandoStats ? "Enviando..." : "Enviar para revisão"}
+      </button>
+    </form>
+  </section>
+)}
+
 
       {/* ================= VÍDEO ================= */}
       {videoFinal && (

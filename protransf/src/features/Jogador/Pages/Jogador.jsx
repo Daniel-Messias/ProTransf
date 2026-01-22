@@ -243,16 +243,16 @@ export default function Jogador() {
           {!editando ? (
             <>
               <h1>{jogador.nome}</h1>
-              <p>@{jogador.username}</p>
+              <p className={styles.nomejogador}>@{jogador.username}</p>
 
-              <p>
-                Posição: {jogador.posicaoPrimaria || "N/A"}
+              <p className={styles.status}>
+                Posição: <spam className={styles.posicao}>{jogador.posicaoPrimaria || "N/A"}
                 {jogador.posicaoSecundaria &&
-                  ` | ${jogador.posicaoSecundaria}`}
+                  ` | ${jogador.posicaoSecundaria}`}</spam>
               </p>
 
-              <p>Camisa: {jogador.numeroCamisaPessoal || "-"}</p>
-              <p>Plataforma: {jogador.plataforma || "N/A"}</p>
+              <p className={styles.status}>Camisa: <spam className={styles.numeroCamisa}>{jogador.numeroCamisaPessoal || "-"}</spam></p>
+              <p className={styles.status}>Plataforma: <spam className={styles.plataforma}>{jogador.plataforma || "N/A"}</spam></p>
               <p className={styles.status}>
   Status:
   <span

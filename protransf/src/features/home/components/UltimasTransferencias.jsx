@@ -1,4 +1,3 @@
-// src/features/home/components/UltimasTransferencias.jsx (exemplo de caminho)
 import React, { useEffect, useState } from "react";
 import { collection, query, orderBy, limit, getDocs } from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
@@ -16,72 +15,70 @@ export default function UltimasTransferencias() {
         const q = query(
           collection(db, "convites"),
           orderBy("criadoEm", "desc"),
-          limit(30)
+          limit(5)
         );
+
         const snapshot = await getDocs(q);
-        const todosConvites = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
-        const aceito = todosConvites.find(c => c.status === "aceito");
-        const recusado = todosConvites.find(c => c.status === "recusado");
-        const pendente = todosConvites.find(c => c.status === "pendente");
+        const lista = snapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
 
-        const resultado = [aceito, recusado, pendente].filter(Boolean);
-        setConvites(resultado);
+        setConvites(lista);
       } catch (error) {
         console.error("Erro ao buscar convites:", error);
       }
       setLoading(false);
     }
+
     buscarConvites();
   }, []);
 
-  if (loading) return <p>Carregando últimas transferências...</p>;
-  if (convites.length === 0) return <p>Nenhuma transferência encontrada.</p>;
+  if (loading) {
+    return <p className="transferencias-loading">Carregando últimas transferências...</p>;
+  }
 
-  const corSeta = (status) => {
-    switch (status) {
-      case "aceito":
-        return "green";
-      case "recusado":
-        return "red";
-      case "pendente":
-        return "orange";
-      default:
-        return "gray";
-    }
-  };
+  if (convites.length === 0) {
+    return <p className="transferencias-empty">Nenhuma transferência encontrada.</p>;
+  }
 
   return (
-    <ul className="transfer-list">
+    <div className="transferencias-feed">
       {convites.map(c => (
-        <li key={c.id} className="transfer-item" style={{ marginBottom: "12px" }}>
-          <span
-            className="from"
-            onClick={() => navigate(`/perfil/${c.jogadorUsername}`)}
-            style={{ cursor: "pointer" }}
-            title={`Perfil do jogador ${c.jogadorUsername}`}
-          >
-            {c.jogadorUsername}
-          </span>
+        <div
+          key={c.id}
+          className={`transferencia-item status-${c.status}`}
+        >
+          {/* Linha principal */}
+          <div className="transferencia-main">
+            <span
+              className="transferencia-time clickable"
+              onClick={() => navigate(`/perfil/${c.jogadorUsername}`)}
+              title={`Perfil do jogador ${c.jogadorUsername}`}
+            >
+              {c.jogadorUsername}
+            </span>
 
-          <span
-            className="arrow"
-            style={{ color: corSeta(c.status), margin: "0 8px", fontWeight: "bold", fontSize: "18px" }}
-            title={`Status: ${c.status}`}
-          >
-            →
-          </span>
+            <span className="transferencia-arrow">➜</span>
 
-          <span
-            className="to"
-            onClick={() => navigate(`/perfil/${c.clubeId}`)}
-            style={{ cursor: "pointer" }}
-            title={`Perfil do clube ${c.clubeNome}`}
-          >
-            {c.clubeNome}
-          </span>
-        </li>
+            <span
+              className="transferencia-time destaque clickable"
+              onClick={() => navigate(`/perfil/${c.clubeId}`)}
+              title={`Perfil do clube ${c.clubeNome}`}
+            >
+              {c.clubeNome}
+            </span>
+          </div>
+
+          {/* Linha secundária (status / meta) */}
+          <div className="transferencia-meta">
+            <span className={`status-badge ${c.status}`}>
+              {c.status}
+            </span>
+          </div>
+        </div>
       ))}
-    </ul>
+    </div>
   );
 }

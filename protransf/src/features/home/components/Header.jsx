@@ -82,6 +82,7 @@ export default function Header() {
       />
 
       <header className="main-header" ref={menuRef}>
+        <div className="header-inner shell">
         {/* ESQUERDA */}
         <div className="header-left">
           <Link to="/" className="brand" onClick={closeMenu}>
@@ -157,6 +158,7 @@ export default function Header() {
               Sair
             </button>
           )}
+        </div>
         </div>
       </header>
     </>

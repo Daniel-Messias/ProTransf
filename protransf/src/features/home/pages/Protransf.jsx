@@ -177,25 +177,7 @@ export default function Home() {
           {/* SIDEBAR */}
           <aside className="sidebar">
             {/* CARD RANKING */}
-            <div className="sidebar-card">
-              <div className="sidebar-header">
-                <span className="sidebar-title">Top Clubes</span>
-                <span className="sidebar-badge">Ao vivo</span>
-              </div>
-              <ul className="market-list ranking-list">
-                {clubes.map((clube, i) => (
-                  <li
-                    key={clube.id}
-                    className="market-item ranking-item"
-                    onClick={() => navigate(`/perfil/${clube.id}`)}
-                  >
-                    <span className="pos">{i + 1}</span>
-                    <span className="team-name">{clube.nome}</span>
-                    <span className="pontos">{clube.pontos} pts</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
+            
 
             {/* CARD ÚLTIMAS TRANSFERÊNCIAS */}
             <div className="sidebar-card">

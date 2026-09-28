@@ -1,0 +1,62 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Mesmo UID admin usado no front-end (src/App.js -> ADMIN_UIDS).
+    // Isso é o que realmente impede alguém de editar dados direto
+    // pelo console do navegador, sem passar pela tela do app.
+    function isAdmin() {
+      return request.auth != null
+        && request.auth.uid == "Am6psnQw80fyw5GLfKqj8tnjyBz2";
+    }
+
+    function isOwner(userId) {
+      return request.auth != null && request.auth.uid == userId;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    // ---------- usuarios (jogadores e clubes) ----------
+    match /usuarios/{userId} {
+      // Perfis são públicos para leitura (mercado de transferências precisa listar todo mundo)
+      allow read: if true;
+
+      // Só o próprio dono cria/edita o próprio documento...
+      allow create, update: if isOwner(userId);
+
+      // ...EXCETO campos de estatísticas (totalGols, totalAssistencias etc.),
+      // que só o admin pode alterar (é isso que a tela AdminSolicitacoes faz).
+      allow update: if isAdmin();
+
+      allow delete: if isOwner(userId) || isAdmin();
+    }
+
+    // ---------- convites de transferência ----------
+    match /convites/{conviteId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn();
+      // Só as partes envolvidas no convite podem alterá-lo (aceitar/recusar)
+      allow update, delete: if isSignedIn() &&
+        (request.auth.uid == resource.data.remetenteId ||
+         request.auth.uid == resource.data.destinatarioId);
+    }
+
+    // ---------- solicitações de estatísticas (painel admin) ----------
+    match /solicitacoesEstatisticas/{solicId} {
+      // O jogador pode criar sua própria solicitação e ver o status dela
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && request.auth.uid == request.resource.data.jogadorId;
+      // Só o admin aprova/rejeita
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // Qualquer outra coleção: bloqueada por padrão até ser explicitamente liberada acima.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

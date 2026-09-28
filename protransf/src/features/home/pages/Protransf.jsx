@@ -145,12 +145,12 @@ export default function Home() {
                     <Link to="/cadastro" className="btn btn-primary">
                       Sou jogador
                     </Link>
-                    <Link to="/cadastro-clube" className="btn btn-outline">
+                    <Link to="/cadastro" className="btn btn-outline">
                       Sou clube
                     </Link>
                   </>
                 ) : (
-                  <Link to={tipo === "jogador" ? "/meu-perfil" : "/clube"} className="btn btn-primary">
+                  <Link to={tipo === "jogador" ? `/jogador/${user.uid}` : "/clube"} className="btn btn-primary">
                     Meu Perfil
                   </Link>
                 )}

@@ -1,48 +1,42 @@
 /* =====================================================
-   VARIÁVEIS GLOBAIS
-   Cores e identidade visual do projeto
+   DESIGN SYSTEM — PRO TRANSFER (estilo FUT / EA FC)
+   Base escura + gradiente dourado/verde + holográfico
    ===================================================== */
 :root {
-  --bg: #020617;
-  --surface: rgba(15, 23, 42, 0.96);
-  --surface-soft: rgba(15, 23, 42, 0.9);
-  --border: #1f2937;
-  --border-soft: #111827;
-  --primary: #22c55e;
-  --primary-soft: rgba(34, 197, 94, 0.12);
-  --text: #e5e7eb;
-  --muted: #9ca3af;
+  --bg: #05070d;
+  --surface: rgba(13, 18, 32, 0.96);
+  --surface-soft: rgba(13, 18, 32, 0.88);
+  --border: #23283a;
+  --border-soft: #171b28;
+
+  --gold: #ffd75e;
+  --gold-deep: #b8860b;
+  --green: #22c55e;
+  --green-deep: #0f9d58;
+  --teal: #22d3c5;
+
+  --gradient-holo: linear-gradient(115deg, var(--gold) 0%, var(--green) 45%, var(--teal) 75%, var(--gold) 100%);
+  --gradient-gold: linear-gradient(135deg, #ffe9a8 0%, var(--gold) 45%, var(--gold-deep) 100%);
+  --gradient-green: linear-gradient(135deg, #4ade80 0%, var(--green) 55%, var(--green-deep) 100%);
+
+  --text: #eef1f8;
+  --muted: #9aa1b4;
 }
 
-/* =====================================================
-   RESET GLOBAL
-   ===================================================== */
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
+/* ===================== RESET ===================== */
+* { margin: 0; padding: 0; box-sizing: border-box; }
 
 body {
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
   background: var(--bg);
   color: var(--text);
   min-height: 100vh;
 }
 
-a {
-  color: inherit;
-  text-decoration: none;
-}
+a { color: inherit; text-decoration: none; }
 
-/* =====================================================
-   BACKGROUND GLOBAL (Home)
-   ===================================================== */
-.page {
-  position: relative;
-  min-height: 100vh;
-  overflow: hidden;
-}
+/* ===================== BACKGROUND GLOBAL ===================== */
+.page { position: relative; min-height: 100vh; overflow: hidden; }
 
 .bg-image {
   position: fixed;
@@ -50,184 +44,145 @@ a {
   background-image: url('../../../assets/fotos/CampoRealista.png');
   background-size: cover;
   background-position: center;
-  filter: blur(2px);
-  transform: scale(1.04);
+  filter: blur(3px) brightness(0.55) saturate(1.15);
+  transform: scale(1.05);
   z-index: -2;
 }
 
 .bg-overlay {
   position: fixed;
   inset: 0;
-  background: radial-gradient(
-    circle at top,
-    rgba(15, 23, 42, 0.9),
-    rgba(15, 23, 42, 0.98)
-  );
+  background:
+    radial-gradient(circle at 15% -10%, rgba(255, 215, 94, 0.10), transparent 45%),
+    radial-gradient(circle at 90% 0%, rgba(34, 197, 94, 0.12), transparent 45%),
+    radial-gradient(circle at top, rgba(5, 7, 13, 0.9), rgba(5, 7, 13, 0.98));
   z-index: -1;
 }
 
-/* =====================================================
-   CONTAINER PADRÃO
-   Usado em Home e outras páginas
-   ===================================================== */
-.shell {
-  max-width: 1180px;
-  margin: 0 auto;
-  padding: 0.9rem 1.25rem 2.2rem;
-}
+.shell { max-width: 1180px; margin: 0 auto; padding: 0.9rem 1.25rem 2.2rem; }
 
 /* =====================================================
-   HEADER (DESKTOP FIRST)
-   Usado em todas as páginas
+   HEADER — barra com friso holográfico
    ===================================================== */
-/* CASCA DO HEADER (visual) */
 .main-header {
   margin: 1.2rem auto 1.4rem;
-
   max-width: 1150px;
   width: 100%;
-
-  background: rgba(15, 23, 42, 0.96);
+  background: var(--surface);
   border: 1px solid var(--border);
   backdrop-filter: blur(14px);
-
-  border-radius: 999px;
+  border-radius: 20px;
   position: relative;
   z-index: 999;
+  overflow: hidden;
+}
+
+/* friso holográfico no topo do header */
+.main-header::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 3px;
+  background: var(--gradient-holo);
+  background-size: 300% 100%;
+  animation: holoShift 6s linear infinite;
+}
+
+@keyframes holoShift {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 100% 50%; }
 }
 
 .header-inner {
   display: flex;
   justify-content: space-between;
   align-items: center;
-
-  min-height: 50px;
-  padding: 0.35rem 1.25rem;
+  min-height: 54px;
+  padding: 0.5rem 1.25rem;
 }
 
+.header-left { display: flex; align-items: center; }
 
+.brand { display: flex; align-items: center; gap: 0.75rem; cursor: pointer; }
 
-
-/* ----- Área esquerda do header (logo + nome) ----- */
-.header-left {
-  display: flex;
-  align-items: center;
-}
-
-.brand {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  cursor: pointer;
-}
-
-/* ATENÇÃO:
-   havia um erro de digitação no width (54 px).
-   Aqui mantemos o valor correto (54px).
-*/
 .brand-logo img {
   width: 44px;
   height: 44px;
   object-fit: contain;
-}
-
-/* Usado para empilhar textos se necessário */
-.brand-text {
-  display: flex;
-  flex-direction: column;
-  line-height: 1.05;
+  filter: drop-shadow(0 0 10px rgba(255, 215, 94, 0.35));
 }
 
 .brand-title {
-  font-size: 0.95rem;
-  font-weight: 700;
-
-  /* degradê igual ao login */
-  background: linear-gradient(
-    90deg,
-    #20d353,
-    #0b5986
-  );
-
+  font-size: 1rem;
+  font-weight: 800;
+  letter-spacing: 0.2px;
+  background: var(--gradient-holo);
+  background-size: 250% 100%;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-
-  letter-spacing: 0.2px;
+  animation: holoShift 6s linear infinite;
 }
 
+.brand-subtitle { font-size: 0.72rem; color: var(--muted); }
 
-.brand-subtitle {
-  font-size: 0.72rem;
-  color: var(--muted);
-}
-
-/* =====================================================
-   NAVEGAÇÃO (DESKTOP)
-   ===================================================== */
-.main-nav {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  font-size: 0.85rem;
-}
+/* ===================== NAV ===================== */
+.main-nav { display: flex; align-items: center; gap: 0.35rem; font-size: 0.85rem; }
 
 .nav-link {
-  padding: 0.45rem 0.9rem;
+  padding: 0.5rem 1rem;
   border-radius: 999px;
   color: var(--muted);
+  font-weight: 600;
   border: 1px solid transparent;
-  transition: all 0.15s ease;
+  position: relative;
+  transition: all 0.18s ease;
 }
 
 .nav-link:hover {
   color: var(--text);
-  background: var(--primary-soft);
+  background: rgba(255, 215, 94, 0.08);
+  border-color: rgba(255, 215, 94, 0.25);
 }
 
-/* Classe opcional para link ativo */
 .nav-link-active {
-  color: var(--text);
-  background: var(--primary-soft);
-  border-color: rgba(34, 197, 94, 0.35);
+  color: #0b0d14;
+  background: var(--gradient-gold);
+  border-color: transparent;
 }
 
-/* =====================================================
-   AÇÕES DO HEADER (DESKTOP)
-   ===================================================== */
-.header-actions {
-  display: flex;
-  align-items: center;
-}
+/* ===================== AÇÕES HEADER ===================== */
+.header-actions { display: flex; align-items: center; }
 
 .btn-login {
   font-size: 0.85rem;
-  font-weight: 600;
-  padding: 0.45rem 1rem;
+  font-weight: 700;
+  padding: 0.5rem 1.2rem;
   border-radius: 999px;
-  background: var(--primary);
-  color: #020617;
-  transition: all 0.15s ease;
+  background: var(--gradient-gold);
+  color: #14100a;
+  box-shadow: 0 8px 24px rgba(255, 215, 94, 0.28);
+  transition: all 0.18s ease;
 }
 
-.btn-login:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 8px 22px rgba(34, 197, 94, 0.35);
-}
+.btn-login:hover { transform: translateY(-1px); box-shadow: 0 12px 30px rgba(255, 215, 94, 0.4); }
 
 .btn-logout {
   font-size: 0.85rem;
-  padding: 0.45rem 1rem;
+  font-weight: 600;
+  padding: 0.5rem 1.1rem;
   border-radius: 999px;
   background: transparent;
-  color: #ef4444;
-  border: 1px solid #ef4444;
+  color: #f87171;
+  border: 1px solid rgba(248, 113, 113, 0.5);
   cursor: pointer;
+  transition: all 0.15s ease;
 }
 
+.btn-logout:hover { background: rgba(248, 113, 113, 0.08); }
+
 /* =====================================================
-   LAYOUT PRINCIPAL (HOME)
-   Grid principal: conteúdo + sidebar
+   LAYOUT PRINCIPAL
    ===================================================== */
 .layout {
   display: grid;
@@ -237,56 +192,77 @@ a {
   margin-bottom: 1.8rem;
 }
 
-.main-panel {
-  display: flex;
-  flex-direction: column;
-  gap: 1.8rem;
-}
+.main-panel { display: flex; flex-direction: column; gap: 1.8rem; }
 
 /* =====================================================
-   HERO (Home principal)
+   HERO — visual "card FUT" com corte de canto e brilho
    ===================================================== */
 .hero {
+  position: relative;
   background: var(--surface);
-  border-radius: 22px;
+  border-radius: 26px;
   border: 1px solid var(--border-soft);
-  padding: 1.7rem;
-  box-shadow: 0 26px 70px rgba(0, 0, 0, 0.65);
+  padding: 2rem 2rem 1.8rem;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.65);
+  overflow: hidden;
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 40px 100%, 0 calc(100% - 40px));
+}
+
+/* faixa dourada diagonal no fundo, estilo card FUT ouro/verde */
+.hero::before {
+  content: "";
+  position: absolute;
+  top: -60%;
+  right: -30%;
+  width: 70%;
+  height: 220%;
+  background: var(--gradient-holo);
+  opacity: 0.08;
+  transform: rotate(18deg);
+  pointer-events: none;
 }
 
 .hero-tag {
-  font-size: 0.78rem;
-  color: var(--muted);
-  margin-bottom: 0.6rem;
+  display: inline-flex;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--gold);
+  border: 1px solid rgba(255, 215, 94, 0.4);
+  background: rgba(255, 215, 94, 0.08);
+  padding: 0.3rem 0.8rem;
+  border-radius: 999px;
+  margin-bottom: 0.9rem;
 }
 
 .hero-title {
-  font-size: clamp(2rem, 3.4vw, 2.7rem);
+  font-size: clamp(2.1rem, 3.6vw, 2.9rem);
   font-weight: 800;
-  letter-spacing: -0.04em;
-  margin-bottom: 0.75rem;
-  line-height: 1.2;
+  letter-spacing: -0.03em;
+  margin-bottom: 0.85rem;
+  line-height: 1.15;
+  position: relative;
 }
 
 .hero-title span {
-  color: var(--primary);
+  background: var(--gradient-green);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .hero-subtitle {
   font-size: 0.98rem;
   color: var(--muted);
-  margin-bottom: 1.5rem;
+  margin-bottom: 1.6rem;
   max-width: 520px;
+  position: relative;
 }
 
-.hero-cta {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.75rem;
-  margin-bottom: 0.8rem;
-}
+.hero-cta { display: flex; flex-wrap: wrap; gap: 0.85rem; margin-bottom: 0.9rem; position: relative; }
 
-/* Botões genéricos */
+/* ===================== BOTÕES ===================== */
 .btn {
   display: inline-flex;
   align-items: center;
@@ -294,143 +270,120 @@ a {
   border-radius: 999px;
   border: none;
   cursor: pointer;
-  font-weight: 600;
+  font-weight: 700;
   font-size: 0.95rem;
-  padding: 0.6rem 1.5rem;
+  padding: 0.7rem 1.7rem;
   white-space: nowrap;
-  transition: all 0.15s ease;
+  transition: all 0.18s ease;
 }
 
 .btn-primary {
-  background: #22c55e;
-  color: #020617;
-  box-shadow: 0 12px 30px rgba(34, 197, 94, 0.35);
+  background: var(--gradient-green);
+  color: #04150b;
+  box-shadow: 0 14px 32px rgba(34, 197, 94, 0.35);
 }
 
-.btn-primary:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 16px 40px rgba(34, 197, 94, 0.45);
-}
+.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 18px 42px rgba(34, 197, 94, 0.45); }
 
 .btn-outline {
   background: transparent;
   color: var(--text);
-  border: 1px solid var(--border);
+  border: 1px solid rgba(255, 215, 94, 0.45);
 }
 
 .btn-outline:hover {
-  border-color: var(--primary);
-  background: rgba(34, 197, 94, 0.05);
+  border-color: var(--gold);
+  background: rgba(255, 215, 94, 0.08);
+  transform: translateY(-2px);
 }
 
-.hero-microcopy,
-.hero-note {
-  font-size: 0.8rem;
-  color: var(--muted);
-}
-
-.hero-microcopy {
-  margin-bottom: 0.5rem;
-}
+.hero-microcopy, .hero-note { font-size: 0.8rem; color: var(--muted); position: relative; }
+.hero-microcopy { margin-bottom: 0.5rem; }
 
 /* =====================================================
    MINI SEÇÃO "COMO FUNCIONA"
    ===================================================== */
 .mini-section {
-  border-radius: 18px;
+  border-radius: 20px;
   border: 1px solid var(--border-soft);
-  padding: 1.1rem;
+  padding: 1.3rem 1.4rem;
   background: var(--surface-soft);
+  position: relative;
 }
 
-.mini-title {
-  font-size: 0.9rem;
-  font-weight: 600;
-  margin-bottom: 0.35rem;
+.mini-section::before {
+  content: "";
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 3px;
+  background: var(--gradient-holo);
 }
 
-.mini-text {
-  font-size: 0.86rem;
-  color: var(--muted);
-  margin-bottom: 0.6rem;
-}
+.mini-title { font-size: 0.92rem; font-weight: 700; margin-bottom: 0.4rem; }
+.mini-text { font-size: 0.86rem; color: var(--muted); margin-bottom: 0.7rem; }
 
-.mini-steps {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.9rem;
-  font-size: 0.82rem;
-  color: var(--muted);
-}
+.mini-steps { display: flex; flex-wrap: wrap; gap: 0.9rem; font-size: 0.82rem; color: var(--muted); }
 
 .mini-step {
-  padding: 0.35rem 0.7rem;
+  padding: 0.4rem 0.8rem;
   border-radius: 999px;
   border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.02);
 }
 
 /* =====================================================
-   SIDEBAR (Ranking + Últimas Transferências)
+   SIDEBAR — card "holográfico"
    ===================================================== */
-.sidebar {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  gap: 1.2rem;
-}
+.sidebar { position: relative; display: flex; flex-direction: column; gap: 1.2rem; }
 
 .sidebar-card {
+  position: relative;
   background: var(--surface);
-  border-radius: 18px;
+  border-radius: 20px;
   border: 1px solid var(--border-soft);
-  padding: 1.2rem 1.1rem;
-  box-shadow: 0 22px 60px rgba(0, 0, 0, 0.6);
+  padding: 1.3rem 1.2rem;
+  box-shadow: 0 24px 65px rgba(0, 0, 0, 0.6);
+  overflow: hidden;
 }
 
-.sidebar-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 0.9rem;
+.sidebar-card::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 3px;
+  background: var(--gradient-holo);
+  background-size: 300% 100%;
+  animation: holoShift 8s linear infinite;
 }
 
-.sidebar-title {
-  font-size: 0.9rem;
-  font-weight: 600;
-}
+.sidebar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+.sidebar-title { font-size: 0.92rem; font-weight: 700; }
 
 .sidebar-badge {
-  font-size: 0.72rem;
+  font-size: 0.68rem;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  padding: 0.18rem 0.6rem;
+  font-weight: 700;
+  padding: 0.2rem 0.6rem;
   border-radius: 999px;
-  background: rgba(220, 38, 38, 0.1);
-  color: #fca5a5;
-  border: 1px solid rgba(248, 113, 113, 0.5);
+  background: rgba(34, 197, 94, 0.12);
+  color: #4ade80;
+  border: 1px solid rgba(74, 222, 128, 0.45);
 }
 
-.market-list {
-  list-style: none;
-  font-size: 0.82rem;
-}
+.market-list { list-style: none; font-size: 0.82rem; }
 
 .market-item {
   display: flex;
   justify-content: space-between;
-  padding: 0.45rem 0;
-  border-bottom: 1px solid rgba(15, 23, 42, 0.9);
+  padding: 0.5rem 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
   cursor: pointer;
   transition: color 0.15s ease;
 }
 
-.market-item:last-child {
-  border-bottom: none;
-}
-
-.market-item:hover {
-  color: var(--primary);
-}
+.market-item:last-child { border-bottom: none; }
+.market-item:hover { color: var(--gold); }
 
 .ranking-item .pos {
   display: inline-flex;
@@ -438,27 +391,17 @@ a {
   justify-content: center;
   width: 24px;
   height: 24px;
-  background: var(--primary-soft);
+  background: rgba(255, 215, 94, 0.12);
   border-radius: 50%;
-  font-weight: 600;
-  color: var(--primary);
+  font-weight: 700;
+  color: var(--gold);
   font-size: 0.75rem;
 }
 
-.ranking-item .team-name {
-  flex: 1;
-  margin: 0 0.5rem;
-}
+.ranking-item .team-name { flex: 1; margin: 0 0.5rem; }
+.ranking-item .pontos { font-weight: 700; color: var(--gold); }
 
-.ranking-item .pontos {
-  font-weight: 600;
-  color: var(--primary);
-}
-
-.transferencias-container {
-  font-size: 0.82rem;
-  color: var(--muted);
-}
+.transferencias-container { font-size: 0.82rem; color: var(--muted); }
 
 /* =====================================================
    FOOTER
@@ -467,13 +410,13 @@ a {
   margin-top: 1.8rem;
   font-size: 0.78rem;
   color: var(--muted);
-  padding-top: 0.9rem;
+  padding-top: 1rem;
   border-top: 1px solid var(--border);
   text-align: center;
 }
 
 /* =====================================================
-   MENU MOBILE (Hambúrguer)
+   MENU MOBILE
    ===================================================== */
 .menu-toggle {
   display: none;
@@ -481,7 +424,7 @@ a {
   height: 42px;
   border-radius: 999px;
   border: 1px solid var(--border);
-  background: rgba(15, 23, 42, 0.9);
+  background: rgba(13, 18, 32, 0.9);
   cursor: pointer;
   position: relative;
 }
@@ -500,28 +443,14 @@ a {
 .menu-toggle span:nth-child(2) { top: 20px; }
 .menu-toggle span:nth-child(3) { top: 27px; }
 
-/* animação do X */
-.menu-toggle.open span:nth-child(1) {
-  transform: rotate(45deg);
-  top: 20px;
-}
+.menu-toggle.open span:nth-child(1) { transform: rotate(45deg); top: 20px; }
+.menu-toggle.open span:nth-child(2) { opacity: 0; }
+.menu-toggle.open span:nth-child(3) { transform: rotate(-45deg); top: 20px; }
 
-.menu-toggle.open span:nth-child(2) {
-  opacity: 0;
-}
-
-.menu-toggle.open span:nth-child(3) {
-  transform: rotate(-45deg);
-  top: 20px;
-}
-
-/* =====================================================
-   OVERLAY MOBILE
-   ===================================================== */
 .menu-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(2, 6, 23, 0.6);
+  background: rgba(5, 7, 13, 0.65);
   backdrop-filter: blur(2px);
   opacity: 0;
   pointer-events: none;
@@ -529,37 +458,16 @@ a {
   z-index: 998;
 }
 
-.menu-overlay.open {
-  opacity: 1;
-  pointer-events: auto;
-}
+.menu-overlay.open { opacity: 1; pointer-events: auto; }
 
 /* =====================================================
-   RESPONSIVO (MOBILE / TABLET)
-   ATENÇÃO: existem duplicações históricas aqui.
-   Não removidas por segurança visual.
+   RESPONSIVO
    ===================================================== */
 @media (max-width: 900px) {
-  .main-header {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 0.6rem;
-    border-radius: 18px;
-  }
+  .main-header { flex-direction: column; align-items: stretch; gap: 0.6rem; border-radius: 18px; }
+  .header-left { width: 100%; justify-content: space-between; align-items: center; }
+  .menu-toggle { display: inline-flex; align-items: center; justify-content: center; }
 
-  .header-left {
-    width: 100%;
-    justify-content: space-between;
-    align-items: center;
-  }
-
-  .menu-toggle {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  /* no mobile o menu fica fechado por padrão */
   .main-nav {
     display: none;
     flex-direction: column;
@@ -569,182 +477,70 @@ a {
     border-top: 1px solid var(--border);
   }
 
-  .main-nav.open {
-    display: flex;
-  }
+  .main-nav.open { display: flex; }
+  .nav-link { width: 100%; padding: 0.7rem 1rem; border-radius: 10px; }
+  .btn-login, .btn-logout { min-height: 44px; }
+  .brand-logo img { width: 40px; height: 40px; }
 
-  .nav-link {
-    width: 100%;
-    padding: 0.7rem 1rem;
-    border-radius: 10px;
-  }
+  .header-actions { display: none; }
 
-  /* botões maiores para toque */
-  .btn-login,
-  .btn-logout {
-    min-height: 44px;
-  }
+  .layout { grid-template-columns: 1fr; }
+  .sidebar { width: 100%; }
 
-  .brand-logo img {
-    width: 40px;
-    height: 40px;
-  }
+  .hero { clip-path: none; padding: 1.6rem; }
 }
 
-/* =====================================================
-   REGRAS DESKTOP ESPECÍFICAS
-   ===================================================== */
 @media (min-width: 769px) {
-  /* botão sair do menu mobile não aparece no desktop */
-  .menu-logout {
-    display: none;
-  }
+  .menu-logout { display: none; }
 }
-/* =====================================================
-   PATCH MOBILE — HEADER
-   Correção de duplicação do botão "Sair"
-   Desktop NÃO é afetado
-   ===================================================== */
-@media (max-width: 900px) {
 
-  /* Esconde ações do header no mobile
-     (login / sair do topo) */
-  .header-actions {
-    display: none;
-  }
-
-}
-/* =====================================================
-   PATCH MOBILE — LAYOUT HOME
-   Corrige quebra de layout após ajustes do header
-   ===================================================== */
-@media (max-width: 900px) {
-
-  /* Layout vira coluna única no mobile */
-  .layout {
-    grid-template-columns: 1fr;
-  }
-
-  /* Sidebar desce e ocupa largura total */
-  .sidebar {
-    width: 100%;
-  }
-
-}
 /* =====================================================
    ÚLTIMAS TRANSFERÊNCIAS — FEED
    ===================================================== */
+.transferencias-feed { display: flex; flex-direction: column; gap: 0.75rem; min-height: 220px; }
 
-/* Container do feed */
-.transferencias-feed {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-
-  min-height: 220px; /* deixa o card mais longo */
-}
-
-/* Estado loading / vazio */
-.transferencias-loading,
-.transferencias-empty {
+.transferencias-loading, .transferencias-empty {
   font-size: 0.8rem;
   color: var(--muted);
   text-align: center;
   padding: 0.8rem 0;
 }
 
-/* =====================================================
-   ITEM DE TRANSFERÊNCIA
-   ===================================================== */
 .transferencia-item {
-  padding: 0.65rem 0.75rem;
+  padding: 0.7rem 0.8rem;
   border-radius: 14px;
-
-  background: rgba(15, 23, 42, 0.75);
-  border: 1px solid rgba(255, 255, 255, 0.04);
-
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.05);
   display: flex;
   flex-direction: column;
   gap: 0.35rem;
-
   transition: all 0.15s ease;
 }
 
 .transferencia-item:hover {
-  background: rgba(34, 197, 94, 0.08);
-  border-color: rgba(34, 197, 94, 0.25);
+  background: rgba(255, 215, 94, 0.06);
+  border-color: rgba(255, 215, 94, 0.3);
 }
 
-/* =====================================================
-   LINHA PRINCIPAL (times + seta)
-   ===================================================== */
-.transferencia-main {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  font-size: 0.85rem;
-  line-height: 1.2;
-}
+.transferencia-main { display: flex; align-items: center; gap: 0.4rem; font-size: 0.85rem; line-height: 1.2; }
+.transferencia-arrow { color: var(--gold); font-weight: 700; }
+.transferencia-time { color: var(--text); }
+.transferencia-time.destaque { color: var(--green); font-weight: 700; }
 
-.transferencia-arrow {
-  color: var(--primary);
+.clickable { cursor: pointer; }
+.clickable:hover { text-decoration: underline; }
+
+.transferencia-meta { display: flex; justify-content: flex-end; }
+
+.status-badge {
+  font-size: 0.65rem;
+  padding: 0.18rem 0.55rem;
+  border-radius: 999px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
   font-weight: 700;
 }
 
-/* Nome dos times */
-.transferencia-time {
-  color: var(--text);
-}
-
-/* Destaque (clube destino) */
-.transferencia-time.destaque {
-  color: var(--primary);
-  font-weight: 600;
-}
-
-/* Click */
-.clickable {
-  cursor: pointer;
-}
-
-.clickable:hover {
-  text-decoration: underline;
-}
-
-/* =====================================================
-   META (status)
-   ===================================================== */
-.transferencia-meta {
-  display: flex;
-  justify-content: flex-end;
-}
-
-/* Badge padrão */
-.status-badge {
-  font-size: 0.65rem;
-  padding: 0.15rem 0.5rem;
-  border-radius: 999px;
-
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  font-weight: 600;
-}
-
-/* Status: aceito */
-.status-badge.aceito {
-  background: rgba(34, 197, 94, 0.15);
-  color: #22c55e;
-}
-
-/* Status: recusado */
-.status-badge.recusado {
-  background: rgba(239, 68, 68, 0.15);
-  color: #ef4444;
-}
-
-/* Status: pendente */
-.status-badge.pendente {
-  background: rgba(234, 179, 8, 0.15);
-  color: #facc15;
-}
-
+.status-badge.aceito { background: rgba(34, 197, 94, 0.15); color: #4ade80; }
+.status-badge.recusado { background: rgba(239, 68, 68, 0.15); color: #f87171; }
+.status-badge.pendente { background: rgba(255, 215, 94, 0.15); color: var(--gold); }

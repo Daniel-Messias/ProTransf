@@ -1,12 +1,24 @@
 .container {
+  position: relative;
   max-width: 420px;
   margin: 2rem auto;
-  padding: 1.5rem 2rem;
-  background: transparent; 
-  border-radius: 0px;
-  box-shadow: none;
+  padding: 1.8rem 2rem 2rem;
+  background: var(--surface);
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.55);
   color: #fff;
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.container::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 3px;
+  background: var(--gradient-holo);
+  background-size: 300% 100%;
+  animation: holoShift 7s linear infinite;
 }
 
 .titulo {
@@ -45,8 +57,8 @@
 
 .formInput,
 select {
-  background: transparent; /* <-- antes era #0d1b2a */
-  border: 2px solid #5fbdf2;
+  background: transparent; /* <-- antes era var(--bg) */
+  border: 2px solid var(--gold);
   border-radius: 6px;
   padding: 0.5rem 0.75rem;
   font-size: 1rem;
@@ -58,7 +70,7 @@ select {
 
 .formInput:focus,
 select:focus {
-  border-color: #74c0fc;
+  border-color: var(--teal);
   outline: none;
 }
 
@@ -88,12 +100,12 @@ select:focus {
 
 /* Botões */
 .btnSecondary {
-  background-color: #5fbdf2;
+  background-color: var(--gold);
   border: none;
   padding: 0.7rem 1.4rem;
   border-radius: 6px;
   font-weight: 700;
-  color: #0d1b2a;
+  color: var(--bg);
   cursor: pointer;
   font-size: 1rem;
   transition: background-color 0.25s ease;
@@ -101,7 +113,7 @@ select:focus {
 }
 
 .btnSecondary:hover:not(:disabled) {
-  background-color: #4a9ed9;
+  background-color: var(--gold-deep);
 }
 
 .btnSecondary:disabled,
@@ -127,8 +139,8 @@ select:focus {
 .fileInputLabel {
   display: inline-block;
   cursor: pointer;
-  background-color: #5fbdf2;
-  color: #0d1b2a;
+  background-color: var(--gold);
+  color: var(--bg);
   padding: 0.5rem 1rem;
   border-radius: 6px;
   font-weight: 600;
@@ -139,7 +151,7 @@ select:focus {
 }
 
 .fileInputLabel:hover {
-  background-color: #4a9ed9;
+  background-color: var(--gold-deep);
 }
 
 /* Preview da foto */
@@ -149,8 +161,8 @@ select:focus {
   height: 96px;
   border-radius: 50%;
   overflow: hidden;
-  border: 3px solid #5fbdf2;
-  box-shadow: 0 0 10px #5fbdf2aa;
+  border: 3px solid var(--gold);
+  box-shadow: 0 0 10px var(--gold)aa;
 }
 
 .avatarPreview img {
@@ -174,7 +186,7 @@ select:focus {
 }
 
 .modal {
-  background-color: #1b263b;
+  background-color: var(--surface);
   padding: 2rem 2.5rem;
   border-radius: 10px;
   width: 90%;
@@ -205,14 +217,14 @@ select:focus {
   border: none;
   font-size: 1.8rem;
   font-weight: 700;
-  color: #74c0fc;
+  color: var(--teal);
   cursor: pointer;
   transition: color 0.2s ease;
   line-height: 1;
 }
 
 .closeButton:hover {
-  color: #5fbdf2;
+  color: var(--gold);
 }
 .main {
   padding: 0;
@@ -241,9 +253,9 @@ select:focus {
 }
 /* Estilização adicional para selects */
 select {
-  background-color: #0d1b2a; /* Fundo escuro no dropdown */
+  background-color: var(--bg); /* Fundo escuro no dropdown */
   color: #ffffff;            /* Texto branco */
-  border: 2px solid #5fbdf2;
+  border: 2px solid var(--gold);
   padding: 0.5rem 0.75rem;
   font-size: 1rem;
   border-radius: 6px;
@@ -251,14 +263,14 @@ select {
 }
 
 select option {
-  background-color: #0d1b2a; /* Fundo escuro das opções */
+  background-color: var(--bg); /* Fundo escuro das opções */
   color: #ffffff;            /* Texto branco */
 }
 
 select:focus {
   outline: none;
-  border-color: #74c0fc;
-  box-shadow: 0 0 5px #74c0fc66;
+  border-color: var(--teal);
+  box-shadow: 0 0 5px var(--teal)66;
 }
 @media (max-width: 480px) {
   .container {

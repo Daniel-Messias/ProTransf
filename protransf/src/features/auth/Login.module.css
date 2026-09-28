@@ -1,8 +1,8 @@
 .loginContainer {
-  --primary-login: #59d17a; /* verde usado no login */
-  --background-login: #0d1b2a;
-  --surface-login: #1b263b;
-  --text-login: #ffffff;
+  --primary-login: var(--green);
+  --background-login: var(--bg);
+  --surface-login: var(--surface);
+  --text-login: var(--text);
   --error-login: #ff5c5c;
 
   position: relative;
@@ -58,12 +58,24 @@
 }
 
 .formulario {
+  position: relative;
   background-color: var(--surface-login);
   padding: 32px;
   border-radius: 20px;
+  overflow: hidden;
   box-shadow: 0 8px 24px rgba(0,0,0,0.4);
   backdrop-filter: blur(8px);
   animation: fadeInUp 0.6s ease-out;
+}
+
+.formulario::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 3px;
+  background: var(--gradient-holo);
+  background-size: 300% 100%;
+  animation: holoShift 7s linear infinite;
 }
 
 .formGroup {
@@ -117,7 +129,7 @@
 }
 
 .btnSecondary:hover {
-  background-color: #49b76d; /* verde hover */
+  background-color: var(--green-deep);
 }
 
 .linkCadastro {
@@ -170,7 +182,7 @@
 }
 
 .linkButton:hover:not(:disabled) {
-  color: #49b76d;
+  color: var(--green-deep);
 }
 
 /* Modal */
@@ -254,7 +266,7 @@
 }
 
 .modalActions button:first-child:hover:not(:disabled) {
-  background-color: #49b76d;
+  background-color: var(--green-deep);
 }
 
 .modalActions button:last-child {
@@ -297,7 +309,8 @@
   font-family: 'Poppins', 'Montserrat', sans-serif;
   font-weight: 700;
   font-size: 28px;
-  background: linear-gradient(90deg, #20d353, #0b5986); /* degrade verde para azul */
+  background: var(--gradient-holo);
+  background-size: 250% 100%;
   -webkit-background-clip: text;
   background-clip: text; /* adiciona a propriedade padrão */
   -webkit-text-fill-color: transparent;

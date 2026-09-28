@@ -12,15 +12,14 @@ import { auth } from "./services/firebase";
 
 import Home from "./features/home/pages/Protransf";
 import Transferencia from "./features/transferencias/pages/Transferencia";
-import Cadastro from "./features/Cadastro/pages/Cadastro";
+import Cadastro from "./features/cadastro/pages/Cadastro";
 import Login from "./features/auth/pages/Login";
-import PerfilPage from "./features/perfil/pages/PerfilPage";
 import RankingPage from "./features/ranking/pages/Ranking";
-import Jogador from "./features/Jogador/Pages/Jogador";
+import Jogador from "./features/Jogador/pages/Jogador";
 import "./features/home/styles/Protransf.css";
 import Header from "./features/home/components/Header";
 import Clube from "./features/clubes/pages/clube";
-import AdminSolicitacoes from "./AdminSolicitacoes";
+import AdminSolicitacoes from "./features/admin/pages/AdminSolicitacoes";
 
 import { onAuthStateChanged } from "firebase/auth";
 
@@ -45,9 +44,6 @@ function AppContent({ user }) {
         <Route path="/transferencias" element={<Transferencia />} />
         <Route path="/cadastro" element={<Cadastro />} />
         <Route path="/login" element={<Login />} />
-
-        <Route path="/perfil" element={<PerfilPage />} />
-        <Route path="/perfil/:id" element={<PerfilPage />} />
 
         <Route path="/jogador/:id" element={<Jogador />} />
         <Route path="/clube/:id" element={<Clube />} />

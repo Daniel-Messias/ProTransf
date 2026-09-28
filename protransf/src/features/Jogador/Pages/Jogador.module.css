@@ -36,6 +36,17 @@
   background: rgba(0, 0, 0, 0.55);
 }
 
+.header::after {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 3px;
+  background: var(--gradient-holo);
+  background-size: 300% 100%;
+  animation: holoShift 7s linear infinite;
+  z-index: 2;
+}
+
 .cardFoto,
 .infoBasica {
   position: relative;
@@ -49,7 +60,7 @@
   }
 .status {
 font-weight: 700;
-color: #22c55e;
+color: var(--green);
 }
 /* ===============================
    FOTO
@@ -60,7 +71,7 @@ color: #22c55e;
   border-radius: 12px;
   overflow: hidden;
   background: rgba(0, 0, 0, 0.6);
-  border: 2px solid #22c55e;
+  border: 2px solid var(--green);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -79,7 +90,7 @@ color: #22c55e;
   height: 190px;
   border-radius: 12px;
   background: rgba(0, 0, 0, 0.85);
-  border: 1px solid #22c55e;
+  border: 1px solid var(--green);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -90,7 +101,7 @@ color: #22c55e;
 
 .btnTrocarFoto {
   margin-top: 6px;
-  background-color: #00bfff;
+  background-color: var(--gold);
   color: #fff;
   padding: 4px 10px;
   border-radius: 999px;
@@ -117,7 +128,7 @@ color: #22c55e;
   border-radius: 12px;
   padding: 16px 20px;
   margin-top: 8px;
-  border: 1px solid #00bfff;
+  border: 1px solid var(--gold);
 
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -134,7 +145,7 @@ color: #22c55e;
 .formEdicao input,
 .formEdicao textarea {
   background: rgba(5, 10, 20, 0.9);
-  border: 1px solid #00bfff;
+  border: 1px solid var(--gold);
   border-radius: 8px;
   padding: 8px 10px;
   color: #fff;
@@ -166,7 +177,7 @@ color: #22c55e;
   height: 30px;
   border-radius: 30%;
    background-color: transparent;
-  color: #22c55e;
+  color: var(--green);
   font-size: 0.9rem;
   font-weight: 700;
   display: flex;
@@ -203,7 +214,7 @@ color: #22c55e;
 
 
 .btnSalvar {
-  background: linear-gradient(90deg, #22c55e, #ebebf0d2);
+  background: linear-gradient(90deg, var(--green), #ebebf0d2);
   color: #000;
   border: none;
   padding: 10px 18px;
@@ -241,7 +252,7 @@ color: #22c55e;
 .btnCancelar:hover {
   background-color: rgba(255, 255, 255, 0.08);
   color: #fff;
-  border-color: #00bfff;
+  border-color: var(--gold);
 }
 
 /* ===============================
@@ -256,10 +267,10 @@ color: #22c55e;
 
 .section h2 {
   font-size: 1.3rem;
-  color: #22c55e;
+  color: var(--green);
   margin-top: 0;
   margin-bottom: 1rem;
-  border-bottom: 2px solid #22c55e;
+  border-bottom: 2px solid var(--green);
   padding-bottom: 0.5rem;
 }
 
@@ -289,7 +300,7 @@ color: #22c55e;
 .formStats .campo textarea {
   width: 100%;
   background: rgba(5, 10, 20, 0.9);
-  border: 1px solid #00bfff;
+  border: 1px solid var(--gold);
   border-radius: 8px;
   padding: 6px 8px;
   color: #fff;
@@ -358,7 +369,7 @@ color: #22c55e;
   height: 0;
   overflow: hidden;
   border-radius: 12px;
-  border: 1px solid #22c55e;
+  border: 1px solid var(--green);
   background-color: #000;
 }
 
@@ -407,7 +418,7 @@ color: #22c55e;
 
 /* 🟢 Livre */
 .statusLivre {
-  background-color: #22c55e;
+  background-color: var(--green);
   box-shadow: 0 0 6px rgba(34, 197, 94, 0.8);
 }
 

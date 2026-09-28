@@ -11,9 +11,9 @@
 
 h2 {
   font-size: 1.8rem;
-  color: #22c55e;
+  color: var(--green);
   margin-bottom: 1.5rem;
-  border-bottom: 2px solid #22c55e;
+  border-bottom: 2px solid var(--green);
   padding-bottom: 0.5rem;
   display: flex;
   align-items: center;
@@ -29,7 +29,7 @@ h2 {
 }
 
 .filtros select {
-  background-color: #0a0f1c;
+  background-color: var(--bg);
   color: #fff;
   border: 2px solid transparent;
   padding: 0.75rem 1.25rem;
@@ -43,8 +43,8 @@ h2 {
 
 .filtros select:focus {
   outline: none;
-  border-color: #22c55e;
-  box-shadow: 0 0 8px #22c55e;
+  border-color: var(--green);
+  box-shadow: 0 0 8px var(--green);
 }
 
 .resultados {
@@ -96,7 +96,7 @@ h2 {
   font-size: 1.3rem;
   font-weight: bold;
   margin-bottom: 1rem;
-  border-bottom: 2px solid #22c55e;
+  border-bottom: 2px solid var(--green);
   padding-bottom: 5px;
 }
 
@@ -166,8 +166,9 @@ h2 {
 
 .botaoConvite {
   margin-top: 0.5rem;
-  background-color: #1e90ff;
-  color: white;
+  background: var(--gradient-gold);
+  color: #14100a;
+  font-weight: 700;
   border: none;
   padding: 0.4rem 0.8rem;
   border-radius: 6px;
@@ -176,13 +177,13 @@ h2 {
 }
 
 .botaoConvite:hover {
-  background-color: #0c70c1;
+  background-color: var(--gold-deep);
 }
 
 /* Estilos dos cards (copiado do seu cardTransferencia.module.css) */
 .cardTransferencia, .card {
   background: rgba(0, 0, 0, 0.65);
-  border: 1px solid #22c55e;
+  border: 1px solid var(--green);
   border-radius: 12px;
   padding: 1.5rem;
   color: white;
@@ -212,7 +213,7 @@ h2 {
   background-color: rgba(255, 255, 255, 0.07);
   padding: 12px 16px;
   border-radius: 12px;
-  border: 1px solid #007bff;
+  border: 1px solid var(--gold);
   color: #fff;
   box-shadow: 0 2px 8px rgba(0,0,0,0.4);
 }
@@ -226,22 +227,22 @@ h2 {
 .value {
   font-size: 1rem;
   font-weight: 700;
-  color: #00bfff; /* azul ProTransf */
+  color: var(--gold); /* azul ProTransf */
   text-shadow: 0 0 4px rgba(0, 191, 255, 0.3); /* leve brilho azul */
 }
 
 .seta {
   font-size: 1.5rem;
-  color: #22c55e;
+  color: var(--green);
   margin: 0 10px;
 }
 
 .clubeNome {
-  color: #22c55e;
+  color: var(--green);
 }
 
 .jogadorNome {
-  color: #ffcc00;
+  color: var(--gold);
 }
 
 .info {
@@ -251,7 +252,7 @@ h2 {
 h4 {
   font-size: 1.2rem;
   margin-bottom: 0.3rem;
-  color: #22c55e;
+  color: var(--green);
 }
 
 p {
@@ -262,7 +263,7 @@ p {
 .link {
   margin-top: 0.5rem;
   display: inline-block;
-  color: #22c55e;
+  color: var(--green);
   text-decoration: underline;
   font-weight: 500;
 }
@@ -278,23 +279,23 @@ p {
 }
 
 .status-aceito {
-  background-color: #28a745;
+  background-color: var(--green);
   color: #fff;
 }
 
 .status-recusado {
-  background-color: #dc3545;
+  background-color: #ef4444;
   color: #fff;
 }
 
 .status-pendente {
-  background-color: #ffc107;
+  background-color: var(--gold);
   color: #000;
 }
 
 .posicaoBadge {
   display: inline-block;
-  background-color: #007bff;
+  background-color: var(--gold);
   color: white;
   padding: 3px 8px;
   font-size: 0.75rem;
@@ -305,7 +306,7 @@ p {
 }
 
 .btn {
-  background-color: #22c55e;
+  background-color: var(--green);
   color: white;
   border: none;
   padding: 0.6rem 1.2rem;
@@ -316,7 +317,7 @@ p {
 }
 
 .btn:hover {
-  background-color: #009acd;
+  background-color: var(--green-deep);
 }
 
 @keyframes fadeIn {

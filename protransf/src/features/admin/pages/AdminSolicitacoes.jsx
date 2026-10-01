@@ -20,6 +20,7 @@ function AdminSolicitacoes() {
   const [jogadores, setJogadores] = useState({}); // jogadorId -> perfil
   const [carregando, setCarregando] = useState(true);
   const [processando, setProcessando] = useState(null);
+  const [fotoAmpliada, setFotoAmpliada] = useState(null);
   const [mensagem, setMensagem] = useState(null); // { tipo: 'sucesso' | 'erro', texto }
 
   useEffect(() => {
@@ -154,11 +155,15 @@ function AdminSolicitacoes() {
           </p>
           {s.observacoes && <p><strong>Obs:</strong> {s.observacoes}</p>}
           {s.fotoUrl && (
-            <p>
-              <a href={s.fotoUrl} target="_blank" rel="noreferrer">
-                Ver foto das estatísticas
-              </a>
-            </p>
+            // fotos novas são data URL (o navegador bloqueia abrir em nova aba),
+            // então o print aparece aqui mesmo; clique para ampliar
+            <img
+              src={s.fotoUrl}
+              alt="Print das estatísticas da partida"
+              className={`${styles.fotoStats} ${fotoAmpliada === s.id ? styles.fotoAmpliada : ""}`}
+              onClick={() => setFotoAmpliada(fotoAmpliada === s.id ? null : s.id)}
+              title="Clique para ampliar"
+            />
           )}
 
           <div className={styles.actions}>

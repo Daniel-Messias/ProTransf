@@ -128,3 +128,19 @@
   opacity: 0.55;
   cursor: default;
 }
+
+.fotoStats {
+  display: block;
+  max-width: 100%;
+  max-height: 220px;
+  margin: 0.8rem 0;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  cursor: zoom-in;
+  transition: max-height 0.2s ease;
+}
+
+.fotoAmpliada {
+  max-height: none;
+  cursor: zoom-out;
+}

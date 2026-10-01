@@ -3,8 +3,6 @@ import { Link, useParams } from "react-router-dom";
 
 import { db } from "../../../services/firebase";
 import { doc, getDoc, updateDoc, collection, addDoc } from "firebase/firestore";
-import { storage } from "../../../services/firebase";
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { useAuth } from "../../../services/AuthContext";
 import { buscarClube } from "../../../services/firestoreService";
 import { sairDoClube } from "../../../services/convitesService";
@@ -26,6 +24,11 @@ import {
 } from "../../../utils/jogador";
 import { mediaPorPartida } from "../../../utils/ranking";
 import { toast } from "../../../utils/toast";
+import {
+  comprimirImagem,
+  PRESET_AVATAR,
+  PRESET_PRINT_ESTATISTICA,
+} from "../../../utils/imagem";
 
 // ===============================
 // CONVERTER LINK YOUTUBE PARA EMBED
@@ -79,7 +82,7 @@ export default function Jogador() {
   // FOTO
   // ===============================
   const [fotoPreview, setFotoPreview] = useState("");
-  const [fotoFile, setFotoFile] = useState(null);
+  const [fotoNova, setFotoNova] = useState(""); // data URL já comprimido
 
 // ===============================
 // FORMULÁRIO DE ESTATÍSTICAS
@@ -112,7 +115,7 @@ const [enviandoStats, setEnviandoStats] = useState(false);
       setVideoEdit(jogador.video || "");
     } else {
       // cancelar: descarta foto escolhida e volta a original
-      setFotoFile(null);
+      setFotoNova("");
       setFotoPreview(getFoto(jogador));
     }
 
@@ -128,16 +131,8 @@ const [enviandoStats, setEnviandoStats] = useState(false);
     setSalvando(true);
 
     try {
-      let fotoUrlFinal = getFoto(jogador);
-
-      if (fotoFile) {
-        const storageRef = ref(
-          storage,
-          `fotosJogadores/${jogador.id}-${Date.now()}`
-        );
-        await uploadBytes(storageRef, fotoFile);
-        fotoUrlFinal = await getDownloadURL(storageRef);
-      }
+      // a foto vai como data URL dentro do próprio documento (sem Storage)
+      const fotoUrlFinal = fotoNova || getFoto(jogador);
 
       const refUsuario = doc(db, "usuarios", jogador.id);
 
@@ -166,7 +161,7 @@ const [enviandoStats, setEnviandoStats] = useState(false);
       }));
 
       setEditando(false);
-      setFotoFile(null);
+      setFotoNova("");
       toast("Perfil atualizado!");
     } catch (err) {
       console.error("Erro ao salvar perfil:", err);
@@ -192,14 +187,14 @@ async function handleEnviarEstatisticas(e) {
   setEnviandoStats(true);
 
   try {
-    // 1) Upload da foto para o Storage
-   const pasta = `fotosJogadores`;
-
-    const nomeArquivo = `${Date.now()}-${fotoStatsFile.name}`;
-    const storageRef = ref(storage, `${pasta}/${nomeArquivo}`);
-
-    await uploadBytes(storageRef, fotoStatsFile);
-    const fotoUrl = await getDownloadURL(storageRef);
+    // 1) Comprime o print (vai como data URL no documento, sem Storage)
+    let fotoUrl;
+    try {
+      fotoUrl = await comprimirImagem(fotoStatsFile, PRESET_PRINT_ESTATISTICA);
+    } catch (errImg) {
+      toast(errImg.message, "erro");
+      return;
+    }
 
     // 2) Criar documento em solicitacoesEstatisticas com status pendente
     const colecao = collection(db, "solicitacoesEstatisticas");
@@ -340,11 +335,16 @@ async function handleEnviarEstatisticas(e) {
                 type="file"
                 accept="image/*"
                 hidden
-                onChange={(e) => {
+                onChange={async (e) => {
                   const file = e.target.files?.[0];
                   if (!file) return;
-                  setFotoFile(file);
-                  setFotoPreview(URL.createObjectURL(file));
+                  try {
+                    const dataUrl = await comprimirImagem(file, PRESET_AVATAR);
+                    setFotoNova(dataUrl);
+                    setFotoPreview(dataUrl);
+                  } catch (err) {
+                    toast(err.message, "erro");
+                  }
                 }}
               />
             </label>

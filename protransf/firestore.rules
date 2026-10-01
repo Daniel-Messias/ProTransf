@@ -29,6 +29,14 @@ service cloud.firestore {
               'totalCartoesAmarelos', 'totalCartoesVermelhos', 'totalPartidas'];
     }
 
+    // Fotos são data URL dentro do documento (sem Storage). O front comprime
+    // (avatar ~60 KB, print ~450 KB); aqui só barramos abuso, já que o
+    // documento inteiro tem limite de 1 MiB.
+    function fotoCabe(data, maxCaracteres) {
+      let foto = data.get('fotoUrl', '');
+      return !(foto is string) || foto.size() <= maxCaracteres;
+    }
+
     // Clubes antigos guardavam o dono em `donoUid`
     function presidenteDe(clube) {
       return clube.get('presidenteId', clube.get('donoUid', ''));
@@ -93,12 +101,14 @@ service cloud.firestore {
       // Cadastro: sem estatísticas e sem clube
       allow create: if isOwner(userId)
         && !request.resource.data.keys().hasAny(camposEstatistica())
-        && request.resource.data.get('clubeId', '') == '';
+        && request.resource.data.get('clubeId', '') == ''
+        && fotoCabe(request.resource.data, 120000);
 
       allow update: if isAdmin()
         || (isOwner(userId)
             && !camposAlterados().hasAny(camposEstatistica())
-            && vinculoProprioValido(userId))
+            && vinculoProprioValido(userId)
+            && fotoCabe(request.resource.data, 120000))
         || presidenteAlterandoVinculo(userId);
 
       allow delete: if isOwner(userId) || isAdmin();
@@ -160,7 +170,8 @@ service cloud.firestore {
       // O jogador cria a própria solicitação, sempre como pendente
       allow create: if isSignedIn()
         && request.auth.uid == request.resource.data.jogadorId
-        && request.resource.data.status == 'pendente';
+        && request.resource.data.status == 'pendente'
+        && fotoCabe(request.resource.data, 700000);
       // Só o admin aprova/rejeita
       allow update, delete: if isAdmin();
     }

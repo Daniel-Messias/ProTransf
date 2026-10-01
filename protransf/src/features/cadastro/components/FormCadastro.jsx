@@ -1,16 +1,11 @@
 import React, { useState } from "react";
 import { useNavigate } from 'react-router-dom';  // Importa o hook
 import styles from "../cadastro.module.css";
-import { auth, db, storage } from '../../../services/firebase';
+import { auth, db } from '../../../services/firebase';
 import {
   createUserWithEmailAndPassword,
   updateProfile,
 } from "firebase/auth";
-import {
-  ref as storageRef,
-  uploadBytes,
-  getDownloadURL,
-} from "firebase/storage";
 import {
   doc,
   setDoc,
@@ -18,6 +13,7 @@ import {
 } from "firebase/firestore";
 
 import { PLATAFORMAS, POSICOES, STATUS_LIVRE } from "../../../utils/jogador";
+import { comprimirImagem, PRESET_AVATAR } from "../../../utils/imagem";
 
 const posicoes = ["", ...POSICOES];
 
@@ -85,14 +81,20 @@ export default function FormCadastro() {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleChange = (e) => {
+  const handleChange = async (e) => {
     const { name, value, type, checked, files } = e.target;
     if (type === "checkbox") {
       setFormData((prev) => ({ ...prev, [name]: checked }));
     } else if (type === "file") {
       if (files.length > 0) {
-        setFormData((prev) => ({ ...prev, foto: files[0] }));
-        setPreview(URL.createObjectURL(files[0]));
+        // comprime já na escolha: a foto vai como data URL no perfil (sem Storage)
+        try {
+          const dataUrl = await comprimirImagem(files[0], PRESET_AVATAR);
+          setFormData((prev) => ({ ...prev, foto: dataUrl }));
+          setPreview(dataUrl);
+        } catch (err) {
+          setFirebaseError(err.message);
+        }
       }
     } else {
       setFormData((prev) => ({ ...prev, [name]: value }));
@@ -114,17 +116,8 @@ export default function FormCadastro() {
       );
       const user = userCredential.user;
 
-      let photoURL = null;
-      if (formData.foto) {
-        const imageRef = storageRef(storage, `avatars/${user.uid}/avatar.jpg`);
-        await uploadBytes(imageRef, formData.foto);
-        photoURL = await getDownloadURL(imageRef);
-      }
-
-      await updateProfile(user, {
-        displayName: formData.username,
-        photoURL: photoURL,
-      });
+      // a foto fica só no Firestore (data URL é grande demais para o Auth)
+      await updateProfile(user, { displayName: formData.username });
 
       await setDoc(doc(db, "usuarios", user.uid), {
         nome: formData.nome,
@@ -135,7 +128,7 @@ export default function FormCadastro() {
         posicaoPrimaria: formData.posicaoPrimaria,
         posicaoSecundaria: formData.posicaoSecundaria || "",
         termosAceitos: formData.termos,
-        fotoUrl: photoURL || "",
+        fotoUrl: formData.foto || "",
         criadoEm: serverTimestamp(),
         tipo: formData.tipoUsuario,
         status: STATUS_LIVRE,

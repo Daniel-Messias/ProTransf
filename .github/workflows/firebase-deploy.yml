@@ -1,0 +1,62 @@
+# Testa, gera o build e publica no Firebase (site + firestore.rules) a cada
+# push na branch principal. Pull requests só rodam testes e build.
+#
+# Requer o secret FIREBASE_SERVICE_ACCOUNT no GitHub (JSON da conta de serviço
+# do projeto protransf-dmjc). Sem ele, o deploy é pulado e só os testes rodam.
+
+name: Deploy Firebase
+
+on:
+  push:
+    branches: [refatoracao-estrutura]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-deploy:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: protransf
+    env:
+      FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: protransf/package-lock.json
+
+      - name: Instalar dependências
+        run: npm ci
+
+      - name: Testes
+        run: npm test -- --watchAll=false
+        env:
+          CI: true
+
+      - name: Build
+        run: npm run build
+        env:
+          CI: true
+
+      - name: Publicar no Firebase (site + regras)
+        if: github.event_name != 'pull_request' && env.FIREBASE_SERVICE_ACCOUNT != ''
+        run: |
+          echo "$FIREBASE_SERVICE_ACCOUNT" > "$RUNNER_TEMP/sa.json"
+          export GOOGLE_APPLICATION_CREDENTIALS="$RUNNER_TEMP/sa.json"
+          npx --yes firebase-tools@13 deploy \
+            --only hosting,firestore:rules \
+            --project protransf-dmjc \
+            --non-interactive
+
+      - name: Aviso — deploy pulado
+        if: github.event_name != 'pull_request' && env.FIREBASE_SERVICE_ACCOUNT == ''
+        run: echo "::warning::Secret FIREBASE_SERVICE_ACCOUNT não configurado — deploy no Firebase foi pulado."

@@ -1,381 +1,264 @@
 .container {
-  max-width: 1000px;
-  margin: auto;
-  padding: 2rem 1rem;
-  color: #fff;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  max-width: 1150px;
+  margin: 0 auto;
+  padding: 0 1.25rem 3rem;
+  color: var(--text);
   display: flex;
   flex-direction: column;
-  gap: 2rem;
+  gap: 1.4rem;
+  animation: fadeIn 0.45s ease-out;
 }
 
-h2 {
-  font-size: 1.8rem;
-  color: var(--green);
-  margin-bottom: 1.5rem;
-  border-bottom: 2px solid var(--green);
-  padding-bottom: 0.5rem;
-  display: flex;
+/* ===================== HERO ===================== */
+.hero {
+  position: relative;
+  padding: 1.8rem 2rem;
+  border-radius: 24px;
+  background: var(--surface);
+  border: 1px solid var(--border-soft);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55);
+  overflow: hidden;
+}
+
+.hero::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 3px;
+  background: var(--gradient-holo);
+  background-size: 300% 100%;
+  animation: holoShift 7s linear infinite;
+}
+
+.badge {
+  display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.4rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #4ade80;
+  border: 1px solid rgba(74, 222, 128, 0.45);
+  background: rgba(34, 197, 94, 0.1);
+  padding: 0.25rem 0.75rem;
+  border-radius: 999px;
+  margin-bottom: 0.8rem;
+}
+
+.badge::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #4ade80;
+  box-shadow: 0 0 8px #4ade80;
+}
+
+.titulo {
+  font-size: clamp(1.7rem, 3.4vw, 2.4rem);
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  margin-bottom: 0.5rem;
+}
+
+.titulo span {
+  background: var(--gradient-green);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.subtitulo {
+  color: var(--muted);
+  font-size: 0.95rem;
+  max-width: 620px;
+}
+
+.subtitulo a {
+  color: var(--gold);
+  font-weight: 700;
+}
+
+/* ===================== FILTROS ===================== */
+.painel {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.9rem;
+}
+
+.segmentado {
+  display: inline-flex;
+  padding: 4px;
+  border-radius: 999px;
+  background: var(--surface-soft);
+  border: 1px solid var(--border);
+}
+
+.segmentado button {
+  padding: 0.55rem 1.1rem;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--muted);
+  font-weight: 700;
+  font-size: 0.88rem;
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+
+.segmentado .segAtivo {
+  color: #14100a;
+  background: var(--gradient-gold);
+  box-shadow: 0 8px 20px rgba(255, 215, 94, 0.25);
 }
 
 .filtros {
   display: flex;
   flex-wrap: wrap;
-  gap: 1.25rem;
-  margin-bottom: 2rem;
-  justify-content: start;
+  gap: 0.6rem;
 }
 
-.filtros select {
-  background-color: var(--bg);
-  color: #fff;
-  border: 2px solid transparent;
-  padding: 0.75rem 1.25rem;
-  border-radius: 16px;
-  font-size: 1rem;
-  min-width: 200px;
-  cursor: pointer;
-  box-shadow: 0 2px 6px rgba(0, 191, 255, 0.15);
-  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+.filtros select,
+.campoBusca {
+  background: var(--surface-soft);
+  color: var(--text);
+  border: 1px solid var(--border);
+  padding: 0.6rem 1rem;
+  border-radius: 12px;
+  font-size: 0.88rem;
+  font-family: inherit;
+  min-width: 170px;
 }
 
-.filtros select:focus {
+.campoBusca {
+  min-width: 220px;
+}
+
+.filtros select:focus,
+.campoBusca:focus {
   outline: none;
-  border-color: var(--green);
-  box-shadow: 0 0 8px var(--green);
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px rgba(255, 215, 94, 0.15);
 }
 
-.resultados {
-  display: flex;
-  flex-direction: row;
-  gap: 1rem;
-  margin-bottom: 3rem;
-  overflow-x: auto;      /* permite rolar horizontalmente */
-  scroll-behavior: smooth;
-  padding-bottom: 0.5rem; /* dá espaço para scrollbar */
+/* ===================== RESULTADOS ===================== */
+.contagem {
+  font-size: 0.8rem;
+  color: var(--muted);
+  margin-bottom: -0.6rem;
 }
 
-.resultados::-webkit-scrollbar {
-  height: 6px;
-}
-
-.resultados::-webkit-scrollbar-thumb {
-  background: #888;
-  border-radius: 4px;
-}
-
-/* Garantir que cada card fique com largura fixa e não encolha */
-.cardBusca {
-  flex: 0 0 auto;
-  width: 320px; /* ou 300px, pode ajustar */
-}
-
-
-.transferenciaSection > div:not(.carrossel) {
+.grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
   gap: 1rem;
 }
 
-.transferenciaSection {
-  background-color: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  border-radius: 12px;
-  padding: 1rem;
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.transferenciaSection h3 {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 1.3rem;
-  font-weight: bold;
-  margin-bottom: 1rem;
-  border-bottom: 2px solid var(--green);
-  padding-bottom: 5px;
-}
-
-/* Ícones antes dos títulos para status */
-.status-aceitas::before {
-  content: '✅';
-}
-
-.status-recusadas::before {
-  content: '❌';
-}
-
-.status-pendentes::before {
-  content: '⏳';
-}
-
-/* Estilo do carrossel */
-.carrossel {
-  display: flex;
-  flex-direction: row;
-  gap: 1rem;
-  overflow-x: auto;
-  scroll-behavior: smooth;
-  padding: 0.5rem 0;
-  scrollbar-width: none;
-}
-
-.carrossel::-webkit-scrollbar {
-  height: 6px;
-}
-
-.carrossel::-webkit-scrollbar-thumb {
-  background: #888;
-  border-radius: 4px;
-}
-
-.carrossel > * {
-  flex: 0 0 auto;
-  scroll-snap-align: start;
-}
-
-/* Mensagem para listas vazias */
 .msgVazio {
-  font-style: italic;
-  color: #ccc;
   text-align: center;
-  padding: 1rem 0;
+  color: var(--muted);
+  padding: 2rem 1rem;
+  border-radius: 18px;
+  border: 1px dashed var(--border);
+  background: var(--surface-soft);
 }
 
-/* Responsividade para os filtros */
-@media (max-width: 600px) {
-  .filtros {
-    flex-direction: column;
-  }
-
-  .filtros select {
-    width: 100%;
-  }
+/* ===================== FEED ===================== */
+.feedSecao {
+  margin-top: 1rem;
+  padding: 1.4rem;
+  border-radius: 22px;
+  background: var(--surface-soft);
+  border: 1px solid var(--border-soft);
 }
 
-.cardBusca {
-  margin-bottom: 1rem;
-  padding: 0.5rem;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-}
-
-.botaoConvite {
-  margin-top: 0.5rem;
-  background: var(--gradient-gold);
-  color: #14100a;
-  font-weight: 700;
-  border: none;
-  padding: 0.4rem 0.8rem;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: background 0.3s;
-}
-
-.botaoConvite:hover {
-  background-color: var(--gold-deep);
-}
-
-/* Estilos dos cards (copiado do seu cardTransferencia.module.css) */
-.cardTransferencia, .card {
-  background: rgba(0, 0, 0, 0.65);
-  border: 1px solid var(--green);
-  border-radius: 12px;
-  padding: 1.5rem;
-  color: white;
-  font-weight: bold;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  justify-content: space-between;
-  min-width: 280px;
-  max-width: 320px;
-  min-height: 220px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
-  animation: fadeIn 0.4s ease-in-out;
-  transition: transform 0.3s ease;
-  flex-shrink: 0;
-}
-
-.cardTransferencia:hover, .card:hover {
-  transform: scale(1.05);
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.5);
-}
-
-.transferBox {
+.feedTopo {
   display: flex;
   flex-wrap: wrap;
-  gap: 12px;
-  background-color: rgba(255, 255, 255, 0.07);
-  padding: 12px 16px;
-  border-radius: 12px;
-  border: 1px solid var(--gold);
-  color: #fff;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.8rem;
+  margin-bottom: 1.1rem;
 }
 
-.label {
-  font-size: 0.85rem;
-  color: #888888;
-  margin-bottom: 2px;
+.secaoTitulo {
+  font-size: 1.15rem;
+  font-weight: 800;
 }
 
-.value {
-  font-size: 1rem;
+.feedAbas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.feedAbas button {
+  padding: 0.35rem 0.85rem;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--muted);
+  font-size: 0.78rem;
   font-weight: 700;
-  color: var(--gold); /* azul ProTransf */
-  text-shadow: 0 0 4px rgba(0, 191, 255, 0.3); /* leve brilho azul */
-}
-
-.seta {
-  font-size: 1.5rem;
-  color: var(--green);
-  margin: 0 10px;
-}
-
-.clubeNome {
-  color: var(--green);
-}
-
-.jogadorNome {
-  color: var(--gold);
-}
-
-.info {
-  flex: 1;
-}
-
-h4 {
-  font-size: 1.2rem;
-  margin-bottom: 0.3rem;
-  color: var(--green);
-}
-
-p {
-  margin: 0.2rem 0;
-  line-height: 1.3;
-}
-
-.link {
-  margin-top: 0.5rem;
-  display: inline-block;
-  color: var(--green);
-  text-decoration: underline;
-  font-weight: 500;
-}
-
-.statusBadge {
-  display: inline-block;
-  padding: 4px 10px;
-  border-radius: 6px;
-  font-size: 0.75rem;
-  font-weight: bold;
-  margin-top: 8px;
-  text-transform: capitalize;
-}
-
-.status-aceito {
-  background-color: var(--green);
-  color: #fff;
-}
-
-.status-recusado {
-  background-color: #ef4444;
-  color: #fff;
-}
-
-.status-pendente {
-  background-color: var(--gold);
-  color: #000;
-}
-
-.posicaoBadge {
-  display: inline-block;
-  background-color: var(--gold);
-  color: white;
-  padding: 3px 8px;
-  font-size: 0.75rem;
-  border-radius: 12px;
-  margin-left: 8px;
-  font-weight: 600;
-  vertical-align: middle;
-}
-
-.btn {
-  background-color: var(--green);
-  color: white;
-  border: none;
-  padding: 0.6rem 1.2rem;
-  border-radius: 12px;
   cursor: pointer;
-  font-weight: 700;
-  transition: background-color 0.3s ease;
 }
 
-.btn:hover {
-  background-color: var(--green-deep);
+.feedAbas .feedAbaAtiva {
+  color: var(--text);
+  border-color: rgba(255, 215, 94, 0.5);
+  background: rgba(255, 215, 94, 0.1);
+}
+
+.feedGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 0.7rem;
+}
+
+.transferencia {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.75rem 0.9rem;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-left: 3px solid var(--gold);
+  font-size: 0.88rem;
+}
+
+.aceito { border-left-color: var(--green); }
+.recusado { border-left-color: #ef4444; }
+
+.trJogador { font-weight: 700; }
+.trClube { font-weight: 800; color: #4ade80; }
+.trJogador:hover,
+.trClube:hover { text-decoration: underline; }
+.trSeta { color: var(--gold); font-weight: 700; }
+
+.trPosicao {
+  margin-left: auto;
+  font-size: 0.7rem;
+  color: var(--muted);
+  padding: 0.1rem 0.5rem;
+  border-radius: 999px;
+  border: 1px solid var(--border);
 }
 
 @keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: translateY(0); }
 }
-@media (max-width: 600px) {
-  .container {
-    max-width: 100%;
-    padding: 1rem;
-  }
 
-  .carrossel {
-    padding: 1rem 0;
-    width: 100%;
-  }
-
-  .carrossel > * {
-    min-width: 260px;
-    max-width: 280px;
-  }
-
-  .filtros {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .resultados {
-    flex-direction: column;
-    overflow-x: visible;
-  }
-
-  .cardBusca {
-    width: 100%;
-    max-width: none;
-  }
-
-  .botaoConvite {
-    padding: 0.8rem 1.2rem;
-    font-size: 1rem;
-  }
-
-  h2 {
-    font-size: 1.4rem;
-  }
-
-  h3 {
-    font-size: 1.1rem;
-  }
-
-  .cardTransferencia, .card {
-    min-height: auto;
-    padding: 1rem;
-  }
+@media (max-width: 640px) {
+  .container { padding: 0 0.9rem 2rem; }
+  .hero { padding: 1.4rem 1.2rem; }
+  .painel, .filtros { flex-direction: column; align-items: stretch; }
+  .segmentado { display: flex; }
+  .segmentado button { flex: 1; }
+  .filtros select, .campoBusca { width: 100%; min-width: 0; }
 }

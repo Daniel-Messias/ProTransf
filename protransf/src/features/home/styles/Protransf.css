@@ -145,10 +145,35 @@ a { color: inherit; text-decoration: none; }
   border-color: rgba(255, 215, 94, 0.25);
 }
 
-.nav-link-active {
+.nav-link { display: inline-flex; align-items: center; gap: 0.4rem; }
+
+.nav-link-active,
+.nav-link-active:hover {
   color: #0b0d14;
   background: var(--gradient-gold);
   border-color: transparent;
+}
+
+/* contador de convites pendentes */
+.nav-count {
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: #ef4444;
+  color: #fff;
+  font-size: 0.68rem;
+  font-weight: 800;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 0 2px rgba(5, 7, 13, 0.9);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.12); }
 }
 
 /* ===================== AÇÕES HEADER ===================== */
@@ -398,8 +423,38 @@ a { color: inherit; text-decoration: none; }
   font-size: 0.75rem;
 }
 
-.ranking-item .team-name { flex: 1; margin: 0 0.5rem; }
+.ranking-item { align-items: center; }
+.ranking-item .team-name { flex: 1; margin: 0 0.6rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .ranking-item .pontos { font-weight: 700; color: var(--gold); }
+
+.ovr-chip {
+  --cor-raridade: var(--gold);
+  min-width: 34px;
+  text-align: center;
+  padding: 0.15rem 0.4rem;
+  border-radius: 8px;
+  font-weight: 900 !important;
+  color: #14100a !important;
+  background: var(--cor-raridade);
+}
+
+.sidebar-link { font-size: 0.75rem; font-weight: 700; color: var(--gold); }
+.sidebar-link:hover { text-decoration: underline; }
+
+/* números da plataforma no hero */
+.hero-numeros {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.6rem;
+  margin-top: 1.4rem;
+  padding-top: 1.2rem;
+  border-top: 1px solid var(--border);
+}
+
+.hero-numeros div { display: flex; flex-direction: column; }
+.hero-numeros strong { font-size: 1.6rem; font-weight: 900; color: var(--gold); line-height: 1.1; }
+.hero-numeros span { font-size: 0.72rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; }
 
 .transferencias-container { font-size: 0.82rem; color: var(--muted); }
 
@@ -464,13 +519,16 @@ a { color: inherit; text-decoration: none; }
    RESPONSIVO
    ===================================================== */
 @media (max-width: 900px) {
-  .main-header { flex-direction: column; align-items: stretch; gap: 0.6rem; border-radius: 18px; }
+  .main-header { border-radius: 18px; margin: 0.8rem 0.8rem 1.2rem; width: auto; }
+  .header-inner { flex-wrap: wrap; }
   .header-left { width: 100%; justify-content: space-between; align-items: center; }
   .menu-toggle { display: inline-flex; align-items: center; justify-content: center; }
 
   .main-nav {
     display: none;
+    width: 100%;
     flex-direction: column;
+    align-items: stretch;
     gap: 0.4rem;
     margin-top: 0.6rem;
     padding-top: 0.6rem;
@@ -479,7 +537,7 @@ a { color: inherit; text-decoration: none; }
 
   .main-nav.open { display: flex; }
   .nav-link { width: 100%; padding: 0.7rem 1rem; border-radius: 10px; }
-  .btn-login, .btn-logout { min-height: 44px; }
+  .btn-login, .btn-logout { min-height: 44px; display: inline-flex; align-items: center; justify-content: center; }
   .brand-logo img { width: 40px; height: 40px; }
 
   .header-actions { display: none; }
@@ -490,7 +548,7 @@ a { color: inherit; text-decoration: none; }
   .hero { clip-path: none; padding: 1.6rem; }
 }
 
-@media (min-width: 769px) {
+@media (min-width: 901px) {
   .menu-logout { display: none; }
 }
 

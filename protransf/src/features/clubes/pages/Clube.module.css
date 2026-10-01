@@ -2,44 +2,27 @@
    CONTAINER
 =============================== */
 .container {
-  min-height: 100vh;
   max-width: 1100px;
   margin: 0 auto;
-  padding: 24px;
-  color: #e5e7eb;
-
-  background:
-    linear-gradient(
-      180deg,
-      rgba(2, 6, 23, 0.75),
-      rgba(2, 6, 23, 0.88)
-
-    ),
-    url("../../../assets/fotos/vestiario.png")
-      center / cover
-      no-repeat
-      fixed;
+  padding: 0 1.25rem 3rem;
+  color: var(--text);
+  animation: fadeIn 0.45s ease-out;
 }
-
 
 /* ===============================
    HEADER DO CLUBE
 =============================== */
 .header {
   position: relative;
-  background: linear-gradient(
-      180deg,
-      rgba(2, 6, 23, 0.85),
-      rgba(2, 6, 23, 0.95)
-    ),
-    url("../../../assets/fotos/campo2.png") center/cover no-repeat;
+  background:
+    linear-gradient(180deg, rgba(5, 7, 13, 0.82), rgba(5, 7, 13, 0.96)),
+    url("../../../assets/fotos/vestiario.png") center / cover no-repeat;
   border-radius: 24px;
-  padding: 36px;
-  margin-bottom: 36px;
+  padding: 2rem;
+  margin-bottom: 1.6rem;
   overflow: hidden;
-  box-shadow:
-    0 20px 50px rgba(0, 0, 0, 0.7),
-    inset 0 0 0 1px rgba(255, 215, 94, 0.15);
+  border: 1px solid var(--border-soft);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.65);
 }
 
 .header::before {
@@ -55,99 +38,179 @@
 .headerTop {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
   flex-wrap: wrap;
-  gap: 16px;
+  gap: 1rem;
+}
+
+.identidade {
+  display: flex;
+  align-items: center;
+  gap: 1.1rem;
+}
+
+.escudo {
+  flex: 0 0 auto;
+  width: 78px;
+  height: 78px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.2rem;
+  font-weight: 900;
+  color: #04150b;
+  background: var(--gradient-green);
+  clip-path: polygon(50% 0, 100% 14%, 100% 60%, 50% 100%, 0 60%, 0 14%);
+  box-shadow: 0 0 30px rgba(34, 197, 94, 0.35);
 }
 
 .title {
-  font-size: 30px;
+  font-size: clamp(1.6rem, 3.2vw, 2.1rem);
   font-weight: 900;
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 10px;
-  letter-spacing: 0.3px;
+  gap: 0.6rem;
+  letter-spacing: -0.01em;
 }
 
 .badge {
-  background: var(--green);
-  color: #020617;
-  font-size: 12px;
+  background: var(--teal);
+  color: #04150b;
+  font-size: 0.7rem;
   font-weight: 800;
-  padding: 4px 12px;
+  padding: 0.2rem 0.6rem;
   border-radius: 999px;
 }
 
 .subtitle {
-  margin-top: 6px;
-  color: #94a3b8;
-  font-size: 14px;
+  margin-top: 0.25rem;
+  color: var(--muted);
+  font-size: 0.9rem;
 }
 
-/* Badge visual para status do mercado */
-.subtitle:last-child {
+.mercadoAberto,
+.mercadoFechado {
   display: inline-block;
-  margin-top: 12px;
-  padding: 6px 16px;
+  margin-top: 0.6rem;
+  padding: 0.25rem 0.75rem;
   border-radius: 999px;
   font-weight: 700;
-  font-size: 13px;
+  font-size: 0.75rem;
+}
+
+.mercadoAberto {
   background: rgba(34, 197, 94, 0.15);
-  color: var(--green);
+  color: #4ade80;
+  border: 1px solid rgba(74, 222, 128, 0.4);
+}
+
+.mercadoFechado {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--muted);
+  border: 1px solid var(--border);
+}
+
+.headerAcoes {
+  display: flex;
+  gap: 0.6rem;
+}
+
+.numeros {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 140px));
+  gap: 0.8rem;
+  margin-top: 1.6rem;
+}
+
+.numeros div {
+  display: flex;
+  flex-direction: column;
+  padding: 0.7rem 0.9rem;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border);
+}
+
+.numeros strong {
+  font-size: 1.5rem;
+  font-weight: 900;
+  color: var(--gold);
+  line-height: 1.1;
+}
+
+.numeros span {
+  font-size: 0.7rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 /* ===============================
    BOTÕES
 =============================== */
 .editBtn {
-  background: var(--green);
-  color: #020617;
-  padding: 12px 20px;
-  border-radius: 14px;
+  background: var(--gradient-green);
+  color: #04150b;
+  padding: 0.7rem 1.3rem;
+  border-radius: 999px;
   border: none;
   font-weight: 800;
   cursor: pointer;
-  transition: 0.25s;
-  box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.6);
+  box-shadow: 0 12px 28px rgba(34, 197, 94, 0.3);
+  transition: transform 0.15s ease;
 }
 
-.editBtn:hover {
-  background: var(--green-deep);
-  box-shadow: 0 0 0 6px rgba(34, 197, 94, 0.15);
+.editBtn:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+.ghostBtn {
+  background: transparent;
+  color: var(--text);
+  padding: 0.7rem 1.3rem;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  font-weight: 700;
+  cursor: pointer;
 }
 
 .saveBtn {
   width: 100%;
-  background: linear-gradient(135deg, var(--green), var(--green-deep));
-  color: #020617;
-  padding: 16px;
-  border-radius: 16px;
+  background: var(--gradient-green);
+  color: #04150b;
+  padding: 0.95rem;
+  border-radius: 14px;
   border: none;
-  font-size: 16px;
+  font-size: 1rem;
   font-weight: 900;
-  margin-top: 28px;
+  margin-top: 0.4rem;
   cursor: pointer;
-  box-shadow: 0 15px 40px rgba(34, 197, 94, 0.35);
+  box-shadow: 0 15px 40px rgba(34, 197, 94, 0.3);
+}
+
+.saveBtn:disabled,
+.editBtn:disabled {
+  opacity: 0.6;
+  cursor: default;
 }
 
 /* ===============================
    SEÇÕES
 =============================== */
 .section {
-  background: linear-gradient(180deg, #020617, #020617cc);
+  background: var(--surface-soft);
+  border: 1px solid var(--border-soft);
   border-radius: 22px;
-  padding: 26px;
-  margin-bottom: 28px;
-  box-shadow:
-    0 12px 30px rgba(0, 0, 0, 0.5),
-    inset 0 0 0 1px rgba(148, 163, 184, 0.06);
+  padding: 1.5rem;
+  margin-bottom: 1.4rem;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
 }
 
 .section h2 {
-  font-size: 19px;
-  margin-bottom: 18px;
+  font-size: 1.1rem;
+  margin-bottom: 1rem;
   font-weight: 900;
-  letter-spacing: 0.3px;
 }
 
 .section h2::after {
@@ -156,28 +219,97 @@
   width: 40px;
   height: 3px;
   background: var(--gradient-holo);
-  margin-top: 8px;
+  margin-top: 0.45rem;
   border-radius: 999px;
 }
 
+.secaoTopo {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.linkMercado {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--gold);
+}
+
+.linkMercado:hover {
+  text-decoration: underline;
+}
+
+.muted {
+  color: var(--muted);
+}
+
+.muted a {
+  color: var(--gold);
+}
+
+.contatos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-top: 1rem;
+}
+
+.contatos a {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.45rem 0.9rem;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.contatos a:hover {
+  border-color: var(--gold);
+  color: var(--gold);
+}
+
 /* ===============================
-   INPUTS
+   FORM
 =============================== */
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--muted);
+}
+
+.duasColunas {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
 .input,
 .textarea,
 .select {
   width: 100%;
-  background: #020617;
-  border: 1px solid #1e293b;
-  border-radius: 14px;
-  padding: 14px 16px;
-  color: #fff;
-  margin-top: 10px;
-  font-size: 14px;
+  background: rgba(5, 7, 13, 0.8);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 0.8rem 1rem;
+  color: var(--text);
+  font-size: 0.92rem;
+  font-family: inherit;
 }
 
 .textarea {
-  min-height: 120px;
+  min-height: 110px;
   resize: vertical;
 }
 
@@ -185,7 +317,8 @@
 .textarea:focus,
 .select:focus {
   outline: none;
-  border-color: var(--green);
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px rgba(255, 215, 94, 0.15);
 }
 
 /* ===============================
@@ -193,95 +326,49 @@
 =============================== */
 .elencoGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 18px;
+  grid-template-columns: repeat(auto-fill, minmax(165px, 1fr));
+  gap: 1.4rem 1rem;
+  justify-items: center;
 }
 
-.jogadorCard {
-  background: linear-gradient(180deg, #020617, #020617dd);
-  border-radius: 18px;
-  padding: 18px;
-  border: 1px solid rgba(148, 163, 184, 0.12);
-  transition: 0.25s;
-}
-
-.jogadorCard:hover {
-  transform: translateY(-6px) scale(1.02);
-  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.65);
-}
-
-.jogadorNome {
-  font-size: 16px;
-  font-weight: 900;
-  margin-bottom: 6px;
-}
-
-.camisa {
-  font-size: 14px;
-  color: #94a3b8;
+.jogadorSlot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .removeBtn {
-  margin-top: 12px;
-  background: #dc2626;
-  color: #fff;
-  border: none;
-  border-radius: 12px;
-  padding: 10px 14px;
-  font-size: 13px;
+  background: transparent;
+  color: #f87171;
+  border: 1px solid rgba(248, 113, 113, 0.5);
+  border-radius: 999px;
+  padding: 0.35rem 0.9rem;
+  font-size: 0.78rem;
   font-weight: 700;
   cursor: pointer;
 }
 
-/* ===============================
-   FORM ADD JOGADOR
-=============================== */
-.addJogador {
-  display: flex;
-  gap: 12px;
-  margin-bottom: 22px;
+.removeBtn:hover {
+  background: rgba(248, 113, 113, 0.1);
 }
 
-.addJogador button {
-  background: var(--gradient-gold);
-  color: #14100a;
-  border-radius: 14px;
-  padding: 12px 16px;
-  border: none;
-  font-weight: 700;
-  cursor: pointer;
-  box-shadow: 0 10px 26px rgba(255, 215, 94, 0.3);
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 /* ===============================
    RESPONSIVO
 =============================== */
-@media (max-width: 768px) {
-  .header {
-    padding: 28px;
-  }
-
-  .headerTop {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .title {
-    font-size: 24px;
-  }
-
-  .saveBtn {
-    font-size: 15px;
-  }
-}
-
-/* ===============================
-   MICRO ANIMAÇÕES (PREMIUM FEEL)
-=============================== */
-* {
-  transition:
-    background-color 0.2s ease,
-    color 0.2s ease,
-    box-shadow 0.2s ease,
-    transform 0.2s ease;
+@media (max-width: 640px) {
+  .container { padding: 0 0.9rem 2rem; }
+  .header { padding: 1.4rem; }
+  .escudo { width: 60px; height: 60px; font-size: 1.7rem; }
+  .numeros { grid-template-columns: repeat(3, 1fr); }
+  .numeros strong { font-size: 1.2rem; }
+  .duasColunas { grid-template-columns: 1fr; }
+  .headerAcoes { width: 100%; }
+  .headerAcoes button { flex: 1; }
+  .elencoGrid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 1rem 0.5rem; }
 }

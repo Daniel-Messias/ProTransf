@@ -1,48 +1,34 @@
-import { Link, useNavigate } from "react-router-dom";
+import { Link, NavLink, useNavigate } from "react-router-dom";
 import logo from "../../../assets/fotos/logo.png";
 import "../styles/Protransf.css";
 
-import { onAuthStateChanged, signOut } from "firebase/auth";
-import { doc, getDoc } from "firebase/firestore";
-import { auth, db } from "../../../services/firebase";
+import { signOut } from "firebase/auth";
+import { auth } from "../../../services/firebase";
+import { useAuth } from "../../../services/AuthContext";
+import { ouvirPendentesParaResponder } from "../../../services/convitesService";
 import { useEffect, useRef, useState } from "react";
 
+const navClass = ({ isActive }) => `nav-link ${isActive ? "nav-link-active" : ""}`;
+
 export default function Header() {
-  const [user, setUser] = useState(null);
-  const [clubeId, setClubeId] = useState(null);
+  const { user, clube, ehPresidente, ehAdmin } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [pendentes, setPendentes] = useState(0);
 
   const menuRef = useRef(null);
   const navigate = useNavigate();
 
-  // 🔐 Auth + Clube
+  const clubeId = clube ? clube.id : null;
+  const clubePresidido = ehPresidente ? clube.id : null;
+
+  // 🔔 Convites aguardando minha resposta
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (usuario) => {
-      setUser(usuario);
-
-      if (!usuario) {
-        setClubeId(null);
-        return;
-      }
-
-      try {
-        const refUsuario = doc(db, "usuarios", usuario.uid);
-        const snap = await getDoc(refUsuario);
-
-        if (snap.exists()) {
-          const dados = snap.data();
-          setClubeId(dados.clubeId || null);
-        } else {
-          setClubeId(null);
-        }
-      } catch (error) {
-        console.error("Erro ao buscar usuário:", error);
-        setClubeId(null);
-      }
-    });
-
-    return () => unsubscribe();
-  }, []);
+    if (!user) {
+      setPendentes(0);
+      return;
+    }
+    return ouvirPendentesParaResponder(user.uid, clubePresidido, setPendentes);
+  }, [user, clubePresidido]);
 
   // 🖱️ Fechar menu ao clicar fora
   useEffect(() => {
@@ -67,7 +53,6 @@ export default function Header() {
   const handleLogout = async () => {
     setMenuOpen(false);
     await signOut(auth);
-    setClubeId(null);
     navigate("/login");
   };
 
@@ -107,43 +92,56 @@ export default function Header() {
 
         {/* MENU / NAV */}
         <nav className={`main-nav ${menuOpen ? "open" : ""}`}>
-          <Link to="/" className="nav-link" onClick={closeMenu}>
+          <NavLink to="/" end className={navClass} onClick={closeMenu}>
             Início
-          </Link>
+          </NavLink>
 
-          <Link to="/transferencias" className="nav-link" onClick={closeMenu}>
+          <NavLink to="/transferencias" className={navClass} onClick={closeMenu}>
             Mercado
-          </Link>
+          </NavLink>
 
-          {user && (
-            <Link
-              to={`/jogador/${user.uid}`}
-              className="nav-link"
-              onClick={closeMenu}
-            >
-              Meu Perfil
-            </Link>
-          )}
-
-          {clubeId && (
-            <Link
-              to={`/clube/${clubeId}`}
-              className="nav-link"
-              onClick={closeMenu}
-            >
-              Meu Clube
-            </Link>
-          )}
-
-          <Link to="/ranking" className="nav-link" onClick={closeMenu}>
+          <NavLink to="/ranking" className={navClass} onClick={closeMenu}>
             Ranking
-          </Link>
+          </NavLink>
 
-          {/* BOTÃO SAIR (APENAS MENU MOBILE) */}
           {user && (
+            <NavLink to={`/jogador/${user.uid}`} className={navClass} onClick={closeMenu}>
+              Meu Perfil
+            </NavLink>
+          )}
+
+          {user && (
+            <NavLink
+              to={clubeId ? `/clube/${clubeId}` : "/clube"}
+              className={navClass}
+              onClick={closeMenu}
+            >
+              {clubeId ? "Meu Clube" : "Criar Clube"}
+            </NavLink>
+          )}
+
+          {user && (
+            <NavLink to="/convites" className={navClass} onClick={closeMenu}>
+              Convites
+              {pendentes > 0 && <span className="nav-count">{pendentes}</span>}
+            </NavLink>
+          )}
+
+          {ehAdmin && (
+            <NavLink to="/admin/solicitacoes" className={navClass} onClick={closeMenu}>
+              Admin
+            </NavLink>
+          )}
+
+          {/* AÇÕES (APENAS MENU MOBILE) */}
+          {user ? (
             <button onClick={handleLogout} className="btn-logout menu-logout">
               Sair
             </button>
+          ) : (
+            <Link to="/login" className="btn-login menu-logout" onClick={closeMenu}>
+              Entrar
+            </Link>
           )}
         </nav>
 

@@ -1,19 +1,25 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import {
   collection,
   query,
   where,
   onSnapshot,
   doc,
-  updateDoc,
-  getDoc,
+  increment,
+  serverTimestamp,
+  writeBatch,
 } from "firebase/firestore";
 import { db } from "../../../services/firebase";
+import { buscarUsuario } from "../../../services/firestoreService";
+import Loader from "../../../components/Loader";
 import styles from "../admin.module.css";
 
 function AdminSolicitacoes() {
   const [solicitacoes, setSolicitacoes] = useState([]);
+  const [jogadores, setJogadores] = useState({}); // jogadorId -> perfil
   const [carregando, setCarregando] = useState(true);
+  const [processando, setProcessando] = useState(null);
   const [mensagem, setMensagem] = useState(null); // { tipo: 'sucesso' | 'erro', texto }
 
   useEffect(() => {
@@ -30,6 +36,22 @@ function AdminSolicitacoes() {
     return () => unsub();
   }, []);
 
+  // busca nome/username de quem enviou cada solicitação
+  useEffect(() => {
+    const faltando = [...new Set(solicitacoes.map((s) => s.jogadorId))].filter(
+      (id) => id && !(id in jogadores)
+    );
+    if (faltando.length === 0) return;
+
+    Promise.all(faltando.map(buscarUsuario)).then((perfis) => {
+      setJogadores((prev) => {
+        const novo = { ...prev };
+        faltando.forEach((id, i) => (novo[id] = perfis[i]));
+        return novo;
+      });
+    });
+  }, [solicitacoes, jogadores]);
+
   useEffect(() => {
     if (!mensagem) return;
     const timer = setTimeout(() => setMensagem(null), 4000);
@@ -39,59 +61,61 @@ function AdminSolicitacoes() {
   const toNumber = (v) => Number(v || 0);
 
   async function aprovarSolicitacao(s) {
+    if (jogadores[s.jogadorId] === null) {
+      setMensagem({ tipo: "erro", texto: "Jogador não encontrado para esta solicitação." });
+      return;
+    }
+
+    setProcessando(s.id);
     try {
-      const jogadorRef = doc(db, "usuarios", s.jogadorId);
-      const snapJogador = await getDoc(jogadorRef);
+      // increment() + batch: soma atômica no servidor, sem risco de duas
+      // aprovações seguidas sobrescreverem uma à outra.
+      const batch = writeBatch(db);
 
-      if (!snapJogador.exists()) {
-        setMensagem({ tipo: "erro", texto: "Jogador não encontrado para esta solicitação." });
-        return;
-      }
-
-      const j = snapJogador.data();
-
-      const novosDados = {
-        totalGols: toNumber(j.totalGols) + toNumber(s.gols),
-        totalAssistencias:
-          toNumber(j.totalAssistencias) + toNumber(s.assistencias),
-        totalDesarmes: toNumber(j.totalDesarmes) + toNumber(s.desarmes),
-        totalDefesas: toNumber(j.totalDefesas) + toNumber(s.defesas),
-        totalCartoesAmarelos:
-          toNumber(j.totalCartoesAmarelos) + toNumber(s.amarelos),
-        totalCartoesVermelhos:
-          toNumber(j.totalCartoesVermelhos) + toNumber(s.vermelhos),
-      };
-
-      await updateDoc(jogadorRef, novosDados);
-
-      const solicRef = doc(db, "solicitacoesEstatisticas", s.id);
-      await updateDoc(solicRef, {
-        status: "aprovada",
-        aprovadaEm: new Date(),
+      batch.update(doc(db, "usuarios", s.jogadorId), {
+        totalGols: increment(toNumber(s.gols)),
+        totalAssistencias: increment(toNumber(s.assistencias)),
+        totalDesarmes: increment(toNumber(s.desarmes)),
+        totalDefesas: increment(toNumber(s.defesas)),
+        totalCartoesAmarelos: increment(toNumber(s.amarelos)),
+        totalCartoesVermelhos: increment(toNumber(s.vermelhos)),
+        totalPartidas: increment(1),
       });
 
+      batch.update(doc(db, "solicitacoesEstatisticas", s.id), {
+        status: "aprovada",
+        aprovadaEm: serverTimestamp(),
+      });
+
+      await batch.commit();
       setMensagem({ tipo: "sucesso", texto: "Solicitação aprovada e estatísticas somadas." });
     } catch (err) {
       console.error("Erro ao aprovar solicitação:", err);
       setMensagem({ tipo: "erro", texto: "Erro ao aprovar solicitação." });
+    } finally {
+      setProcessando(null);
     }
   }
 
   async function rejeitarSolicitacao(id) {
+    setProcessando(id);
     try {
-      const ref = doc(db, "solicitacoesEstatisticas", id);
-      await updateDoc(ref, {
+      const batch = writeBatch(db);
+      batch.update(doc(db, "solicitacoesEstatisticas", id), {
         status: "rejeitada",
-        rejeitadaEm: new Date(),
+        rejeitadaEm: serverTimestamp(),
       });
+      await batch.commit();
       setMensagem({ tipo: "sucesso", texto: "Solicitação rejeitada." });
     } catch (err) {
       console.error("Erro ao rejeitar solicitação:", err);
       setMensagem({ tipo: "erro", texto: "Erro ao rejeitar solicitação." });
+    } finally {
+      setProcessando(null);
     }
   }
 
-  if (carregando) return <div className={styles.page}>Carregando solicitações...</div>;
+  if (carregando) return <Loader texto="Carregando solicitações..." />;
 
   return (
     <div className={styles.page}>
@@ -105,7 +129,16 @@ function AdminSolicitacoes() {
 
       {solicitacoes.map((s) => (
         <div key={s.id} className={styles.card}>
-          <p><strong>Jogador:</strong> {s.jogadorId}</p>
+          <p>
+            <strong>Jogador:</strong>{" "}
+            <Link to={`/jogador/${s.jogadorId}`} className={styles.linkJogador}>
+              {jogadores[s.jogadorId]
+                ? `${jogadores[s.jogadorId].nome || "Sem nome"} (@${jogadores[s.jogadorId].username || "—"})`
+                : jogadores[s.jogadorId] === null
+                ? "⚠ jogador não encontrado"
+                : s.jogadorId}
+            </Link>
+          </p>
           <p><strong>Data da partida:</strong> {s.dataPartida || "—"}</p>
           <p>
             <strong>Gols:</strong> {s.gols} {" "}
@@ -129,10 +162,18 @@ function AdminSolicitacoes() {
           )}
 
           <div className={styles.actions}>
-            <button className={styles.btnAprovar} onClick={() => aprovarSolicitacao(s)}>
+            <button
+              className={styles.btnAprovar}
+              onClick={() => aprovarSolicitacao(s)}
+              disabled={processando === s.id}
+            >
               Aprovar e somar no jogador
             </button>
-            <button className={styles.btnRejeitar} onClick={() => rejeitarSolicitacao(s.id)}>
+            <button
+              className={styles.btnRejeitar}
+              onClick={() => rejeitarSolicitacao(s.id)}
+              disabled={processando === s.id}
+            >
               Rejeitar
             </button>
           </div>

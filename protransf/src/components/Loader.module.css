@@ -1,0 +1,35 @@
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 4rem 1rem;
+}
+
+.telaCheia {
+  min-height: 100vh;
+  background: var(--bg);
+}
+
+.anel {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: conic-gradient(var(--gold), var(--green), var(--teal), transparent 75%);
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 5px), #000 calc(100% - 4px));
+  mask: radial-gradient(farthest-side, transparent calc(100% - 5px), #000 calc(100% - 4px));
+  animation: girar 0.9s linear infinite;
+  filter: drop-shadow(0 0 10px rgba(255, 215, 94, 0.35));
+}
+
+.texto {
+  color: var(--muted);
+  font-size: 0.9rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+@keyframes girar {
+  to { transform: rotate(360deg); }
+}

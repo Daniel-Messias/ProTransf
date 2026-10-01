@@ -1,121 +1,38 @@
 import React, { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { onAuthStateChanged } from "firebase/auth";
-import { auth, db } from "../../../services/firebase";
-import { buscarJogadores } from "../../../services/firestoreService";
-import { doc, getDoc, collection, limit, query, orderBy, getDocs } from "firebase/firestore";
-import { addDoc, serverTimestamp } from "firebase/firestore";
+import { Link } from "react-router-dom";
+import { buscarClubes, buscarUsuarios } from "../../../services/firestoreService";
+import { useAuth } from "../../../services/AuthContext";
+import { prepararJogadores, rankearJogadores } from "../../../utils/ranking";
+import { getNomeExibicao, idsComClube } from "../../../utils/jogador";
 import UltimasTransferencias from "../components/UltimasTransferencias";
-import logo from "../../../assets/fotos/logo.png";
-import CampoRealista from "../../../assets/fotos/CampoRealista.png";
-
 
 export default function Home() {
-  const [user, setUser] = useState(null);
-  const [tipo, setTipo] = useState(null);
-  const [jogadores, setJogadores] = useState([]);
-  const [clubes, setClubes] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [formEnviado, setFormEnviado] = useState(false);
-
-  const navigate = useNavigate();
+  const { user } = useAuth();
+  const [topJogadores, setTopJogadores] = useState([]);
+  const [numeros, setNumeros] = useState(null);
+  const [carregandoTop, setCarregandoTop] = useState(true);
 
   useEffect(() => {
-    // Atualizar ano no footer
-    const yearElement = document.getElementById("year");
-    if (yearElement) {
-      yearElement.textContent = new Date().getFullYear();
-    }
-  }, []);
-
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-      setUser(firebaseUser);
-      if (firebaseUser) {
-        try {
-          const docRef = doc(db, "usuarios", firebaseUser.uid);
-          const docSnap = await getDoc(docRef);
-          setTipo(docSnap.exists() ? docSnap.data().tipo : null);
-        } catch (error) {
-          console.error("Erro ao buscar tipo do usuário:", error);
-          setTipo(null);
-        }
-      } else {
-        setTipo(null);
-      }
-    });
-    return () => unsubscribe();
-  }, []);
-
-  useEffect(() => {
-    async function carregarClubes() {
+    async function carregar() {
       try {
-        const q = query(collection(db, "clubes"), limit(4));
-        const snapshot = await getDocs(q);
-        const lista = snapshot.docs.map((doc, i) => ({
-          id: doc.id,
-          ...doc.data(),
-          pontos: 70 - i * 4
-        }));
-        setClubes(lista);
+        const [usuarios, clubes] = await Promise.all([buscarUsuarios(), buscarClubes()]);
+        const jogadores = prepararJogadores(usuarios);
+
+        setTopJogadores(rankearJogadores(jogadores, "overall", "todos", 5));
+        const ocupados = idsComClube(clubes, usuarios);
+        setNumeros({
+          jogadores: jogadores.length,
+          livres: jogadores.filter((j) => !ocupados.has(j.id)).length,
+          clubes: clubes.length,
+        });
       } catch (error) {
-        console.error("Erro ao buscar clubes:", error);
+        console.error("Erro ao carregar dados da home:", error);
+      } finally {
+        setCarregandoTop(false);
       }
     }
-    carregarClubes();
+    carregar();
   }, []);
-
-  useEffect(() => {
-    async function carregarJogadores() {
-      setLoading(true);
-      try {
-        const jogadoresReais = await buscarJogadores();
-        setJogadores(jogadoresReais);
-      } catch (error) {
-        console.error("Erro ao buscar jogadores:", error);
-      }
-      setLoading(false);
-    }
-    carregarJogadores();
-  }, []);
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    const nome = e.target.nome.value;
-    const email = e.target.email.value;
-    const mensagem = e.target.mensagem.value;
-
-    try {
-      await addDoc(collection(db, "mensagensContato"), {
-        nome,
-        email,
-        mensagem,
-        enviadoEm: serverTimestamp(),
-      });
-
-      setFormEnviado(true);
-      setTimeout(() => setFormEnviado(false), 3000);
-      e.target.reset();
-    } catch (error) {
-      console.error("Erro ao enviar mensagem:", error);
-      alert("Erro ao enviar. Tente novamente.");
-    }
-  };
-
-  if (loading) {
-    return (
-      <div className="page">
-        <div className="bg-image"></div>
-        <div className="bg-overlay"></div>
-        <div className="shell">
-          <p style={{ textAlign: "center", color: "#e5e7eb", padding: "2rem" }}>
-            Carregando jogadores...
-          </p>
-        </div>
-      </div>
-    );
-  }
-  
 
   return (
     <div className="page">
@@ -123,8 +40,6 @@ export default function Home() {
       <div className="bg-overlay"></div>
 
       <div className="shell">
-       
-
         {/* MAIN LAYOUT */}
         <main className="layout">
           {/* COLUNA PRINCIPAL */}
@@ -136,28 +51,41 @@ export default function Home() {
                 A plataforma que conecta <span>jogadores</span> e <span>clubes</span> de Pro Clubs em um único lugar.
               </h1>
               <p className="hero-subtitle">
-                Cadastre jogadores e clubes do EA FC 26+ para organizar transferências sem depender de grupos de redes sociais.
+                Cadastre jogadores e clubes do EA FC para organizar transferências sem depender de grupos de redes sociais.
               </p>
 
               <div className="hero-cta">
                 {!user ? (
                   <>
                     <Link to="/cadastro" className="btn btn-primary">
-                      Sou jogador
+                      Criar minha conta
                     </Link>
-                    <Link to="/cadastro" className="btn btn-outline">
-                      Sou clube
+                    <Link to="/transferencias" className="btn btn-outline">
+                      Ver o mercado
                     </Link>
                   </>
                 ) : (
-                  <Link to={tipo === "jogador" ? `/jogador/${user.uid}` : "/clube"} className="btn btn-primary">
-                    Meu Perfil
-                  </Link>
+                  <>
+                    <Link to={`/jogador/${user.uid}`} className="btn btn-primary">
+                      Meu Perfil
+                    </Link>
+                    <Link to="/transferencias" className="btn btn-outline">
+                      Ir ao mercado
+                    </Link>
+                  </>
                 )}
               </div>
 
               <div className="hero-microcopy">Cadastro gratuito para jogadores e clubes.</div>
               <div className="hero-note">Foco em ligas e federações organizadas de Pro Clubs.</div>
+
+              {numeros && (
+                <div className="hero-numeros">
+                  <div><strong>{numeros.jogadores}</strong><span>jogadores</span></div>
+                  <div><strong>{numeros.livres}</strong><span>livres no mercado</span></div>
+                  <div><strong>{numeros.clubes}</strong><span>clubes</span></div>
+                </div>
+              )}
             </div>
 
             {/* SEÇÃO COMO FUNCIONA */}
@@ -167,9 +95,9 @@ export default function Home() {
                 A Pro Transfer centraliza perfis de jogadores e clubes para facilitar contratações de Pro Clubs.
               </div>
               <div className="mini-steps">
-                <div className="mini-step">1. Crie sua conta como jogador ou clube.</div>
-                <div className="mini-step">2. Preencha posição, overall, horários ou vagas.</div>
-                <div className="mini-step">3. Use os filtros internos para encontrar a outra ponta.</div>
+                <div className="mini-step">1. Crie sua conta e monte seu perfil.</div>
+                <div className="mini-step">2. Envie suas estatísticas e suba no ranking.</div>
+                <div className="mini-step">3. Convide jogadores ou peça para entrar num clube.</div>
               </div>
             </section>
           </section>
@@ -177,7 +105,39 @@ export default function Home() {
           {/* SIDEBAR */}
           <aside className="sidebar">
             {/* CARD RANKING */}
-            
+            <div className="sidebar-card">
+              <div className="sidebar-header">
+                <span className="sidebar-title">Top 5 · Overall</span>
+                <Link to="/ranking" className="sidebar-link">
+                  Ver ranking →
+                </Link>
+              </div>
+
+              {carregandoTop ? (
+                <p className="transferencias-loading">Carregando ranking...</p>
+              ) : topJogadores.length === 0 ? (
+                <p className="transferencias-empty">
+                  Ninguém no ranking ainda. Envie suas estatísticas!
+                </p>
+              ) : (
+                <ol className="market-list">
+                  {topJogadores.map((j, i) => (
+                    <li key={j.id}>
+                      <Link to={`/jogador/${j.id}`} className="market-item ranking-item">
+                        <span className="pos">{i + 1}</span>
+                        <span className="team-name">{getNomeExibicao(j)}</span>
+                        <span
+                          className="pontos ovr-chip"
+                          style={{ "--cor-raridade": j.raridade.corPrincipal }}
+                        >
+                          {j.overall}
+                        </span>
+                      </Link>
+                    </li>
+                  ))}
+                </ol>
+              )}
+            </div>
 
             {/* CARD ÚLTIMAS TRANSFERÊNCIAS */}
             <div className="sidebar-card">
@@ -193,10 +153,9 @@ export default function Home() {
         </main>
         {/* FOOTER */}
         <footer className="main-footer">
-          © <span id="year"></span> Pro Transfer — plataforma independente focada em Pro Clubs no EA FC.
+          © {new Date().getFullYear()} Pro Transfer — plataforma independente focada em Pro Clubs no EA FC.
         </footer>
       </div>
     </div>
-
   );
 }

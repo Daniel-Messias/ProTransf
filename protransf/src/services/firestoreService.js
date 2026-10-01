@@ -1,11 +1,30 @@
 import { db } from "./firebase";
-import { collection, getDocs } from "firebase/firestore";
+import { collection, doc, getDoc, getDocs } from "firebase/firestore";
+import { ehJogador } from "../utils/jogador";
+
+export const buscarUsuarios = async () => {
+  const snapshot = await getDocs(collection(db, "usuarios"));
+  return snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
+};
 
 export const buscarJogadores = async () => {
-  const jogadoresRef = collection(db, "usuarios");
-  const snapshot = await getDocs(jogadoresRef);
+  const usuarios = await buscarUsuarios();
+  return usuarios.filter(ehJogador);
+};
 
-  return snapshot.docs
-    .map(doc => ({ id: doc.id, ...doc.data() }))
-    .filter(user => user.tipo === "jogador" || user.tipo === "clube_jogador");
+export const buscarClubes = async () => {
+  const snapshot = await getDocs(collection(db, "clubes"));
+  return snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
+};
+
+export const buscarUsuario = async (uid) => {
+  if (!uid) return null;
+  const snap = await getDoc(doc(db, "usuarios", uid));
+  return snap.exists() ? { id: snap.id, ...snap.data() } : null;
+};
+
+export const buscarClube = async (clubeId) => {
+  if (!clubeId) return null;
+  const snap = await getDoc(doc(db, "clubes", clubeId));
+  return snap.exists() ? { id: snap.id, ...snap.data() } : null;
 };

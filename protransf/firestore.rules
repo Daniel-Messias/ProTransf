@@ -3,58 +3,169 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Mesmo UID admin usado no front-end (src/App.js -> ADMIN_UIDS).
-    // Isso é o que realmente impede alguém de editar dados direto
-    // pelo console do navegador, sem passar pela tela do app.
+    // ================= helpers =================
+
+    // Mesmo UID admin usado no front-end (src/services/AuthContext.jsx -> ADMIN_UIDS).
     function isAdmin() {
       return request.auth != null
         && request.auth.uid == "Am6psnQw80fyw5GLfKqj8tnjyBz2";
-    }
-
-    function isOwner(userId) {
-      return request.auth != null && request.auth.uid == userId;
     }
 
     function isSignedIn() {
       return request.auth != null;
     }
 
-    // ---------- usuarios (jogadores e clubes) ----------
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function camposAlterados() {
+      return request.resource.data.diff(resource.data).affectedKeys();
+    }
+
+    // Só o admin mexe nesses (via aprovação em AdminSolicitacoes)
+    function camposEstatistica() {
+      return ['totalGols', 'totalAssistencias', 'totalDesarmes', 'totalDefesas',
+              'totalCartoesAmarelos', 'totalCartoesVermelhos', 'totalPartidas'];
+    }
+
+    // Clubes antigos guardavam o dono em `donoUid`
+    function presidenteDe(clube) {
+      return clube.get('presidenteId', clube.get('donoUid', ''));
+    }
+
+    function clubeAntes(clubeId) {
+      return get(/databases/$(database)/documents/clubes/$(clubeId)).data;
+    }
+
+    function clubeDepois(clubeId) {
+      return getAfter(/databases/$(database)/documents/clubes/$(clubeId)).data;
+    }
+
+    function conviteDepois(conviteId) {
+      return getAfter(/databases/$(database)/documents/convites/$(conviteId)).data;
+    }
+
+    // O convite (estado após o batch) foi aceito e liga este jogador a este clube?
+    function conviteAceitoLiga(userId, clubeId) {
+      let convite = conviteDepois(request.resource.data.get('conviteAceitoId', '-'));
+      return convite.jogadorId == userId
+        && convite.clubeId == clubeId
+        && convite.status == 'aceito';
+    }
+
+    // O próprio jogador só pode entrar num clube se: criou o clube (é presidente)
+    // ou aceitou um convite. Sair (clubeId vazio) é sempre permitido.
+    function vinculoProprioValido(userId) {
+      let novo = request.resource.data.get('clubeId', '');
+      return !camposAlterados().hasAny(['clubeId'])
+        || novo == ''
+        || presidenteDe(clubeDepois(novo)) == userId
+        || conviteAceitoLiga(userId, novo);
+    }
+
+    // Presidente mexendo no perfil de OUTRO jogador: só o vínculo com o clube.
+    //  - aceitar pedido de entrada (convite jogador_para_clube aceito no mesmo batch)
+    //  - remover do elenco (clubeId atual é o clube dele -> vazio)
+    function presidenteAlterandoVinculo(userId) {
+      let chaves = camposAlterados();
+      let novo = request.resource.data.get('clubeId', '');
+      let atual = resource.data.get('clubeId', '');
+      return isSignedIn()
+        && chaves.hasOnly(['clubeId', 'status', 'conviteAceitoId', 'atualizadoEm'])
+        && (
+          (chaves.hasAll(['conviteAceitoId'])
+            && novo != ''
+            && presidenteDe(clubeAntes(novo)) == request.auth.uid
+            && conviteAceitoLiga(userId, novo))
+          ||
+          (novo == ''
+            && atual != ''
+            && presidenteDe(clubeAntes(atual)) == request.auth.uid)
+        );
+    }
+
+    // ================= usuarios (jogadores) =================
     match /usuarios/{userId} {
-      // Perfis são públicos para leitura (mercado de transferências precisa listar todo mundo)
+      // Perfis são públicos (mercado e ranking listam todo mundo)
       allow read: if true;
 
-      // Só o próprio dono cria/edita o próprio documento...
-      allow create, update: if isOwner(userId);
+      // Cadastro: sem estatísticas e sem clube
+      allow create: if isOwner(userId)
+        && !request.resource.data.keys().hasAny(camposEstatistica())
+        && request.resource.data.get('clubeId', '') == '';
 
-      // ...EXCETO campos de estatísticas (totalGols, totalAssistencias etc.),
-      // que só o admin pode alterar (é isso que a tela AdminSolicitacoes faz).
-      allow update: if isAdmin();
+      allow update: if isAdmin()
+        || (isOwner(userId)
+            && !camposAlterados().hasAny(camposEstatistica())
+            && vinculoProprioValido(userId))
+        || presidenteAlterandoVinculo(userId);
 
       allow delete: if isOwner(userId) || isAdmin();
     }
 
-    // ---------- convites de transferência ----------
-    match /convites/{conviteId} {
-      allow read: if isSignedIn();
-      allow create: if isSignedIn();
-      // Só as partes envolvidas no convite podem alterá-lo (aceitar/recusar)
-      allow update, delete: if isSignedIn() &&
-        (request.auth.uid == resource.data.remetenteId ||
-         request.auth.uid == resource.data.destinatarioId);
+    // ================= clubes =================
+    match /clubes/{clubeId} {
+      allow read: if true;
+
+      allow create: if isSignedIn()
+        && request.resource.data.presidenteId == request.auth.uid
+        && request.resource.data.get('verificado', false) == false;
+
+      // Presidente edita, mas não transfere a presidência nem se auto-verifica
+      allow update: if isAdmin()
+        || (isSignedIn()
+            && presidenteDe(resource.data) == request.auth.uid
+            && !camposAlterados().hasAny(['presidenteId', 'donoUid', 'verificado']));
+
+      allow delete: if isAdmin()
+        || (isSignedIn() && presidenteDe(resource.data) == request.auth.uid);
     }
 
-    // ---------- solicitações de estatísticas (painel admin) ----------
-    match /solicitacoesEstatisticas/{solicId} {
-      // O jogador pode criar sua própria solicitação e ver o status dela
-      allow read: if isSignedIn();
-      allow create: if isSignedIn() && request.auth.uid == request.resource.data.jogadorId;
-      // Só o admin aprova/rejeita
-      allow update: if isAdmin();
+    // ================= convites de transferência =================
+    match /convites/{conviteId} {
+      // Leitura pública: o feed de "Últimas transferências" aparece pra visitantes
+      allow read: if true;
+
+      // Clube convida (só o presidente) · jogador pede (só ele mesmo)
+      allow create: if isSignedIn()
+        && request.resource.data.status == 'pendente'
+        && (
+          (request.resource.data.tipo == 'clube_para_jogador'
+            && presidenteDe(clubeAntes(request.resource.data.clubeId)) == request.auth.uid)
+          ||
+          (request.resource.data.tipo == 'jogador_para_clube'
+            && request.resource.data.jogadorId == request.auth.uid)
+        );
+
+      // Só quem RECEBEU responde, só uma vez, e só muda status/data
+      allow update: if isSignedIn()
+        && resource.data.status == 'pendente'
+        && request.resource.data.status in ['aceito', 'recusado']
+        && camposAlterados().hasOnly(['status', 'respondidoEm'])
+        && (
+          (resource.data.tipo == 'clube_para_jogador'
+            && request.auth.uid == resource.data.jogadorId)
+          ||
+          (resource.data.tipo == 'jogador_para_clube'
+            && presidenteDe(clubeAntes(resource.data.clubeId)) == request.auth.uid)
+        );
+
       allow delete: if isAdmin();
     }
 
-    // Qualquer outra coleção: bloqueada por padrão até ser explicitamente liberada acima.
+    // ================= solicitações de estatísticas =================
+    match /solicitacoesEstatisticas/{solicId} {
+      allow read: if isSignedIn();
+      // O jogador cria a própria solicitação, sempre como pendente
+      allow create: if isSignedIn()
+        && request.auth.uid == request.resource.data.jogadorId
+        && request.resource.data.status == 'pendente';
+      // Só o admin aprova/rejeita
+      allow update, delete: if isAdmin();
+    }
+
+    // Qualquer outra coleção: bloqueada por padrão.
     match /{document=**} {
       allow read, write: if false;
     }

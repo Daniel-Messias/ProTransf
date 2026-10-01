@@ -1,0 +1,68 @@
+.badge {
+  --cor-principal: var(--gold);
+  --cor-secundaria: var(--gold-deep);
+
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  background: linear-gradient(160deg, var(--cor-principal), var(--cor-secundaria));
+  color: #14100a;
+  font-weight: 900;
+  line-height: 1;
+  box-shadow:
+    0 8px 20px rgba(0, 0, 0, 0.4),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.25);
+  position: relative;
+  overflow: hidden;
+}
+
+/* brilho diagonal, igual o resto do site */
+.badge::before {
+  content: "";
+  position: absolute;
+  top: -60%;
+  left: -30%;
+  width: 60%;
+  height: 220%;
+  background: rgba(255, 255, 255, 0.35);
+  transform: rotate(20deg);
+  filter: blur(2px);
+}
+
+.numero {
+  position: relative;
+  font-size: 1.1rem;
+}
+
+.raridade {
+  position: relative;
+  font-size: 0.55rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 700;
+  opacity: 0.85;
+}
+
+/* tamanhos */
+.sm {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+}
+.sm .numero { font-size: 0.95rem; }
+.sm .raridade { font-size: 0.42rem; }
+
+.md {
+  width: 60px;
+  height: 60px;
+}
+
+.lg {
+  width: 84px;
+  height: 84px;
+  border-radius: 16px;
+}
+.lg .numero { font-size: 1.6rem; }
+.lg .raridade { font-size: 0.65rem; }

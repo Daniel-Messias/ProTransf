@@ -17,18 +17,9 @@ import {
   serverTimestamp,
 } from "firebase/firestore";
 
-const posicoes = [
-  "",
-  "Goleiro",
-  "Zagueiro",
-  "Lateral Direito",
-  "Lateral Esquerdo",
-  "Volante",
-  "Meia",
-  "Atacante",
-  "Ponta Direita",
-  "Ponta Esquerda",
-];
+import { PLATAFORMAS, POSICOES, STATUS_LIVRE } from "../../../utils/jogador";
+
+const posicoes = ["", ...POSICOES];
 
 function Modal({ onClose }) {
   return (
@@ -141,13 +132,14 @@ export default function FormCadastro() {
         email: formData.email,
         nascimento: formData.nascimento,
         plataforma: formData.plataforma,
-        posicao: formData.posicaoPrimaria,
-        posicaoSecundaria: formData.posicaoSecundaria || null,
+        posicaoPrimaria: formData.posicaoPrimaria,
+        posicaoSecundaria: formData.posicaoSecundaria || "",
         termosAceitos: formData.termos,
-        fotoURL: photoURL,
+        fotoUrl: photoURL || "",
         criadoEm: serverTimestamp(),
         tipo: formData.tipoUsuario,
-        status: "Livre no Mercado",
+        status: STATUS_LIVRE,
+        clubeId: "",
       });
 
       setShowModal(true);
@@ -176,9 +168,10 @@ export default function FormCadastro() {
   };
 
   const fecharModal = () => {
-  setShowModal(false);
-  window.location.href = "/"; // ✅ Força reload da aplicação e já mostra o menu corretamente
-};
+    setShowModal(false);
+    // o AuthContext já acompanha o login ao vivo, não precisa recarregar a página
+    navigate(auth.currentUser ? `/jogador/${auth.currentUser.uid}` : "/");
+  };
 
   return (
     <div className={styles.container}>
@@ -319,9 +312,9 @@ export default function FormCadastro() {
             className={styles.formInput}
           >
             <option value="">Selecione</option>
-            <option value="PlayStation">PlayStation</option>
-            <option value="Xbox">Xbox</option>
-            <option value="PC">PC</option>
+            {PLATAFORMAS.map((p) => (
+              <option key={p} value={p}>{p}</option>
+            ))}
           </select>
           {errors.plataforma && (
             <div className={styles.errorMsg}>{errors.plataforma}</div>

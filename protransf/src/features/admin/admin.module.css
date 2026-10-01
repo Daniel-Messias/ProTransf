@@ -113,3 +113,18 @@
 }
 
 .btnRejeitar:hover { background: rgba(248, 113, 113, 0.08); }
+
+.linkJogador {
+  color: var(--gold);
+  font-weight: 700;
+}
+
+.linkJogador:hover {
+  text-decoration: underline;
+}
+
+.btnAprovar:disabled,
+.btnRejeitar:disabled {
+  opacity: 0.55;
+  cursor: default;
+}

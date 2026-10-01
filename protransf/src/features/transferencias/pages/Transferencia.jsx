@@ -1,325 +1,218 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { collection, limit, onSnapshot, orderBy, query } from 'firebase/firestore';
+import { db } from '../../../services/firebase';
+import { buscarClubes, buscarUsuarios } from '../../../services/firestoreService';
+import { useAuth } from '../../../services/AuthContext';
 import {
-  collection,
-  query,
-  where,
-  onSnapshot,
-  getDocs,
-  doc,
-  getDoc,
-  setDoc,
-} from 'firebase/firestore';
-import { db, auth } from '../../../services/firebase';
+  clubeBuscandoJogadores,
+  ehJogador,
+  getPosicao,
+  idsComClube,
+  PLATAFORMAS,
+  POSICOES,
+} from '../../../utils/jogador';
 import styles from '../transferencia.module.css';
 import CardTransferencia from '../components/CardTransferencia';
+import Loader from '../../../components/Loader';
+
+const ABAS_FEED = [
+  { id: 'aceito', label: '✅ Fechadas' },
+  { id: 'pendente', label: '⏳ Negociando' },
+  { id: 'recusado', label: '❌ Melou' },
+];
+
+function normalizar(texto) {
+  return String(texto || '')
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '');
+}
 
 export default function Transferencia() {
-  const [transferenciasAceitas, setTransferenciasAceitas] = useState([]);
-  const [transferenciasRecusadas, setTransferenciasRecusadas] = useState([]);
-  const [transferenciasPendentes, setTransferenciasPendentes] = useState([]);
-  const [filtro, setFiltro] = useState('todos');
-  const [posicaoFiltro, setPosicaoFiltro] = useState('');
-  const [resultadosBusca, setResultadosBusca] = useState([]);
-  const [usuarioAtual, setUsuarioAtual] = useState(null);
-  const [nomeClubeAtual, setNomeClubeAtual] = useState('');
+  const { user } = useAuth();
 
-  // Índices para controle do carrossel
-  const [indexAceitas, setIndexAceitas] = useState(0);
-  const [indexRecusadas, setIndexRecusadas] = useState(0);
-  const [indexPendentes, setIndexPendentes] = useState(0);
+  const [usuarios, setUsuarios] = useState([]);
+  const [clubes, setClubes] = useState([]);
+  const [carregando, setCarregando] = useState(true);
 
-  const itensPorPagina = 5;
+  const [aba, setAba] = useState('jogadores');
+  const [busca, setBusca] = useState('');
+  const [posicao, setPosicao] = useState('');
+  const [plataforma, setPlataforma] = useState('');
 
-  function enriquecerTransferencia(item) {
-    return {
-      ...item,
-      clubeNome: item.clubeNome || 'Time não encontrado',
-      jogadorNome: item.jogadorUsername || 'Jogador não encontrado',
-      posicao: item.posicao || 'N/A',
-    };
-  }
-
-  const buscar = useCallback(async () => {
-  const usuariosRef = collection(db, 'usuarios');
-  const clubesRef = collection(db, 'clubes');
-  const promessas = [];
-
-  if (filtro === 'jogadores' || filtro === 'todos') {
-    let q;
-    if (posicaoFiltro) {
-      q = query(
-        usuariosRef,
-        where('status', '==', 'Livre'),
-        where('posicaoPrimaria', '==', posicaoFiltro)
-      );
-    } else {
-      q = query(usuariosRef, where('status', '==', 'Livre'));
-    }
-    promessas.push(getDocs(q));
-  }
-
-  if (filtro === 'clubes' || filtro === 'todos') {
-    // Corrigido aqui para usar 'estaBuscando' boolean
-    const q = query(clubesRef, where('estaBuscando', '==', true));
-    promessas.push(getDocs(q));
-  }
-
-  // Aguarda as promessas
-  const resultados = await Promise.all(promessas);
-
-  console.log('Resultados da busca:', resultados);
-
-  // Ajusta resultados conforme filtro para evitar índices errados
-  let jogadoresSnap = { docs: [] };
-  let clubesSnap = { docs: [] };
-
-  if (filtro === 'jogadores') {
-    jogadoresSnap = resultados[0] || { docs: [] };
-  } else if (filtro === 'clubes') {
-    clubesSnap = resultados[0] || { docs: [] };
-  } else if (filtro === 'todos') {
-    jogadoresSnap = resultados[0] || { docs: [] };
-    clubesSnap = resultados[1] || { docs: [] };
-  }
-
-  const jogadores = (jogadoresSnap.docs || []).map(doc => ({
-    id: doc.id,
-    tipo: 'jogador',
-    ...doc.data(),
-  }));
-
-  const clubes = (clubesSnap.docs || []).map(doc => ({
-    id: doc.id,
-    tipo: 'clube',
-    ...doc.data(),
-  }));
-
-  setResultadosBusca([...jogadores, ...clubes]);
-}, [filtro, posicaoFiltro]);
-
-
+  const [convites, setConvites] = useState([]);
+  const [abaFeed, setAbaFeed] = useState('aceito');
 
   useEffect(() => {
-    const ref = collection(db, 'convites');
-
-    const qAceitas = query(ref, where('status', '==', 'aceito'));
-    const qRecusadas = query(ref, where('status', '==', 'recusado'));
-    const qPendentes = query(ref, where('status', '==', 'pendente'));
-
-    async function carregarTransferencias(snap, setFunc) {
-      const docs = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      const docsEnriquecidos = docs.map(enriquecerTransferencia);
-      setFunc(docsEnriquecidos.slice(-100).reverse()); // Pega até 100 para dar mais "material" pro carrossel
-    }
-
-    const unsubAceitas = onSnapshot(qAceitas, snap => {
-      carregarTransferencias(snap, setTransferenciasAceitas);
-      setIndexAceitas(0); // resetar índice ao atualizar dados
-    });
-
-    const unsubRecusadas = onSnapshot(qRecusadas, snap => {
-      carregarTransferencias(snap, setTransferenciasRecusadas);
-      setIndexRecusadas(0);
-    });
-
-    const unsubPendentes = onSnapshot(qPendentes, snap => {
-      carregarTransferencias(snap, setTransferenciasPendentes);
-      setIndexPendentes(0);
-    });
-
-    return () => {
-      unsubAceitas();
-      unsubRecusadas();
-      unsubPendentes();
-    };
+    Promise.all([buscarUsuarios(), buscarClubes()])
+      .then(([u, c]) => {
+        setUsuarios(u);
+        setClubes(c);
+      })
+      .catch((e) => console.error('Erro ao carregar mercado:', e))
+      .finally(() => setCarregando(false));
   }, []);
 
   useEffect(() => {
-    buscar();
-  }, [buscar]);
-
-  useEffect(() => {
-    async function carregarUsuarioEClube() {
-      const user = auth.currentUser;
-      if (user) {
-        const userRef = doc(db, 'usuarios', user.uid);
-        const userSnap = await getDoc(userRef);
-        if (userSnap.exists()) {
-          const usuarioData = { id: user.uid, ...userSnap.data() };
-          setUsuarioAtual(usuarioData);
-
-          if (usuarioData.tipo === 'clube' || usuarioData.tipo === 'clube_jogador') {
-            const clubesRef = collection(db, 'clubes');
-            const q = query(clubesRef, where('donoUid', '==', user.uid));
-            const clubesSnap = await getDocs(q);
-            if (!clubesSnap.empty) {
-              const clubeDoc = clubesSnap.docs[0].data();
-              setNomeClubeAtual(clubeDoc.nome || '');
-            }
-          }
-        }
-      }
-    }
-    carregarUsuarioEClube();
+    const q = query(collection(db, 'convites'), orderBy('criadoEm', 'desc'), limit(60));
+    return onSnapshot(
+      q,
+      (snap) => setConvites(snap.docs.map((d) => ({ id: d.id, ...d.data() }))),
+      (err) => console.error('Erro ao carregar transferências:', err)
+    );
   }, []);
 
-  
-  const enviarConvite = async (clube, jogador) => {
-    try {
-      const conviteRef = doc(collection(db, 'convites'));
-      await setDoc(conviteRef, {
-        tipo: 'clube_para_jogador',
-        clubeId: clube.id,
-        clubeNome: nomeClubeAtual || clube.nome || 'Clube',
-        jogadorId: jogador.id,
-        jogadorUsername: jogador.username || jogador.nome || 'Jogador',
-        status: 'pendente',
-        posicao: jogador.posicaoPrimaria || '',
-        criadoEm: new Date()
-      });
-      alert('Convite enviado com sucesso!');
-    } catch (error) {
-      console.error('Erro ao enviar convite:', error);
-      alert('Erro ao enviar convite');
+  const resultados = useMemo(() => {
+    const termo = normalizar(busca);
+    const bate = (item) =>
+      !termo || normalizar(`${item.nome} ${item.username}`).includes(termo);
+    const plataformaOk = (item) => !plataforma || item.plataforma === plataforma;
+
+    if (aba === 'jogadores') {
+      const ocupados = idsComClube(clubes, usuarios);
+      return usuarios
+        .filter((u) => ehJogador(u) && !ocupados.has(u.id) && u.id !== user?.uid)
+        .filter((u) => !posicao || getPosicao(u) === posicao)
+        .filter(plataformaOk)
+        .filter(bate);
     }
-  };
+    return clubes.filter(clubeBuscandoJogadores).filter(plataformaOk).filter(bate);
+  }, [aba, usuarios, clubes, busca, posicao, plataforma, user]);
 
-  const enviarPedido = async (jogador, clube) => {
-    try {
-      const conviteRef = doc(collection(db, 'convites'));
-      await setDoc(conviteRef, {
-        tipo: 'jogador_para_clube',
-        clubeId: clube.id,
-        clubeNome: clube.nome || 'Clube',
-        jogadorId: jogador.id,
-        jogadorUsername: jogador.username || jogador.nome || 'Jogador',
-        status: 'pendente',
-        posicao: jogador.posicaoPrimaria || '',
-        criadoEm: new Date()
-      });
-      alert('Pedido enviado com sucesso!');
-    } catch (error) {
-      console.error('Erro ao enviar pedido:', error);
-      alert('Erro ao enviar pedido');
-    }
-  };
-
-  // Função para pegar fatia do carrossel, com limite de itensPorPagina
-  function getSlice(arr, index) {
-    return arr.slice(index, index + itensPorPagina);
-  }
-
-  // Efeitos para avançar o índice do carrossel automaticamente
-  useEffect(() => {
-    if (transferenciasAceitas.length <= itensPorPagina) return;
-
-    const timer = setInterval(() => {
-      setIndexAceitas(prev => (prev + 1) % (transferenciasAceitas.length - itensPorPagina + 1));
-    }, 4000);
-
-    return () => clearInterval(timer);
-  }, [transferenciasAceitas]);
-
-  useEffect(() => {
-    if (transferenciasRecusadas.length <= itensPorPagina) return;
-
-    const timer = setInterval(() => {
-      setIndexRecusadas(prev => (prev + 1) % (transferenciasRecusadas.length - itensPorPagina + 1));
-    }, 4000);
-
-    return () => clearInterval(timer);
-  }, [transferenciasRecusadas]);
-
-  useEffect(() => {
-    if (transferenciasPendentes.length <= itensPorPagina) return;
-
-    const timer = setInterval(() => {
-      setIndexPendentes(prev => (prev + 1) % (transferenciasPendentes.length - itensPorPagina + 1));
-    }, 4000);
-
-    return () => clearInterval(timer);
-  }, [transferenciasPendentes]);
+  const feed = convites.filter((c) => c.status === abaFeed).slice(0, 12);
+  const clubesExistentes = new Set(clubes.map((c) => c.id));
 
   return (
-    <section className={styles.container}>
-      <h2>🔍 Buscar Jogadores e Clubes</h2>
+    <main className={styles.container}>
+      {/* ================= HERO ================= */}
+      <section className={styles.hero}>
+        <span className={styles.badge}>Janela aberta</span>
+        <h1 className={styles.titulo}>
+          Mercado de <span>Transferências</span>
+        </h1>
+        <p className={styles.subtitulo}>
+          Encontre jogadores livres ou clubes procurando reforços. Convites e pedidos
+          ficam em <Link to="/convites">Convites</Link>.
+        </p>
+      </section>
 
-      <div className={styles.filtros}>
-        <select value={filtro} onChange={e => setFiltro(e.target.value)}>
-          <option value="todos">Todos</option>
-          <option value="jogadores">Jogadores livres</option>
-          <option value="clubes">Clubes buscando jogadores</option>
-        </select>
-
-        {filtro === 'jogadores' && (
-          <select value={posicaoFiltro} onChange={e => setPosicaoFiltro(e.target.value)}>
-            <option value="">Todas as posições</option>
-            <option value="Goleiro">Goleiro</option>
-            <option value="Zagueiro">Zagueiro</option>
-            <option value="Lateral">Lateral</option>
-            <option value="Volante">Volante</option>
-            <option value="Meio-campo">Meio-campo</option>
-            <option value="Atacante">Atacante</option>
-          </select>
-        )}
-      </div>
-
-      {filtro !== 'todos' && (
-        <div className={styles.resultados}>
-          {resultadosBusca.length === 0 ? (
-            <p>Nenhum resultado encontrado.</p>
-          ) : (
-            resultadosBusca.map((item, index) => (
-              <div key={index} className={styles.cardBusca}>
-                <CardTransferencia dados={item} tipo={item.tipo} />
-              </div>
-            ))
-          )}
+      {/* ================= FILTROS ================= */}
+      <section className={styles.painel}>
+        <div className={styles.segmentado} role="tablist">
+          <button
+            type="button"
+            role="tab"
+            aria-selected={aba === 'jogadores'}
+            className={aba === 'jogadores' ? styles.segAtivo : ''}
+            onClick={() => setAba('jogadores')}
+          >
+            Jogadores livres
+          </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={aba === 'clubes'}
+            className={aba === 'clubes' ? styles.segAtivo : ''}
+            onClick={() => setAba('clubes')}
+          >
+            Clubes buscando
+          </button>
         </div>
+
+        <div className={styles.filtros}>
+          <input
+            type="search"
+            placeholder={aba === 'jogadores' ? 'Buscar jogador...' : 'Buscar clube...'}
+            value={busca}
+            onChange={(e) => setBusca(e.target.value)}
+            className={styles.campoBusca}
+          />
+
+          {aba === 'jogadores' && (
+            <select value={posicao} onChange={(e) => setPosicao(e.target.value)}>
+              <option value="">Todas as posições</option>
+              {POSICOES.map((p) => (
+                <option key={p} value={p}>{p}</option>
+              ))}
+            </select>
+          )}
+
+          <select value={plataforma} onChange={(e) => setPlataforma(e.target.value)}>
+            <option value="">Todas as plataformas</option>
+            {PLATAFORMAS.map((p) => (
+              <option key={p} value={p}>{p}</option>
+            ))}
+          </select>
+        </div>
+      </section>
+
+      {/* ================= RESULTADOS ================= */}
+      {carregando ? (
+        <Loader texto="Abrindo o mercado..." />
+      ) : resultados.length === 0 ? (
+        <p className={styles.msgVazio}>
+          Nenhum {aba === 'jogadores' ? 'jogador livre' : 'clube buscando jogadores'} com esses filtros.
+        </p>
+      ) : (
+        <>
+          <p className={styles.contagem}>
+            {resultados.length} {aba === 'jogadores' ? 'jogador(es)' : 'clube(s)'} encontrado(s)
+          </p>
+          <div className={styles.grid}>
+            {resultados.map((item) => (
+              <CardTransferencia
+                key={item.id}
+                dados={item}
+                tipo={aba === 'jogadores' ? 'jogador' : 'clube'}
+              />
+            ))}
+          </div>
+        </>
       )}
 
-      <hr />
+      {/* ================= FEED ================= */}
+      <section className={styles.feedSecao}>
+        <div className={styles.feedTopo}>
+          <h2 className={styles.secaoTitulo}>Últimas transferências</h2>
+          <div className={styles.feedAbas}>
+            {ABAS_FEED.map((a) => (
+              <button
+                key={a.id}
+                type="button"
+                className={abaFeed === a.id ? styles.feedAbaAtiva : ''}
+                onClick={() => setAbaFeed(a.id)}
+              >
+                {a.label}
+              </button>
+            ))}
+          </div>
+        </div>
 
-      <h2>🔄 Últimas Transferências</h2>
-
-      <div className={styles.transferenciaSection}>
-        <h3 className={styles['status-aceitas']}>Aceitas</h3>
-        {transferenciasAceitas.length === 0 ? (
-          <p className={styles.msgVazio}>Nenhuma transferência aceita.</p>
+        {feed.length === 0 ? (
+          <p className={styles.msgVazio}>Nada por aqui ainda.</p>
         ) : (
-          <div className={styles.carrossel}>
-            {getSlice(transferenciasAceitas, indexAceitas).map(item => (
-              <CardTransferencia key={item.id} dados={item} tipo="transferencia" />
+          <div className={styles.feedGrid}>
+            {feed.map((c) => (
+              <div key={c.id} className={`${styles.transferencia} ${styles[c.status] || ''}`}>
+                <Link to={`/jogador/${c.jogadorId}`} className={styles.trJogador}>
+                  {c.jogadorUsername || c.jogadorNome || 'Jogador'}
+                </Link>
+                <span className={styles.trSeta}>➜</span>
+                {clubesExistentes.has(c.clubeId) ? (
+                  <Link to={`/clube/${c.clubeId}`} className={styles.trClube}>
+                    {c.clubeNome || 'Clube'}
+                  </Link>
+                ) : (
+                  // clube já apagado: mostra o nome, mas sem link quebrado
+                  <span className={styles.trClube}>{c.clubeNome || 'Clube'}</span>
+                )}
+                {c.posicao && <span className={styles.trPosicao}>{c.posicao}</span>}
+              </div>
             ))}
           </div>
         )}
-      </div>
-
-      <div className={styles.transferenciaSection}>
-        <h3 className={styles['status-recusadas']}>Melou</h3>
-        {transferenciasRecusadas.length === 0 ? (
-          <p className={styles.msgVazio}>Nenhuma transferência recusada.</p>
-        ) : (
-          <div className={styles.carrossel}>
-            {getSlice(transferenciasRecusadas, indexRecusadas).map(item => (
-              <CardTransferencia key={item.id} dados={item} tipo="transferencia" />
-            ))}
-          </div>
-        )}
-      </div>
-
-      <div className={styles.transferenciaSection}>
-        <h3 className={styles['status-pendentes']}>Pendentes</h3>
-        {transferenciasPendentes.length === 0 ? (
-          <p className={styles.msgVazio}>Nenhuma transferência pendente.</p>
-        ) : (
-          <div className={styles.carrossel}>
-            {getSlice(transferenciasPendentes, indexPendentes).map(item => (
-              <CardTransferencia key={item.id} dados={item} tipo="transferencia" />
-            ))}
-          </div>
-        )}
-      </div>
-    </section>
+      </section>
+    </main>
   );
 }

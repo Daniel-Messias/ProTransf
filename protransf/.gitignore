@@ -23,3 +23,6 @@ yarn-debug.log*
 yarn-error.log*
 # Firebase
 .firebase/
+# chaves de conta de serviço (NUNCA commitar)
+*service-account*.json
+*-firebase-adminsdk-*.json

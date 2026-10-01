@@ -1,262 +1,152 @@
-import React, { useState, useEffect } from 'react';
-import styles from './CardTransferencia.module.css';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { auth, db } from '../../../services/firebase';
+import styles from './CardTransferencia.module.css';
+import OverallBadge from '../../../components/OverallBadge';
+import { useAuth } from '../../../services/AuthContext';
 import {
-  collection,
-  addDoc,
-  doc,
-  getDoc,
-  serverTimestamp,
-  query,
-  where,
-  getDocs,
-} from 'firebase/firestore';
+  enviarConvite,
+  TIPO_CLUBE_PARA_JOGADOR,
+  TIPO_JOGADOR_PARA_CLUBE,
+} from '../../../services/convitesService';
+import {
+  clubeBuscandoJogadores,
+  ehJogador,
+  getCamisa,
+  getClubeId,
+  getFoto,
+  getNomeExibicao,
+  getPosicao,
+} from '../../../utils/jogador';
+import { toast } from '../../../utils/toast';
 
+/**
+ * Card do mercado. `tipo` = "jogador" | "clube".
+ */
 export default function CardTransferencia({ dados, tipo }) {
-  const user = auth.currentUser;
-
-  const [tipoUsuario, setTipoUsuario] = useState(null);
-  const [clubeAtualIdUsuario, setClubeAtualIdUsuario] = useState(null);
-  const [nomeClubeUsuario, setNomeClubeUsuario] = useState(null);
+  const { user, perfil, clube: meuClube, ehPresidente } = useAuth();
   const [enviando, setEnviando] = useState(false);
+  const [enviado, setEnviado] = useState(false);
 
-  // Buscar dados extras do usuário logado (tipo, clubeAtualId, nome do clube)
-  useEffect(() => {
-    async function fetchDadosUsuario() {
-      if (!user) return;
-      try {
-        const docRef = doc(db, 'usuarios', user.uid);
-        const docSnap = await getDoc(docRef);
-        if (docSnap.exists()) {
-          const data = docSnap.data();
-          setTipoUsuario(data.tipo);
-          setClubeAtualIdUsuario(data.clubeAtualId || null);
-          setNomeClubeUsuario(data.clubeAtual || null);
-        }
-      } catch (error) {
-        console.error('Erro ao buscar dados do usuário:', error);
-      }
+  const isJogador = tipo === 'jogador';
+
+  // Presidente convida jogador · jogador pede para entrar em clube
+  const acao = (() => {
+    if (!user) return null;
+    if (isJogador) {
+      if (!ehPresidente || dados.id === user.uid) return null;
+      if (getClubeId(dados) === meuClube.id) return null;
+      return { label: `Convidar para ${meuClube.nome}`, tipo: TIPO_CLUBE_PARA_JOGADOR };
     }
-    fetchDadosUsuario();
-  }, [user]);
+    if (!ehJogador(perfil) || getClubeId(perfil) === dados.id) return null;
+    return { label: 'Pedir para entrar', tipo: TIPO_JOGADOR_PARA_CLUBE };
+  })();
 
-  const isTransferencia = tipo === 'transferencia' && dados.clubeNome && dados.jogadorNome;
-  const isJogador = tipo === 'jogador' || tipo === 'clube_jogador';
-  const isClube = tipo === 'clube';
-
-  // Permissão para enviar convite
-  const podeConvidar = !!user && (
-    (isJogador && (tipoUsuario === 'clube' || tipoUsuario === 'clube_jogador')) ||
-    (isClube && (tipoUsuario === 'jogador' || tipoUsuario === 'clube_jogador'))
-  );
-
-  // Função para enviar convite no Firestore com verificação de duplicidade
-  const enviarConvite = async () => {
-    if (!user) {
-      alert('Você precisa estar logado para enviar convites.');
-      return;
-    }
+  async function handleConvite() {
+    if (enviando || !acao) return;
     setEnviando(true);
-
     try {
-      const convitesRef = collection(db, 'convites');
-      let conviteQuery;
-
-      if (isJogador) {
-        // Clube convidando jogador
-        conviteQuery = query(
-          convitesRef,
-          where('tipo', '==', 'clube_para_jogador'),
-          where('clubeId', '==', clubeAtualIdUsuario || ''),
-          where('jogadorId', '==', dados.id),
-          where('status', '==', 'pendente')
-        );
-      } else if (isClube) {
-        // Jogador convidando clube
-        conviteQuery = query(
-          convitesRef,
-          where('tipo', '==', 'jogador_para_clube'),
-          where('jogadorId', '==', user.uid),
-          where('clubeId', '==', dados.id),
-          where('status', '==', 'pendente')
-        );
-      }
-
-      const conviteSnapshot = await getDocs(conviteQuery);
-
-      if (!conviteSnapshot.empty) {
-        alert('Já existe um convite pendente para essa transferência.');
-        setEnviando(false);
-        return;
-      }
-
-      if (isJogador) {
-        await addDoc(convitesRef, {
-          tipo: 'clube_para_jogador',
-          clubeId: clubeAtualIdUsuario || '',
-          clubeNome: nomeClubeUsuario || '',
-          jogadorId: dados.id,
-          jogadorNome: dados.nome,
-          status: 'pendente',
-          criadoEm: serverTimestamp(),
-          numeroCamisa: dados.numeroCamisa || '',
-          plataforma: dados.plataforma || '',
-        });
-      } else if (isClube) {
-  // Buscar username do jogador
-  const userDoc = await getDoc(doc(db, 'usuarios', user.uid));
-  const userData = userDoc.exists() ? userDoc.data() : {};
-
-  await addDoc(convitesRef, {
-    tipo: 'jogador_para_clube',
-    jogadorId: user.uid,
-    jogadorNome: user.displayName || '',
-    jogadorUsername: userData.username || '',
-    clubeId: dados.id,
-    clubeNome: dados.nome,
-    status: 'pendente',
-    criadoEm: serverTimestamp(),
-  });
-}
-
-
-      alert('Convite enviado com sucesso!');
+      await enviarConvite(
+        isJogador
+          ? { tipo: acao.tipo, jogador: dados, clube: meuClube }
+          : { tipo: acao.tipo, jogador: perfil, clube: dados }
+      );
+      setEnviado(true);
+      toast(isJogador ? 'Convite enviado!' : 'Pedido enviado ao clube!');
     } catch (error) {
       console.error('Erro ao enviar convite:', error);
-      alert('Erro ao enviar convite. Tente novamente.');
+      toast(error.message || 'Erro ao enviar convite. Tente novamente.', 'erro');
     } finally {
       setEnviando(false);
     }
-  };
+  }
 
-  const handleClick = () => {
-    if (enviando) return;
-    enviarConvite();
-  };
+  const rodape = (
+    <div className={styles.rodape}>
+      <Link
+        to={isJogador ? `/jogador/${dados.id}` : `/clube/${dados.id}`}
+        className={styles.link}
+      >
+        Ver perfil →
+      </Link>
 
-  if (isTransferencia) {
+      {acao && (
+        <button
+          className={styles.btn}
+          onClick={handleConvite}
+          type="button"
+          disabled={enviando || enviado}
+        >
+          {enviado ? 'Enviado ✓' : enviando ? 'Enviando...' : acao.label}
+        </button>
+      )}
+
+      {!user && (
+        <Link to="/login" className={styles.btnGhost}>
+          Entre para negociar
+        </Link>
+      )}
+    </div>
+  );
+
+  if (isJogador) {
+    const foto = getFoto(dados);
+    const nome = getNomeExibicao(dados);
+    const camisa = getCamisa(dados);
+
     return (
-      <div className={`${styles.cardTransferencia} ${styles[dados.status] || ''}`} role="region">
-        <div className={styles.transferBox}>
-          <div>
-            <strong className={styles.label}>Clube:</strong>
-            <p className={styles.value}>{dados.clubeNome}</p>
+      <article className={styles.card}>
+        <div className={styles.cabecalho}>
+          <div className={styles.avatar}>
+            {foto ? <img src={foto} alt="" /> : nome.charAt(0)}
           </div>
-          <div>
-            <strong className={styles.label}>Jogador:</strong>
-            <p className={styles.value}>{dados.jogadorNome}</p>
+          <div className={styles.identidade}>
+            <h4 className={styles.nome}>{nome}</h4>
+            <p className={styles.username}>@{dados.username || 'usuario'}</p>
           </div>
-          <div>
-            <strong className={styles.label}>Posição:</strong>
-            <p className={styles.value}>{dados.posicao}</p>
-            <span
-              className={`${styles.statusBadge} ${
-                dados.status === 'aceito'
-                  ? styles['status-aceito']
-                  : dados.status === 'recusado'
-                  ? styles['status-recusado']
-                  : styles['status-pendente']
-              }`}
-            >
-              {dados.status}
-            </span>
-          </div>
+          <OverallBadge jogador={dados} size="sm" />
         </div>
-      </div>
+
+        <div className={styles.tags}>
+          <span className={styles.tagDestaque}>{getPosicao(dados) || 'Sem posição'}</span>
+          {dados.posicaoSecundaria && <span className={styles.tag}>{dados.posicaoSecundaria}</span>}
+          {dados.plataforma && <span className={styles.tag}>🎮 {dados.plataforma}</span>}
+          {camisa && <span className={styles.tag}>#{camisa}</span>}
+        </div>
+
+        {dados.bio && <p className={styles.bio}>{dados.bio}</p>}
+
+        {rodape}
+      </article>
     );
   }
 
+  const buscando = clubeBuscandoJogadores(dados);
+
   return (
-    <div
-      className={`${styles.card} ${isJogador ? styles.cardJogador : styles.cardClube}`}
-      role="region"
-      aria-label={`Card de ${tipo}`}
-    >
-      <div className={styles.info}>
-        {isJogador ? (
-          <div className={styles.fichaJogador}>
-            <h4 className={styles.nome}>{dados.nome || 'Jogador'}</h4>
-            <p className={styles.username}>@{dados.username || 'usuario'}</p>
-
-            <div className={styles.linha}>
-              <span className={styles.icone}>⚽</span>
-              <span className={styles.label}>Posição principal:</span>
-              <span className={styles.valor}>{dados.posicaoPrimaria || dados.posicao || 'N/A'}</span>
-            </div>
-
-            {dados.posicaoSecundaria && (
-              <div className={styles.linha}>
-                <span className={styles.icone}>🎯</span>
-                <span className={styles.label}>Posição secundária:</span>
-                <span className={styles.valor}>{dados.posicaoSecundaria}</span>
-              </div>
-            )}
-
-            {dados.numeroCamisa && (
-              <div className={styles.linha}>
-                <span className={styles.icone}>🎽</span>
-                <span className={styles.label}>Camisa:</span>
-                <span className={styles.numeroCamisa}>{dados.numeroCamisa}</span>
-              </div>
-            )}
-
-            <div className={styles.linha}>
-              <span className={styles.icone}>🎮</span>
-              <span className={styles.label}>Plataforma:</span>
-              <span className={styles.valor}>{dados.plataforma || 'N/A'}</span>
-            </div>
-
-            <Link
-              to={`/perfil/${dados.id}`}
-              className={styles.link}
-              aria-label={`Ver perfil do jogador ${dados.username}`}
-            >
-              Ver Perfil
-            </Link>
-          </div>
-        ) : (
-          <div className={styles.fichaClube}>
-            <h4 className={styles.nome}>{dados.nome || 'Clube'}</h4>
-
-            <div className={styles.linha}>
-              <span className={styles.icone}>🔎</span>
-              <span className={styles.label}>Buscando jogadores:</span>
-              <span className={styles.valor}>{dados.estaBuscando ? 'Sim' : 'Não'}</span>
-            </div>
-
-            <div className={styles.linha}>
-              <span className={styles.icone}>🏆</span>
-              <span className={styles.label}>Campeonatos:</span>
-              <span className={styles.valor}>
-                {dados.campeonatos && dados.campeonatos.length > 0
-                  ? dados.campeonatos.join(', ')
-                  : 'Nenhum campeonato registrado'}
-              </span>
-            </div>
-
-            <Link
-              to={`/perfil/${dados.criadoPorUsuarioId}`}
-              className={styles.link}
-              aria-label={`Ver perfil do dono do clube ${dados.nome}`}
-            >
-              Ver Perfil
-            </Link>
-          </div>
-        )}
+    <article className={`${styles.card} ${styles.cardClube}`}>
+      <div className={styles.cabecalho}>
+        <div className={`${styles.avatar} ${styles.escudo}`}>
+          {(dados.nome || 'C').charAt(0)}
+        </div>
+        <div className={styles.identidade}>
+          <h4 className={styles.nome}>
+            {dados.nome || 'Clube'}
+            {dados.verificado && <span className={styles.verificado} title="Clube verificado">✔</span>}
+          </h4>
+          <p className={styles.username}>@{dados.username || 'clube'}</p>
+        </div>
       </div>
 
-      {podeConvidar && (
-        <button
-          className={styles.btn}
-          onClick={handleClick}
-          aria-label={isJogador ? `Enviar convite para ${dados.username}` : `Enviar pedido para ${dados.nome}`}
-          type="button"
-          disabled={enviando}
-        >
-          {enviando ? 'Enviando...' : isJogador ? 'Enviar Convite' : 'Enviar Pedido'}
-        </button>
-      )}
-    </div>
+      <div className={styles.tags}>
+        <span className={buscando ? styles.tagDestaque : styles.tag}>
+          {buscando ? '🔎 Buscando jogadores' : 'Mercado fechado'}
+        </span>
+        {dados.plataforma && <span className={styles.tag}>🎮 {dados.plataforma}</span>}
+      </div>
+
+      {dados.bio && <p className={styles.bio}>{dados.bio}</p>}
+
+      {rodape}
+    </article>
   );
 }

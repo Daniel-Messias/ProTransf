@@ -1,14 +1,31 @@
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 
-import { db, auth } from "../../../services/firebase";
-import { doc, getDoc, updateDoc,collection, addDoc } from "firebase/firestore";
+import { db } from "../../../services/firebase";
+import { doc, getDoc, updateDoc, collection, addDoc } from "firebase/firestore";
 import { storage } from "../../../services/firebase";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { useAuth } from "../../../services/AuthContext";
+import { buscarClube } from "../../../services/firestoreService";
+import { sairDoClube } from "../../../services/convitesService";
 
 import styles from "./Jogador.module.css";
 import campo2 from "../../../assets/fotos/campo2.png";
 import { FaInstagram, FaWhatsapp } from "react-icons/fa";
+import OverallBadge from "../../../components/OverallBadge";
+import Loader from "../../../components/Loader";
+import {
+  getCamisa,
+  getClubeId,
+  getFoto,
+  getPosicao,
+  getPresidenteId,
+  PLATAFORMAS,
+  POSICOES,
+  STATUS_LIVRE,
+} from "../../../utils/jogador";
+import { mediaPorPartida } from "../../../utils/ranking";
+import { toast } from "../../../utils/toast";
 
 // ===============================
 // CONVERTER LINK YOUTUBE PARA EMBED
@@ -29,14 +46,16 @@ function transformarUrlYoutube(url) {
 
 export default function Jogador() {
   const { id } = useParams();
+  const { user } = useAuth();
+  const ehProprioPerfil = !!user && user.uid === id;
 
   // ===============================
   // ESTADOS PRINCIPAIS
   // ===============================
   const [jogador, setJogador] = useState(null);
+  const [clube, setClube] = useState(null);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState(null);
-  const [ehProprioPerfil, setEhProprioPerfil] = useState(false);
 
   // ===============================
   // CONTROLE DE EDIÇÃO
@@ -86,13 +105,15 @@ const [enviandoStats, setEnviandoStats] = useState(false);
     if (!editando) {
       setNomeEdit(jogador.nome || "");
       setBioEdit(jogador.bio || "");
-      setPosicaoPrimariaEdit(jogador.posicaoPrimaria || "");
+      setPosicaoPrimariaEdit(getPosicao(jogador));
       setPosicaoSecundariaEdit(jogador.posicaoSecundaria || "");
-      setNumeroCamisaEdit(jogador.numeroCamisaPessoal || "");
+      setNumeroCamisaEdit(getCamisa(jogador));
       setPlataformaEdit(jogador.plataforma || "");
-      setFotoPreview(jogador.fotoUrl || "");
       setVideoEdit(jogador.video || "");
-
+    } else {
+      // cancelar: descarta foto escolhida e volta a original
+      setFotoFile(null);
+      setFotoPreview(getFoto(jogador));
     }
 
     setEditando(!editando);
@@ -107,7 +128,7 @@ const [enviandoStats, setEnviandoStats] = useState(false);
     setSalvando(true);
 
     try {
-      let fotoUrlFinal = jogador.fotoUrl || "";
+      let fotoUrlFinal = getFoto(jogador);
 
       if (fotoFile) {
         const storageRef = ref(
@@ -125,7 +146,7 @@ const [enviandoStats, setEnviandoStats] = useState(false);
         bio: bioEdit,
         posicaoPrimaria: posicaoPrimariaEdit,
         posicaoSecundaria: posicaoSecundariaEdit,
-        numeroCamisaPessoal: Number(numeroCamisaEdit),
+        numeroCamisaPessoal: numeroCamisaEdit ? Number(numeroCamisaEdit) : "",
         plataforma: plataformaEdit,
         fotoUrl: fotoUrlFinal,
         atualizadoEm: new Date(),
@@ -138,7 +159,7 @@ const [enviandoStats, setEnviandoStats] = useState(false);
         bio: bioEdit,
         posicaoPrimaria: posicaoPrimariaEdit,
         posicaoSecundaria: posicaoSecundariaEdit,
-        numeroCamisaPessoal: Number(numeroCamisaEdit),
+        numeroCamisaPessoal: numeroCamisaEdit ? Number(numeroCamisaEdit) : "",
         plataforma: plataformaEdit,
         fotoUrl: fotoUrlFinal,
         video: videoEdit,
@@ -146,9 +167,10 @@ const [enviandoStats, setEnviandoStats] = useState(false);
 
       setEditando(false);
       setFotoFile(null);
+      toast("Perfil atualizado!");
     } catch (err) {
       console.error("Erro ao salvar perfil:", err);
-      alert("Erro ao salvar perfil");
+      toast("Erro ao salvar perfil.", "erro");
     } finally {
       setSalvando(false);
     }
@@ -163,7 +185,7 @@ async function handleEnviarEstatisticas(e) {
 
   // Foto obrigatória
   if (!fotoStatsFile) {
-    alert("Envie uma foto das estatísticas para podermos validar.");
+    toast("Envie uma foto das estatísticas para podermos validar.", "aviso");
     return;
   }
 
@@ -196,7 +218,7 @@ async function handleEnviarEstatisticas(e) {
       criadoEm: new Date(),
     });
 
-    alert("Estatísticas enviadas para revisão. Aguarde aprovação.");
+    toast("Estatísticas enviadas! Assim que o admin aprovar, elas entram no ranking.");
 
     // 3) Limpar formulário
     setGolsPartida("");
@@ -208,9 +230,10 @@ async function handleEnviarEstatisticas(e) {
     setDataPartida("");
     setObservacoesPartida("");
     setFotoStatsFile(null);
+    e.target.reset();
   } catch (err) {
     console.error("Erro ao enviar estatísticas:", err);
-    alert("Erro ao enviar estatísticas. Tente novamente.");
+    toast("Erro ao enviar estatísticas. Tente novamente.", "erro");
   } finally {
     setEnviandoStats(false);
   }
@@ -236,10 +259,8 @@ async function handleEnviarEstatisticas(e) {
 
         const dados = { id: snap.id, ...snap.data() };
         setJogador(dados);
-        setFotoPreview(dados.fotoUrl || "");
-
-        const user = auth.currentUser;
-        setEhProprioPerfil(!!user && user.uid === snap.id);
+        setFotoPreview(getFoto(dados));
+        setClube(await buscarClube(getClubeId(dados)));
       } catch (error) {
         console.error("Erro ao carregar jogador:", error);
         setErro("Erro ao carregar dados do jogador.");
@@ -255,30 +276,44 @@ async function handleEnviarEstatisticas(e) {
   // RENDER CONDIÇÕES
   // ===============================
   if (carregando) {
-    return <section className={styles.container}>Carregando perfil...</section>;
+    return <Loader texto="Carregando perfil..." />;
   }
 
-  if (erro) {
-    return <section className={styles.container}>{erro}</section>;
-  }
-
-  if (!jogador) {
+  if (erro || !jogador) {
     return (
-      <section className={styles.container}>Jogador não disponível</section>
+      <section className={styles.container}>
+        <div className={styles.section}>
+          <h2>{erro || "Jogador não disponível"}</h2>
+          <Link to="/transferencias" className={styles.linkClube}>Voltar ao mercado →</Link>
+        </div>
+      </section>
     );
   }
-
-  const primeiroVideo =
-    Array.isArray(jogador.videos) && jogador.videos.length > 0
-      ? transformarUrlYoutube(jogador.videos[0])
-      : null;
 
   const headerStyle = {
     backgroundImage: `url(${campo2})`,
   };
-  const videoFinal = jogador.video
-  ? transformarUrlYoutube(jogador.video)
-  : null;
+
+  // vídeo único (campo atual) ou o primeiro da lista antiga `videos`
+  const videoOrigem = jogador.video || (Array.isArray(jogador.videos) ? jogador.videos[0] : "");
+  const videoFinal = videoOrigem ? transformarUrlYoutube(videoOrigem) : null;
+
+  const emClube = !!clube;
+  const ehPresidenteDoClube = !!clube && getPresidenteId(clube) === jogador.id;
+  const partidas = Number(jogador.totalPartidas || 0);
+
+  async function handleSairDoClube() {
+    if (!window.confirm(`Sair do ${clube.nome}? Você volta a ficar livre no mercado.`)) return;
+    try {
+      await sairDoClube(jogador.id);
+      setJogador((prev) => ({ ...prev, clubeId: "", status: STATUS_LIVRE }));
+      setClube(null);
+      toast("Você saiu do clube e está livre no mercado.", "aviso");
+    } catch (err) {
+      console.error("Erro ao sair do clube:", err);
+      toast("Erro ao sair do clube.", "erro");
+    }
+  }
 
 
   return (
@@ -319,34 +354,36 @@ async function handleEnviarEstatisticas(e) {
         <div className={styles.infoBasica}>
           {!editando ? (
             <>
-              <h1>{jogador.nome}</h1>
+              <div className={styles.nomeComOverall}>
+                <h1>{jogador.nome}</h1>
+                <OverallBadge jogador={jogador} size="lg" />
+              </div>
               <p className={styles.nomejogador}>@{jogador.username}</p>
 
               <p className={styles.status}>
-                Posição: <spam className={styles.posicao}>{jogador.posicaoPrimaria || "N/A"}
+                Posição: <span className={styles.posicao}>{getPosicao(jogador) || "N/A"}
                 {jogador.posicaoSecundaria &&
-                  ` | ${jogador.posicaoSecundaria}`}</spam>
+                  ` | ${jogador.posicaoSecundaria}`}</span>
               </p>
 
-              <p className={styles.status}>Camisa: <spam className={styles.numeroCamisa}>{jogador.numeroCamisaPessoal || "-"}</spam></p>
-              <p className={styles.status}>Plataforma: <spam className={styles.plataforma}>{jogador.plataforma || "N/A"}</spam></p>
+              <p className={styles.status}>Camisa: <span className={styles.numeroCamisa}>{getCamisa(jogador) || "-"}</span></p>
+              <p className={styles.status}>Plataforma: <span className={styles.plataforma}>{jogador.plataforma || "N/A"}</span></p>
               <p className={styles.status}>
-  Status:
-  <span
-    className={
-      jogador.status === "em_clube"
-        ? styles.statusOcupado
-        : styles.statusLivre
-    }
-  />
-  <span className={styles.statusTexto}>
-    {jogador.status === "em_clube"
-      ? "Contratado"
-      : "Livre no mercado"}
-  </span>
-</p>
-
-
+                Status:
+                <span className={emClube ? styles.statusOcupado : styles.statusLivre} />
+                <span className={styles.statusTexto}>
+                  {emClube ? (
+                    <>
+                      {ehPresidenteDoClube ? "Presidente do " : "Joga no "}
+                      <Link to={`/clube/${clube.id}`} className={styles.linkClube}>
+                        {clube.nome}
+                      </Link>
+                    </>
+                  ) : (
+                    "Livre no mercado"
+                  )}
+                </span>
+              </p>
             </>
           ) : (
             <div className={styles.formEdicao}>
@@ -362,36 +399,50 @@ async function handleEnviarEstatisticas(e) {
                 onChange={(e) => setBioEdit(e.target.value)}
               />
 
-              <input
-                placeholder="Posição principal"
+              <select
                 value={posicaoPrimariaEdit}
                 onChange={(e) => setPosicaoPrimariaEdit(e.target.value)}
-              />
+              >
+                <option value="">Posição principal</option>
+                {POSICOES.map((p) => (
+                  <option key={p} value={p}>{p}</option>
+                ))}
+              </select>
 
-              <input
-                placeholder="Posição secundária"
+              <select
                 value={posicaoSecundariaEdit}
                 onChange={(e) => setPosicaoSecundariaEdit(e.target.value)}
-              />
+              >
+                <option value="">Sem posição secundária</option>
+                {POSICOES.map((p) => (
+                  <option key={p} value={p}>{p}</option>
+                ))}
+              </select>
 
               <input
                 type="number"
+                min="1"
+                max="99"
                 placeholder="Número da camisa"
                 value={numeroCamisaEdit}
                 onChange={(e) => setNumeroCamisaEdit(e.target.value)}
               />
 
-              <input
-                placeholder="Plataforma"
+              <select
                 value={plataformaEdit}
                 onChange={(e) => setPlataformaEdit(e.target.value)}
-              />
-              <input
-              placeholder="Link do vídeo (YouTube)"
-              value={videoEdit}
-              onChange={(e) => setVideoEdit(e.target.value)}
-              />
+              >
+                <option value="">Plataforma</option>
+                {PLATAFORMAS.map((p) => (
+                  <option key={p} value={p}>{p}</option>
+                ))}
+              </select>
 
+              <input
+                placeholder="Link do vídeo (YouTube)"
+                value={videoEdit}
+                onChange={(e) => setVideoEdit(e.target.value)}
+              />
             </div>
           )}
 
@@ -424,30 +475,31 @@ async function handleEnviarEstatisticas(e) {
           )}
 
           {ehProprioPerfil && (
-            <>
-              {!editando ? (
-                <button className={styles.btnEditar} onClick={handleEditarClick}>Editar perfil</button>
-
-              ) : (
-                <div className={styles.botoesEdicao}>
-  <button
-    className={styles.btnSalvar}
-    onClick={handleSalvar}
-    disabled={salvando}
-  >
-    {salvando ? "Salvando..." : "Salvar"}
-  </button>
-
-  <button
-    className={styles.btnCancelar}
-    onClick={handleEditarClick}
-  >
-    Cancelar
-  </button>
-</div>
-
-              )}
-            </>
+            !editando ? (
+              <div className={styles.botoesEdicao}>
+                <button className={styles.btnEditar} onClick={handleEditarClick}>
+                  Editar perfil
+                </button>
+                {emClube && !ehPresidenteDoClube && (
+                  <button className={styles.btnCancelar} onClick={handleSairDoClube}>
+                    Sair do clube
+                  </button>
+                )}
+              </div>
+            ) : (
+              <div className={styles.botoesEdicao}>
+                <button
+                  className={styles.btnSalvar}
+                  onClick={handleSalvar}
+                  disabled={salvando}
+                >
+                  {salvando ? "Salvando..." : "Salvar"}
+                </button>
+                <button className={styles.btnCancelar} onClick={handleEditarClick}>
+                  Cancelar
+                </button>
+              </div>
+            )
           )}
         </div>
       </header>
@@ -464,37 +516,33 @@ async function handleEnviarEstatisticas(e) {
       <section className={styles.section}>
         <h2>Estatísticas gerais</h2>
         <div className={styles.statsGrid}>
-  <div className={styles.statCard}>
-    <div className={styles.statValue}>{jogador.totalGols || 0}</div>
-    <div className={styles.statLabel}>Gols</div>
-  </div>
+          {[
+            ["Partidas", jogador.totalPartidas, false],
+            ["Gols", jogador.totalGols, true],
+            ["Assistências", jogador.totalAssistencias, true],
+            ["Desarmes", jogador.totalDesarmes, true],
+            ["Defesas", jogador.totalDefesas, true],
+            ["Amarelos", jogador.totalCartoesAmarelos, false],
+            ["Vermelhos", jogador.totalCartoesVermelhos, false],
+          ].map(([label, valor, comMedia]) => (
+            <div key={label} className={styles.statCard}>
+              <div className={styles.statValue}>{Number(valor || 0)}</div>
+              <div className={styles.statLabel}>{label}</div>
+              {comMedia && partidas > 0 && (
+                <div className={styles.statMedia}>
+                  {mediaPorPartida(Number(valor || 0), partidas)} / jogo
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
 
-  <div className={styles.statCard}>
-    <div className={styles.statValue}>{jogador.totalAssistencias || 0}</div>
-    <div className={styles.statLabel}>Assistências</div>
-  </div>
-
-  <div className={styles.statCard}>
-    <div className={styles.statValue}>{jogador.totalDesarmes || 0}</div>
-    <div className={styles.statLabel}>Desarmes</div>
-  </div>
-
-  <div className={styles.statCard}>
-    <div className={styles.statValue}>{jogador.totalDefesas || 0}</div>
-    <div className={styles.statLabel}>Defesas</div>
-  </div>
-
-  <div className={styles.statCard}>
-    <div className={styles.statValue}>{jogador.totalCartoesAmarelos || 0}</div>
-    <div className={styles.statLabel}>Amarelos</div>
-  </div>
-
-  <div className={styles.statCard}>
-    <div className={styles.statValue}>{jogador.totalCartoesVermelhos || 0}</div>
-    <div className={styles.statLabel}>Vermelhos</div>
-  </div>
-</div>
-
+        {partidas === 0 && (
+          <p className={styles.statAviso}>
+            Nenhuma partida aprovada ainda: o overall fica no valor base até a
+            primeira aprovação.
+          </p>
+        )}
       </section>
 
       {ehProprioPerfil && (
